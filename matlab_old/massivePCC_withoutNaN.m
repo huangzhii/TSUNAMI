@@ -3,7 +3,7 @@
 % PCC_vec is a column vector of N-by-1 which is the PCC between each row
 % of dataMat and dataVec
 % minCommonThresh is the minimum number of data pairs required for
-% reporting a meaningful PCC value
+% reporting a meaningful PCC value (Pearson Correlation Coefficient)
 function PCC_mat = massivePCC_withoutNaN(dataMat);
 [nRow, nCol] = size(dataMat);
 
@@ -12,7 +12,7 @@ dataMat(isnan(dataMat)) = 0;
 
 if (nRow > 1)
     
-    sumX = sum(dataMat, 2);
+    sumX = sum(dataMat, 2); % sum each rows to a value and becomes n * 1 vector
     meanX = sumX / nCol;
     sumV = sqrt(sum(dataMat.*dataMat, 2) - (sumX .* sumX)/nCol);
     
