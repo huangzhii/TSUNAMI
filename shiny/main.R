@@ -67,13 +67,13 @@ ui <- fluidPage(
     # Main panel for displaying outputs ----
     mainPanel(
       
-      # Output: Header + summary of distribution ----
-      h4("Summary"),
-      verbatimTextOutput("summary"),
+      # Output: Tabset w/ plot, summary, and table ----
+      tabsetPanel(type = "tabs",
+                  # tabPanel("Plot", plotOutput("plot")),
+                  tabPanel("Summary", verbatimTextOutput("summary")),
+                  tabPanel("Table", tableOutput("table"))
+      )
       
-      # Output: Header + table of distribution ----
-      h4("Observations"),
-      tableOutput("view")
     )
     
   )
@@ -89,13 +89,14 @@ server <- function(input, output) {
            "WGCNA" = "WGCNA")
   }, ignoreNULL = FALSE)
   
-  csvfile <- eventReactive(input$update, {
-    req(input$csvfile)
-    data <- read.csv(input$csvfile$datapath,
+  data <- reactive({
+    # file <- input$csvfile
+    if(is.null(input$csvfile)) {return()}
+    read.csv(input$csvfile$datapath,
                      header = input$header,
                      sep = input$sep,
                      quote = input$quote)
-  }, ignoreNULL = FALSE)
+  })
   
   gamma <- eventReactive(input$update, {
     input$gamma
@@ -118,6 +119,7 @@ server <- function(input, output) {
     if (method() == "lmQCM"){
       source("GeneCoExpressionAnalysis.R")
       # Check if is a new data, then determine to perform lmQCM_1 or not.
+      
       cMatrix = lmQCM_preprocess(data())
       
       k = lmQCM(cMatrix, gamma(), lambda(), t(), beta(), minClusterSize())
@@ -128,7 +130,10 @@ server <- function(input, output) {
       # Run WGCNA
     }
   })
-  
+  output$table <- renderTable({
+    if(is.null(data())) {return()}
+    input$csvfile
+  })
   # Show the first "n" observations ----
   # The use of isolate() is necessary because we don't want the table
   # to update whenever input$obs changes (only when the user clicks

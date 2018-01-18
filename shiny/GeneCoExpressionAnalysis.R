@@ -1,9 +1,8 @@
 # 01/17/2018 Zhi Huang
 lmQCM_preprocess <- function(data) {
   # Step 1
-  RNA <- as.numeric(data[2:dim(data)[1], 2:dim(data)[2]])
-  geneID <- as.numeric(data[2:dim(data)[1], 1])
-  
+  RNA <- data.frame(data[1:dim(data)[1], 2:dim(data)[2]])
+  geneID <- data.frame(data[1:dim(data)[1], 1])
   
   
   return(666)
