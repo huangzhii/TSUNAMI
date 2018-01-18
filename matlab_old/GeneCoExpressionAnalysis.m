@@ -22,7 +22,7 @@ geoFile = 'Stomach_Cancer.txt';
 %Filter out probes w/o gene names, low exp value and low variance data.
 %geoDataSort('---',:)= [];%remove data with no gene names
 %remove data with lowest 20% absolute exp value shared by all samples
-[mask, geoDataFilter, geneSymFilter]= genelowvalfilter(transpose(rna),geneId,'absPercentile',20);
+[mask, geoDataFilter, geneSymFilter]= genelowvalfilter(transpose(rna),geneId,'percentile',20);
 %remove data with lowest 10% variance across samples
 [mask2, geoDataFilter2, geneSymFilter2] = genevarfilter(geoDataFilter,geneSymFilter);
 
@@ -44,11 +44,13 @@ topN = min(20000,size(tmpExp,1));
 finalExp = tmpExp(sortInd(1:topN), :); % sorted expression
 finalSym = uniGene(sortInd(1:topN));
 
-
+tic
 
 cMatrix = massivePCC_withoutNaN(finalExp); % calculating Pearson Correlation Coeff
 %cMatrix = corr(transpose(finalExp),'type','Spearman');
 cMatrix(1 : size(cMatrix,1)+1 : end) = 0; % make the diagonal be 0
+
+toc
 % tic
 % Y = mdscale(1-abs(cMatrix), 3);
 % toc

@@ -1,7 +1,8 @@
 library(genefilter)
 library(Biobase)
 # setwd("/media/zhi/Drive3/GeneCoexpression/matlab_old");
-setwd("/Users/zhi/Desktop/GeneCoexpression/shiny"); #mac
+# setwd("/Users/zhi/Desktop/GeneCoexpression/shiny"); #mac
+setwd("E:/GeneCoexpression/shiny"); #win
 source("utils.R")
 data<-read.csv("../matlab_old/RNAdata.csv", header=T, stringsAsFactors=F)
 
