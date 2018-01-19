@@ -76,5 +76,5 @@ massivePCC_withoutNaN <- function (eset){
     PCC_mat2 <- PCC_mat + t(PCC_mat)
     
   }
-  return(PCC_mat)
+  return(PCC_mat2)
 }
