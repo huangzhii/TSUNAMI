@@ -1,5 +1,7 @@
 library(genefilter)
 library(Biobase)
+library(devtools)
+
 # setwd("/media/zhi/Drive3/GeneCoexpression/matlab_old");
 # setwd("/Users/zhi/Desktop/GeneCoexpression/shiny"); #mac
 setwd("E:/GeneCoexpression/shiny"); #win
@@ -22,11 +24,18 @@ ind1 <- res$first
 uniGene <- res$second
 tmpExp <-expData[ind1,]
 nSample <- ncol(tmpExp)
-res <- sort.int(rowMeans(tmpExp), index.return=TRUE)
+res <- sort.int(rowMeans(tmpExp), decreasing = TRUE, index.return=TRUE)
 sortMean <- res$x
 sortInd <- res$ix
 topN <- min(20000, nrow(tmpExp))
 finalExp <- tmpExp[sortInd[1:topN], ]
 finalSym <- uniGene[sortInd[1:topN]]
+# Start the clock!
+ptm <- proc.time()
+
 cMatrix <- massivePCC_withoutNaN(finalExp)
-cMatrix[1 : (nrow(cMatrix)+1) : length(cMatrix)] <- 0
+# Stop the clock
+ptm <- proc.time() - ptm
+print(ptm)
+
+save(cMatrix, file = "../../cMatrix.RData")
