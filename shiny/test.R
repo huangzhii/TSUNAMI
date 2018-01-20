@@ -1,10 +1,12 @@
 library(genefilter)
 library(Biobase)
+library(rPython)
 
 # setwd("/media/zhi/Drive3/GeneCoexpression/matlab_old");
-# setwd("/Users/zhi/Desktop/GeneCoexpression/shiny"); #mac
-setwd("E:/GeneCoexpression/shiny"); #win
+setwd("/Users/zhi/Desktop/GeneCoexpression/shiny"); #mac
+# setwd("E:/GeneCoexpression/shiny"); #win
 source("utils.R")
+
 data<-read.csv("../matlab_old/RNAdata.csv", header=T, stringsAsFactors=F)
 
 # Step 1
@@ -28,9 +30,15 @@ sortMean <- res$x
 sortInd <- res$ix
 topN <- min(20000, nrow(tmpExp))
 finalExp <- tmpExp[sortInd[1:topN], ]
+finalExp[is.nan(finalExp)] <- 0
 finalSym <- uniGene[sortInd[1:topN]]
+
+eset[is.na(eset)] <- 0
 # Start the clock!
 ptm <- proc.time()
+
+python.load("massivePCC_withoutNaN.py")
+cMatrix <- python.call("massivePCC", as.vector(finalExp), nrow(finalExp), ncol(finalExp))
 
 cMatrix <- massivePCC_withoutNaN(finalExp)
 # Stop the clock

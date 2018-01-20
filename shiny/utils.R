@@ -48,7 +48,6 @@ highExpressionProbes <- function (genes, probes, eset){
 massivePCC_withoutNaN <- function (eset){
   nRow <- nrow(eset)
   nCol <- ncol(eset)
-  eset[is.na(eset)] <- 0
   if (nRow > 1) {
     sumX <- rowSums(eset)
     # meanX <- colMeans(eset)
