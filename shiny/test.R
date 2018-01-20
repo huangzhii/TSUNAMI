@@ -33,12 +33,12 @@ finalExp <- tmpExp[sortInd[1:topN], ]
 finalExp[is.nan(finalExp)] <- 0
 finalSym <- uniGene[sortInd[1:topN]]
 
-eset[is.na(eset)] <- 0
+finalExp[is.na(finalExp)] <- 0
 # Start the clock!
 ptm <- proc.time()
 
 python.load("massivePCC_withoutNaN.py")
-cMatrix <- python.call("massivePCC", as.vector(finalExp), nrow(finalExp), ncol(finalExp))
+cMatrix <- python.method.call("massivePCC", as.vector(finalExp), nrow(finalExp), ncol(finalExp))
 
 cMatrix <- massivePCC_withoutNaN(finalExp)
 # Stop the clock
