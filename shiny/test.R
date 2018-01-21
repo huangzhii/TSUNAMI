@@ -35,14 +35,20 @@ finalSym <- uniGene[sortInd[1:topN]]
 
 finalExp[is.na(finalExp)] <- 0
 # Start the clock!
-ptm <- proc.time()
+# ptm <- proc.time()
 
-python.load("massivePCC_withoutNaN.py")
-cMatrix <- python.method.call("massivePCC", as.vector(finalExp), nrow(finalExp), ncol(finalExp))
+step1 = 1
+gamma = 0.5
+t = 1
+lambda = 1
+beta = 0.4
+minClusterSize = 10
+python.load("main.py")
+mergedCluster <- python.call("mainroutine", step1, as.vector(finalExp), nrow(finalExp), ncol(finalExp), gamma, t, lambda, beta, minClusterSize)
 
-cMatrix <- massivePCC_withoutNaN(finalExp)
+# cMatrix <- massivePCC_withoutNaN(finalExp)
 # Stop the clock
-ptm <- proc.time() - ptm
-print(ptm)
+# ptm <- proc.time() - ptm
+# print(ptm)
 
-save(cMatrix, file = "../../cMatrix.RData")
+# save(cMatrix, file = "../../cMatrix.RData")
