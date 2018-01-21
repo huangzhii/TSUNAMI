@@ -9,7 +9,7 @@ source("utils.R")
 
 data<-read.csv("../matlab_old/RNAdata.csv", header=T, stringsAsFactors=F)
 
-# Step 1
+# Step 0
 RNA <- as.matrix(data[1:dim(data)[1], 2:dim(data)[2]])
 geneID <- data.frame(data[1:dim(data)[1], 1])
 # Remove data with lowest 20% absolute exp value shared by all samples
@@ -44,11 +44,12 @@ lambda = 1
 beta = 0.4
 minClusterSize = 10
 python.load("main.py")
-mergedCluster <- python.call("mainroutine", step1, as.vector(finalExp), nrow(finalExp), ncol(finalExp), gamma, t, lambda, beta, minClusterSize)
+# mergedCluster <- python.call("mainroutine", step1, as.vector(finalExp), nrow(finalExp), ncol(finalExp), gamma, t, lambda, beta, minClusterSize)
 
 # cMatrix <- massivePCC_withoutNaN(finalExp)
 # Stop the clock
 # ptm <- proc.time() - ptm
 # print(ptm)
 
-# save(cMatrix, file = "../../cMatrix.RData")
+# save(mergedCluster, file = "./mergedCluster.RData")
+load(file = "./mergedCluster.RData")

@@ -1,6 +1,7 @@
 library(shiny)
+library(rsconnect)
 
-options(shiny.maxRequestSize=100*1024^2) # to the top of server.R would increase the limit to 300MB
+options(shiny.maxRequestSize=300*1024^2) # to the top of server.R would increase the limit to 300MB
 
 
 # Define UI for dataset viewer app ----
@@ -16,7 +17,7 @@ ui <- fluidPage(
     sidebarPanel(
       # Input: Select a file ----
       fileInput("csvfile", "Choose CSV File",
-                multiple = TRUE,
+                multiple = FALSE,
                 accept = c("text/csv",
                            "text/comma-separated-values,text/plain",
                            ".csv")),
@@ -89,14 +90,14 @@ server <- function(input, output) {
            "WGCNA" = "WGCNA")
   }, ignoreNULL = FALSE)
   
-  data <- reactive({
-    # file <- input$csvfile
-    if(is.null(input$csvfile)) {return()}
-    read.csv(input$csvfile$datapath,
-                     header = input$header,
-                     sep = input$sep,
-                     quote = input$quote)
-  })
+  # data <- reactive({
+  #   # file <- input$csvfile
+  #   if(is.null(input$csvfile)) {return(0)}
+  #   read.csv(input$csvfile$datapath,
+  #                    header = input$header,
+  #                    sep = input$sep,
+  #                    quote = input$quote)
+  # })
   
   gamma <- eventReactive(input$update, {
     input$gamma
@@ -116,15 +117,31 @@ server <- function(input, output) {
   
   # Generate a summary of the dataset ----
   output$summary <- renderPrint({
+    req(input$csvfile)
+    
+    data <- read.csv(input$csvfile$datapath,
+                   header = input$header,
+                   sep = input$sep,
+                   quote = input$quote)
+    
+    print("CSV file Uploaded.")
     if (method() == "lmQCM"){
       source("GeneCoExpressionAnalysis.R")
       # Check if is a new data, then determine to perform lmQCM_1 or not.
-      
-      cMatrix = lmQCM_preprocess(data())
-      
-      k = lmQCM(cMatrix, gamma(), lambda(), t(), beta(), minClusterSize())
-      method()
-      # Run GeneCoExpressionAnaylsis
+      step1 <- 0
+      if (length(data) >0){
+        print("Processing CSV file.")
+        output <- lmQCM(step1, data, gamma(), lambda(), t(), beta(), minClusterSize())
+        # Run GeneCoExpressionAnaylsis
+        # print(output)
+        for (i in 1:(length(output))) {
+          cat(as.matrix(output[[i]]), sep=' ')
+          cat('\n')
+        }
+      }
+      else {
+        print("Please upload a CSV file.")
+      }
     } else {
       method()
       # Run WGCNA
