@@ -1,5 +1,8 @@
 library(shiny)
 library(rsconnect)
+library(plyr)
+library(data.table)
+
 
 options(shiny.maxRequestSize=300*1024^2) # to the top of server.R would increase the limit to 300MB
 options(shiny.sanitize.errors = FALSE)
@@ -16,6 +19,7 @@ ui <- fluidPage(
     # Sidebar panel for inputs ----
     sidebarPanel(
       # Input: Select a file ----
+      h4("File uploader"),
       fileInput("csvfile", "Choose CSV File",
                 multiple = FALSE,
                 accept = c("text/csv",
@@ -81,8 +85,8 @@ ui <- fluidPage(
       # Output: Tabset w/ plot, summary, and table ----
       tabsetPanel(type = "tabs",
                   # tabPanel("Plot", plotOutput("plot")),
-                  tabPanel("log", verbatimTextOutput("Log")),
-                  tabPanel("results", tableOutput("Results"))
+                  tabPanel("Log", verbatimTextOutput("log")),
+                  tabPanel("Results", tableOutput("results"))
       )
       
     )
@@ -100,69 +104,57 @@ server <- function(input, output) {
            "WGCNA" = "WGCNA")
   }, ignoreNULL = FALSE)
   
-  # data <- reactive({
-  #   # file <- input$csvfile
-  #   if(is.null(input$csvfile)) {return(0)}
-  #   read.csv(input$csvfile$datapath,
-  #                    header = input$header,
-  #                    sep = input$sep,
-  #                    quote = input$quote)
-  # })
+  gamma <- eventReactive(input$update, {input$gamma}, ignoreNULL = FALSE)
+  lambda <- eventReactive(input$update, {input$lambda}, ignoreNULL = FALSE)
+  t <- eventReactive(input$update, {input$t}, ignoreNULL = FALSE)
+  beta <- eventReactive(input$update, {input$beta}, ignoreNULL = FALSE)
+  minClusterSize <- eventReactive(input$update, {input$minClusterSize}, ignoreNULL = FALSE)
+  y <- reactive( if (dataset()) return(1) else return(0) )
   
-  gamma <- eventReactive(input$update, {
-    input$gamma
-  }, ignoreNULL = FALSE)
-  lambda <- eventReactive(input$update, {
-    input$lambda
-  }, ignoreNULL = FALSE)
-  t <- eventReactive(input$update, {
-    input$t
-  }, ignoreNULL = FALSE)
-  beta <- eventReactive(input$update, {
-    input$beta
-  }, ignoreNULL = FALSE)
-  minClusterSize <- eventReactive(input$update, {
-    input$minClusterSize
-  }, ignoreNULL = FALSE)
-  
-  # Generate a summary of the dataset ----
-
-
-  output$log <- renderText( {
-    if (is.null(input$csvfile)) {
-      "we require input csvfile"
-      return()
-    }
-    # req(input$csvfile)
-    data <- read.csv(input$csvfile$datapath,
+  output$log <- renderText({
+    return("Please upload a CSV file.")
+  })
+  dataset <- reactive({
+    req(input$csvfile)
+    print("CSV file Uploaded.")
+    dataset <- read.csv(input$csvfile$datapath,
                      header = input$header,
                      sep = input$sep,
                      quote = input$quote)
-    print("CSV file Uploaded.")
-    if (method() == "lmQCM"){
-      source("GeneCoExpressionAnalysis.R")
-      # Check if is a new data, then determine to perform lmQCM_1 or not.
-      step1 <- 0
-      if (length(data) >0){
-        print("Processing CSV file.")
-        text <- lmQCM(step1, data, gamma(), lambda(), t(), beta(), minClusterSize())
-        # Run GeneCoExpressionAnaylsis
-        # print(output)
-        
-      }
-      else {
-        print("Please upload a CSV file.")
-      }
-    } else {
-      method()
-      # Run WGCNA
-    }
+    print("CSV file Readed.")
+    return(dataset)
+  })
+  text <- reactive({
+    req(dataset())
+    text <- lmQCM(step1, dataset(), gamma(), lambda(), t(), beta(), minClusterSize())
     return(text)
   })
+  
+  # Generate a summary of the dataset ----
+  # output$log <- renderPrint({
+  #   if (is.null(dataset())){
+  #     print("We require input csvfile.")
+  #     return("We require input csvfile2.")
+  #   }
+  #   
+  #   if (method() == "lmQCM"){
+  #     source("GeneCoExpressionAnalysis.R")
+  #     # Check if is a new data, then determine to perform lmQCM_1 or not.
+  #     step1 <- 0
+  #     print("Processing CSV file.")
+  #     # Run lmQCM
+  #     text <- lmQCM(step1, dataset(), gamma(), lambda(), t(), beta(), minClusterSize())
+  #     
+  #   } else {
+  #     method()
+  #     # Run WGCNA
+  #   }
+  #   # return(text)
+  # })
   output$results <- renderTable({
-    if(is.null(text())) {return()}
-    as.list(strsplit(data, " "))
-  })
+    text_multiline <- strsplit(text(), " ")
+    out <- transpose(data.frame(lapply(text_multiline, `length<-`, max(lengths(text_multiline)))))
+  },rownames = TRUE, colnames = FALSE, na = "", bordered = TRUE)
   # Show the first "n" observations ----
   # The use of isolate() is necessary because we don't want the table
   # to update whenever input$obs changes (only when the user clicks
@@ -194,7 +186,7 @@ server <- function(input, output) {
       if (sep == 1){
         text = gsub(" ", "\t", noquote(text))
         write.table(text, file, eol = "\r\n", quote = FALSE,
-                  row.names = FALSE, col.names = FALSE)
+                    row.names = FALSE, col.names = FALSE)
       }
     }
   )

@@ -11,11 +11,12 @@ lmQCM <- function(step1, data, gamma, lambda, t, beta, minClusterSize) {
   # print(sprintf("minClusterSize: %d",minClusterSize))
   
   # setwd("/media/zhi/Drive3/GeneCoexpression/matlab_old");
-  setwd("/Users/zhi/Desktop/GeneCoexpression/shiny"); #mac
+  # setwd("/Users/zhi/Desktop/GeneCoexpression/shiny"); #mac
   # setwd("E:/GeneCoexpression/shiny"); #win
   source("utils.R")
   
   # Step 0
+  print("Preprocessing ...")
   RNA <- as.matrix(data[1:dim(data)[1], 2:dim(data)[2]])
   geneID <- data.frame(data[1:dim(data)[1], 1])
   # Remove data with lowest 20% absolute exp value shared by all samples
@@ -39,6 +40,9 @@ lmQCM <- function(step1, data, gamma, lambda, t, beta, minClusterSize) {
   finalExp[is.nan(finalExp)] <- 0
   finalSym <- uniGene[sortInd[1:topN]]
   finalExp[is.na(finalExp)] <- 0
+  finalSymChar <- as.character(finalSym)
+  print("Preprocessing Finished.")
+  
   # Start the clock!
   # ptm <- proc.time()
   
@@ -52,5 +56,18 @@ lmQCM <- function(step1, data, gamma, lambda, t, beta, minClusterSize) {
   
   # save(mergedCluster, file = "./mergedCluster.RData")
   load(file = "./mergedCluster.RData")
-  return(mergedCluster)
+  geneCharVector <- matrix(0, nrow = 0, ncol = length(mergedCluster))
+
+  text <- ""
+  for (i in 1:(length(mergedCluster))) {
+    vector <- as.matrix(mergedCluster[[i]])
+    vector <- vector + 1 # covert python indexing to R indexing
+    geneChar <- finalSymChar[vector]
+    geneCharVector[i] <- list(geneChar)
+    # geneCharVector[i] <- capture.output(cat(geneChar, sep=' '))
+    # text <- paste(text, capture.output(cat(geneChar, sep=' ')), sep="\n")
+  }
+  data <- do.call(rbind, lapply(geneCharVector, 
+                         function(x) paste(x,collapse=" ")))
+  return(data)
 }

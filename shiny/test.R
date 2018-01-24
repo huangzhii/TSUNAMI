@@ -32,6 +32,7 @@ topN <- min(20000, nrow(tmpExp))
 finalExp <- tmpExp[sortInd[1:topN], ]
 finalExp[is.nan(finalExp)] <- 0
 finalSym <- uniGene[sortInd[1:topN]]
+finalSymChar <- as.character(finalSym)
 
 finalExp[is.na(finalExp)] <- 0
 # Start the clock!
@@ -53,3 +54,14 @@ python.load("main.py")
 
 # save(mergedCluster, file = "./mergedCluster.RData")
 load(file = "./mergedCluster.RData")
+geneCharVector <- matrix(0, nrow = 0, ncol = length(mergedCluster))
+
+text <- ""
+for (i in 1:(length(mergedCluster))) {
+  vector <- as.matrix(mergedCluster[[i]])
+  vector <- vector + 1 # covert python indexing to R indexing
+  geneChar <- finalSymChar[vector]
+  geneCharVector[i] <- list(geneChar)
+  text <- paste(text, capture.output(cat(geneChar, sep=' ')), sep="\n")
+}
+

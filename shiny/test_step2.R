@@ -27,7 +27,7 @@ C <- C_save
 
 sizeC <- matrix(0, nrow = 0, ncol = length(C))
 for (i in 1:length(C)){
-  sizeC[i] = length(C[[i]])
+  sizeC[i] <- length(C[[i]])
 }
 res <- sort.int(sizeC, decreasing = TRUE, index.return=TRUE)
 sortC <- res$x
@@ -64,7 +64,7 @@ while (mergeOccur == 1) {
   }
   sizeMergedCluster <- matrix(0, nrow = 0, ncol = length(mergedCluster))
   for (i in 1 : length(mergedCluster)) {
-    sizeMergedCluster[i] = length(mergedCluster[[i]])
+    sizeMergedCluster[i] <- length(mergedCluster[[i]])
   }
   res <- sort.int(sizeMergedCluster, decreasing = TRUE, index.return=TRUE)
   sortSize <- res$x
