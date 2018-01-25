@@ -9,7 +9,7 @@
 getwd();
 # If necessary, change the path below to the directory where the data files are stored. 
 # "." means current directory. On Windows use a forward slash / instead of the usual \.
-workingDir = ".";
+workingDir = "/Users/zhi/Desktop/GeneCoexpression/WGCNA";
 setwd(workingDir); 
 # Load the WGCNA package
 library(WGCNA)
@@ -18,7 +18,7 @@ options(stringsAsFactors = FALSE);
 # Allow multi-threading within WGCNA. 
 # Caution: skip this line if you run RStudio or other third-party R environments.
 # See note above.
-enableWGCNAThreads()
+allowWGCNAThreads() #enableWGCNAThreads()
 # Load the data saved in the first part
 lnames = load(file = "Consensus-dataInput.RData");
 # The variable lnames contains the names of loaded variables.

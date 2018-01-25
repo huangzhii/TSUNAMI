@@ -9,7 +9,7 @@
 getwd();
 # If necessary, change the path below to the directory where the data files are stored. 
 # "." means current directory. On Windows use a forward slash / instead of the usual \.
-workingDir = ".";
+workingDir = "/Users/zhi/Desktop/GeneCoexpression/WGCNA";
 setwd(workingDir); 
 # Load the WGCNA package
 library(WGCNA)
@@ -31,14 +31,18 @@ lnames
 #=====================================================================================
 
 
-lnames = load("../Mouse-Female/FemaleLiver-02-networkConstruction-auto.RData")
-lnames
+# lnames = load("../Mouse-Female/FemaleLiver-02-networkConstruction-auto.RData")
+# lnames
 # Rename variables to avoid conflicts
 femaleLabels = moduleLabels;
 femaleColors = moduleColors;
-femaleTree = geneTree;
-femaleMEs = orderMEs(MEs, greyName = "ME0");
+femaleTree = consTree
+# note: Zhi Huang change above line from:
+# femaleTree = geneTree;
 
+femaleMEs = orderMEs(consMEs[1], greyName = "ME0")[[1]]$data;
+# note: Zhi Huang change above line from:
+# femaleMEs = orderMEs(MEs, greyName = "ME0");
 
 #=====================================================================================
 #
@@ -112,5 +116,5 @@ labeledHeatmap(Matrix = pTable,
                colors = greenWhiteRed(100)[50:100],
                main = "Correspondence of Female set-specific and Female-Male consensus modules",
                cex.text = 1.0, cex.lab = 1.0, setStdMargins = FALSE);
-dev.off();
+dev.off()
 

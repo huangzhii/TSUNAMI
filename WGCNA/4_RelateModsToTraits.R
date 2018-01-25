@@ -9,7 +9,7 @@
 getwd();
 # If necessary, change the path below to the directory where the data files are stored. 
 # "." means current directory. On Windows use a forward slash / instead of the usual \.
-workingDir = ".";
+workingDir = "/Users/zhi/Desktop/GeneCoexpression/WGCNA";
 setwd(workingDir); 
 # Load the WGCNA package
 library(WGCNA)
@@ -143,6 +143,7 @@ labeledHeatmap(Matrix = consensusCor,
                main = paste("Consensus module--trait relationships across\n",
                             paste(setLabels, collapse = " and ")))
 
+dev.off();
 
 #=====================================================================================
 #
@@ -151,7 +152,7 @@ labeledHeatmap(Matrix = consensusCor,
 #=====================================================================================
 
 
-file = gzfile(description = "GeneAnnotation.csv.gz");
+file = gzfile(description = "GeneAnnotation.csv");
 annot = read.csv(file = file);
 # Match probes in the data set to the probe IDs in the annotation file 
 probes = names(multiExpr[[1]]$data)
@@ -228,5 +229,5 @@ info = data.frame(Probe = probes, GeneSymbol = annot$gene_symbol[probes2annot],
                   GSmat,
                   kMEmat);
 write.csv(info, file = "consensusAnalysis-CombinedNetworkResults.csv",
-          row.names = FALSE, quote = FALSE);
+          row.names = FALSE, quote = FALSE)
 

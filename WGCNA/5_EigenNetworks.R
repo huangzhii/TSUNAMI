@@ -9,7 +9,7 @@
 getwd();
 # If necessary, change the path below to the directory where the data files are stored. 
 # "." means current directory. On Windows use a forward slash / instead of the usual \.
-workingDir = ".";
+workingDir = "/Users/zhi/Desktop/GeneCoexpression/WGCNA";
 setwd(workingDir); 
 # Load the WGCNA package
 library(WGCNA)
@@ -61,5 +61,5 @@ pdf(file = "Plots/EigengeneNetworks.pdf", width= 8, height = 10);
 par(cex = 0.9)
 plotEigengeneNetworks(MET, setLabels, marDendro = c(0,2,2,1), marHeatmap = c(3,3,2,1),
                       zlimPreservation = c(0.5, 1), xLabelsAngle = 90)
-dev.off();
+dev.off()
 

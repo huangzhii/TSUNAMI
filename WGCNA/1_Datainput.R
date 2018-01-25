@@ -9,7 +9,7 @@
 getwd();
 # If necessary, change the path below to the directory where the data files are stored. 
 # "." means current directory. On Windows use a forward slash / instead of the usual \.
-workingDir = ".";
+workingDir = "/Users/zhi/Desktop/GeneCoexpression/WGCNA";
 setwd(workingDir); 
 # Load the package
 library(WGCNA);
@@ -41,7 +41,7 @@ shortLabels = c("Female", "Male")
 # Form multi-set expression data: columns starting from 9 contain actual expression data.
 multiExpr = vector(mode = "list", length = nSets)
 
-multiExpr[[1]] = list(data = as.data.frame(t(femData[-c(1:8)])));
+multiExpr[[1]] = list(data = as.data.frame(t(femData[-c(1:8)]))); # throw first 8 columns
 names(multiExpr[[1]]$data) = femData$substanceBXH;
 rownames(multiExpr[[1]]$data) = names(femData)[-c(1:8)];
 multiExpr[[2]] = list(data = as.data.frame(t(maleData[-c(1:8)])));
@@ -204,5 +204,5 @@ nSamples = exprSize$nSamples;
 
 
 save(multiExpr, Traits, nGenes, nSamples, setLabels, shortLabels, exprSize, 
-     file = "Consensus-dataInput.RData");
+     file = "Consensus-dataInput.RData")
 
