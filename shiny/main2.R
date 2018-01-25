@@ -6,6 +6,8 @@ library(data.table)
 
 options(shiny.maxRequestSize=300*1024^2) # to the top of server.R would increase the limit to 300MB
 options(shiny.sanitize.errors = FALSE)
+setwd("/Users/zhi/Desktop/GeneCoexpression/shiny"); #mac
+source("GeneCoExpressionAnalysis.R")
 
 # Define UI for dataset viewer app ----
 ui <- fluidPage(
@@ -130,27 +132,6 @@ server <- function(input, output) {
     return(text)
   })
   
-  # Generate a summary of the dataset ----
-  # output$log <- renderPrint({
-  #   if (is.null(dataset())){
-  #     print("We require input csvfile.")
-  #     return("We require input csvfile2.")
-  #   }
-  #   
-  #   if (method() == "lmQCM"){
-  #     source("GeneCoExpressionAnalysis.R")
-  #     # Check if is a new data, then determine to perform lmQCM_1 or not.
-  #     step1 <- 0
-  #     print("Processing CSV file.")
-  #     # Run lmQCM
-  #     text <- lmQCM(step1, dataset(), gamma(), lambda(), t(), beta(), minClusterSize())
-  #     
-  #   } else {
-  #     method()
-  #     # Run WGCNA
-  #   }
-  #   # return(text)
-  # })
   output$results <- renderTable({
     text_multiline <- strsplit(text(), " ")
     out <- transpose(data.frame(lapply(text_multiline, `length<-`, max(lengths(text_multiline)))))
