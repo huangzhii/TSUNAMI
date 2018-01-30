@@ -3,7 +3,7 @@ library(Biobase)
 library(rPython)
 
 # setwd("/media/zhi/Drive3/GeneCoexpression/matlab_old");
-setwd("/Users/zhi/Desktop/GeneCoexpression/shiny"); #mac
+setwd("/Users/zhi/Desktop/GeneCoexpression/lmQCM"); #mac
 # setwd("E:/GeneCoexpression/shiny"); #win
 source("utils.R")
 

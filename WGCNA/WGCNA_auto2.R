@@ -7,7 +7,7 @@ setwd("/Users/zhi/Desktop/GeneCoexpression/WGCNA"); #mac
 data<-read.csv("../matlab_old/RNAdata.csv", header=T, stringsAsFactors=F)
 RNA <- as.matrix(data[1:dim(data)[1], 2:dim(data)[2]])
 geneID <- data[,1]
-row.names(RNA) <- genename
+row.names(RNA) <- geneID
 datExpr <- t(RNA) # gene should be colnames, sample should be rownames
 # datExpr <- log(datExpr + 1) # uncomment if don't need logarithm
 dim(datExpr)
@@ -97,6 +97,15 @@ for (i in 1: length(unique(netcolors))-1){
   geneCharVector[i] <- list(geneChar)
   text <- paste(text, capture.output(cat(geneChar, sep=' ')), sep="\n")
 }
+
+## Compute maximum length
+max.length <- max(sapply(geneCharVector, length))
+## Add NA values to list elements
+geneCharVector2 <- lapply(geneCharVector, function(v) { c(v, rep(NA, max.length-length(v)))})
+## Rbind
+geneCharVector2 <- data.frame(do.call(rbind, geneCharVector2))
+
+
 #=====================================================================================
 #
 #  Code chunk 4 : plot clustring
