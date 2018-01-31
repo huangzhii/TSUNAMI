@@ -205,7 +205,13 @@ navbarPage(
          ),
   tabPanel("4. Summary and Download",
               mainPanel(
-                h4("Merged Gene Results"),
+                h4("Download Results"),
+                radioButtons("filetype", "Choose file type and download processed data:",
+                             choices = c("csv", "txt")),
+                downloadButton('downloadData', 'Download'),
+                # Horizontal line ----
+                tags$hr(),
+                h4("Preview"),
                 tableOutput("clusterResult")
               )
            ),

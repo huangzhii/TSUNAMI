@@ -17,7 +17,7 @@ data <- NULL
 finalExp <- NULL
 finalSym <- NULL
 finalSymChar <- NULL
-text <- ""
+text <- NULL
 
 function(input, output, session) {
   observe({
@@ -31,7 +31,7 @@ function(input, output, session) {
     showModal(modalDialog(
       title = "Loading NCBI GEO database", footer = NULL,
       div(class = "busy",
-          p("Loading NCBI GEO database. Last saved version: 01/31/2018"),
+          p("Loading NCBI GEO database. Last fetched version: 01/31/2018"),
           img(src="images/loading.gif"),
           style = "margin: auto"
       )
@@ -44,13 +44,13 @@ function(input, output, session) {
       do.call(rbind, tables)
     }
     
-    GEO_DB_csvpath = "../NCBI_GEO_SERIES_20180131_DOWNLOADED"
+    GEO_DB_csvpath = "./NCBI_GEO_SERIES_20180131_DOWNLOADED"
     GEO <- load_data(GEO_DB_csvpath)
     GEO[["Actions"]] <- paste0('
     <div class="btn-group" role="group" aria-label="Basic example">
     <button type="button" class="btn analysis"id=analysis_',1:nrow(GEO),'>Analyze</button></div>
     ')
-    print("GEO data loaded from ../NCBI_GEO_SERIES_20180131_DOWNLOADED")
+    print("GEO data loaded from ./NCBI_GEO_SERIES_20180131_DOWNLOADED")
     removeModal()
     DT::datatable(GEO, extensions = 'Responsive', escape=F, selection = 'none')
   })
@@ -230,23 +230,17 @@ observeEvent(input$lastClickId,{
       mergedCluster <- python.call("mainroutine", step1, as.vector(finalExp), nrow(finalExp), ncol(finalExp), gamma, t, lambda, beta, minClusterSize)
       geneCharVector <- matrix(0, nrow = 0, ncol = length(mergedCluster))
       
+      temptext <- ""
       for (i in 1:(length(mergedCluster))) {
         vector <- as.matrix(mergedCluster[[i]])
         vector <- vector + 1 # covert python indexing to R indexing
         geneChar <- finalSymChar[vector]
         geneCharVector[i] <- list(geneChar)
-        text <<- paste(text, capture.output(cat(geneChar, sep=' ')), sep="\n")
+        temptext <- paste(temptext, capture.output(cat(geneChar, sep=' ')), sep="\n")
       }
-      geneCharVector <- matrix(0, nrow = 0, ncol = length(mergedCluster))
+      temptext <- substring(temptext, 2) # remove first \n separater
+      text <<- temptext
       
-      text <- ""
-      for (i in 1:(length(mergedCluster))) {
-        vector <- as.matrix(mergedCluster[[i]])
-        vector <- vector + 1 # covert python indexing to R indexing
-        geneChar <- finalSymChar[vector]
-        geneCharVector[i] <- list(geneChar)
-        text <- paste(text, capture.output(cat(geneChar, sep=' ')), sep="\n")
-      }
       ## Compute maximum length
       max.length <- max(sapply(geneCharVector, length))
       ## Add NA values to list elements
@@ -381,13 +375,21 @@ observeEvent(input$lastClickId,{
       
       removeModal()
       geneCharVector <- matrix(0, nrow = 0, ncol = length(unique(netcolors))-1)
-      
-      text <- ""
-      for (i in 1: length(unique(netcolors))-1){
+      print("unique netcolors")
+      print(unique(netcolors))
+      temptext <- ""
+      for (i in 1: (length(unique(netcolors))-1) ){
         geneChar <- matrix[which(matrix$netcolors == i), 1]
         geneCharVector[i] <- list(geneChar)
-        text <- paste(text, capture.output(cat(geneChar, sep=' ')), sep="\n")
+        temptext <- paste(temptext, capture.output(cat(geneChar, sep=' ')), sep="\n")
+        # if (i == 1){
+        #   print(geneChar)
+        #   print(temptext)
+        # }
       }
+      temptext <- substring(temptext, 2) # remove first \n separater
+      text <<- temptext
+      
       ## Compute maximum length
       max.length <- max(sapply(geneCharVector, length))
       ## Add NA values to list elements
@@ -404,4 +406,30 @@ observeEvent(input$lastClickId,{
     }
   })
   
+  output$downloadData <- downloadHandler(
+    
+    # This function returns a string which tells the client
+    # browser what name to use when saving the file.
+    filename = function() {
+      name = "mergedCluster"
+      # name = paste("lmQCMresult","gamma",gamma(),"lambda",lambda(),"t",t(),"beta",beta(),"minClusterSize",minClusterSize(), sep = "_", collapse = NULL)
+      paste(name, input$filetype, sep = ".")
+    },
+    
+    # This function should write data to a file given to it by
+    # the argument 'file'.
+    content = function(file) {
+      sep <- switch(input$filetype, "csv" = 0, "txt" = 1)
+      if (sep == 0){
+        text_download = gsub(" ", ",", noquote(text))
+        write.table(text_download, file, eol = "\r\n", quote = FALSE,
+                    row.names = FALSE, col.names = FALSE)
+      }
+      if (sep == 1){
+        text_download = gsub(" ", "\t", noquote(text))
+        write.table(text_download, file, eol = "\r\n", quote = FALSE,
+                    row.names = FALSE, col.names = FALSE)
+      }
+    }
+  )
 }
