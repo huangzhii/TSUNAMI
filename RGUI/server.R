@@ -27,6 +27,85 @@ function(input, output, session) {
       session$sendCustomMessage("myCallbackHandler", "tab1")
     }
   })
+  output$mytable1 <- DT::renderDataTable({
+    showModal(modalDialog(
+      title = "Loading NCBI GEO database", footer = NULL,
+      div(class = "busy",
+          p("Loading NCBI GEO database. Last saved version: 01/31/2018"),
+          img(src="images/loading.gif"),
+          style = "margin: auto"
+      )
+    ))
+    # NCBI GEO
+    
+    load_data <- function(path) { 
+      files <- dir(path, pattern = '\\.csv', full.names = TRUE)
+      tables <- lapply(files, read.csv)
+      do.call(rbind, tables)
+    }
+    
+    GEO_DB_csvpath = "../NCBI_GEO_SERIES_20180131_DOWNLOADED"
+    GEO <- load_data(GEO_DB_csvpath)
+    GEO[["Actions"]] <- paste0('
+    <div class="btn-group" role="group" aria-label="Basic example">
+    <button type="button" class="btn analysis"id=analysis_',1:nrow(GEO),'>Analyze</button></div>
+    ')
+    print("GEO data loaded from ../NCBI_GEO_SERIES_20180131_DOWNLOADED")
+    removeModal()
+    DT::datatable(GEO, extensions = 'Responsive', escape=F, selection = 'none')
+  })
+observeEvent(input$lastClickId,{
+  if (input$lastClickId%like%"analysis"){
+  row_of_GEO <- as.numeric(gsub("analysis_","",input$lastClickId))
+  myGSE <- as.character(GEO[row_of_GEO,1])
+  print(myGSE)
+  
+  showModal(modalDialog(
+    title = sprintf("Loading %s file from NCBI GEO Database", myGSE), footer = NULL,
+    div(class = "busy",
+        p("We are currently loading your selected file from NCBI GEO Database ..."),
+        img(src="images/loading.gif"),
+        style = "margin: auto"
+    )
+  ))
+  t <- try(gset <- getGEO(myGSE, GSEMatrix=TRUE, AnnotGPL=TRUE)) #AnnotGPL default is FALSE
+  if("try-error" %in% class(t)) {
+    print("HTTP error 404")
+    showModal(modalDialog(
+      title = "Important message", footer = modalButton("OK"),
+      sprintf("%s is not available in NCBI GEO Database, please try another!",myGSE), easyClose = TRUE
+    ))
+    return()
+  }
+  
+  if (length(gset) > 1) idx <- grep("GPL90", attr(gset, "names")) else idx <- 1
+  gset <- gset[[idx]]
+  edata <- exprs(gset) #This is the expression matrix
+  pdata <- pData(gset) # data.frame of phenotypic information.
+  fname <- featureNames(gset) # e.g. 12345_at
+  data <<- cbind(fname, edata)
+  row.names(data) <- seq(1, length(fname))
+  
+  print("GEO file is downloaded to server and processed.")
+  removeModal()
+  output$mytable4 <- DT::renderDataTable({
+    # Expression Value
+    DT::datatable(data[1:input$quicklook_row, 1:input$quicklook_col])
+  })
+  output$mytable5 <- DT::renderDataTable({
+    # Expression Value
+    DT::datatable(data[input$starting_row:input$quicklook_row, input$starting_col:input$quicklook_col])
+  })
+  output$mytable6 <- renderTable({
+    # Gene ID
+    data[input$starting_gene_row:input$quicklook_row, 1]
+  })
+  print('tab2')
+  session$sendCustomMessage("myCallbackHandler", "tab2")
+  }
+}
+)
+  
   output$readingcsv <- reactive({
     print("readingcsv = 1")
     return(is.null(input$csvfile))
@@ -91,6 +170,7 @@ function(input, output, session) {
       print(dim(data))
       # Step 0
       RNA <- as.matrix(data[input$starting_row:dim(data)[1], input$starting_col:dim(data)[2]])
+      class(RNA) <- "numeric"
       geneID <- data.frame(data[input$starting_gene_row:dim(data)[1], 1])
       print(dim(RNA))
       print(dim(geneID))

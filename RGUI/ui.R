@@ -79,7 +79,11 @@ navbarPage(
                  tabPanel("Series", DT::dataTableOutput("mytable1"))
                  # tabPanel("Datasets", DT::dataTableOutput("mytable2")),
                  # tabPanel("Samples", DT::dataTableOutput("mytable3"))
-               )
+               ),
+               
+               tags$script("$(document).on('click', '#mytable1 button', function () {
+                        Shiny.onInputChange('lastClickId',this.id)
+                       });")
              )
            )
            
