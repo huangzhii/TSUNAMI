@@ -6,6 +6,7 @@ library(genefilter)
 library(Biobase)
 library(rPython)
 library(WGCNA)
+library(GEOquery)
 
 options(shiny.maxRequestSize=300*1024^2) # to the top of server.R would increase the limit to 300MB
 options(shiny.sanitize.errors = FALSE)
