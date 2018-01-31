@@ -10,8 +10,8 @@ library(GEOquery)
 
 options(shiny.maxRequestSize=300*1024^2) # to the top of server.R would increase the limit to 300MB
 options(shiny.sanitize.errors = FALSE)
-setwd("/Users/zhi/Desktop/GeneCoexpression/RGUI"); #mac
-source("../lmQCM/GeneCoExpressionAnalysis.R")
+# setwd("/Users/zhi/Desktop/GeneCoexpression/RGUI"); #mac #remove when deploy to shinyapps.io
+source("./lmQCM/GeneCoExpressionAnalysis.R")
 # ----------------------------------------------------
 data <- NULL
 finalExp <- NULL
@@ -370,7 +370,7 @@ observeEvent(input$lastClickId,{
                           dendroLabels = FALSE, hang = 0.03,
                           addGuide = TRUE, guideHang = 0.05,
                           main = sprintf("COAD, 
-                          power= %d, minModuleSize= 30,mergeCutHeight= 0.25", input$power))
+                          power= %d, minModuleSize= %d,mergeCutHeight= %.4f", input$power, input$minModuleSize, input$mergeCutHeight))
       })
       
       removeModal()
