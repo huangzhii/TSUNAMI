@@ -14,6 +14,7 @@ options(shiny.sanitize.errors = FALSE)
 source("./lmQCM/GeneCoExpressionAnalysis.R")
 # ----------------------------------------------------
 data <- NULL
+GEO <- NULL
 finalExp <- NULL
 finalSym <- NULL
 finalSymChar <- NULL
@@ -45,10 +46,10 @@ function(input, output, session) {
     }
     
     GEO_DB_csvpath = "./NCBI_GEO_SERIES_20180131_DOWNLOADED"
-    GEO <- load_data(GEO_DB_csvpath)
+    GEO <<- load_data(GEO_DB_csvpath)
     GEO[["Actions"]] <- paste0('
-    <div class="btn-group" role="group" aria-label="Basic example">
-    <button type="button" class="btn analysis"id=analysis_',1:nrow(GEO),'>Analyze</button></div>
+    <div>
+    <button type="button" class="btn-analysis" id=analysis_',1:nrow(GEO),'>Analyze</button></div>
     ')
     print("GEO data loaded from ./NCBI_GEO_SERIES_20180131_DOWNLOADED")
     removeModal()
@@ -68,7 +69,7 @@ observeEvent(input$lastClickId,{
         style = "margin: auto"
     )
   ))
-  t <- try(gset <- getGEO(myGSE, GSEMatrix=TRUE, AnnotGPL=TRUE)) #AnnotGPL default is FALSE
+  t <- try(gset <- getGEO(myGSE, GSEMatrix=TRUE, AnnotGPL=FALSE)) #AnnotGPL default is FALSE
   if("try-error" %in% class(t)) {
     print("HTTP error 404")
     showModal(modalDialog(
@@ -196,7 +197,6 @@ observeEvent(input$lastClickId,{
       sortInd <- res$ix
       topN <- min(input$max_gene_retain, nrow(tmpExp))
       finalExp <<- tmpExp[sortInd[1:topN], ]
-      
       print(nrow(tmpExp))
       finalSym <<- uniGene[sortInd[1:topN]]
       finalSymChar <<- as.character(finalSym)
@@ -348,7 +348,7 @@ observeEvent(input$lastClickId,{
                              verbose = input$verbose)
       
       netcolors = net$colors
-      matrix<- data.frame(cbind(finalSym, netcolors))
+      matrixdata<- data.frame(cbind(finalSym, netcolors))
       geneCharVector <- matrix(0, nrow = 0, ncol = length(unique(netcolors))-1)
       
       #=====================================================================================
@@ -375,17 +375,13 @@ observeEvent(input$lastClickId,{
       
       removeModal()
       geneCharVector <- matrix(0, nrow = 0, ncol = length(unique(netcolors))-1)
-      print("unique netcolors")
+      print("unique netcolors: ")
       print(unique(netcolors))
       temptext <- ""
       for (i in 1: (length(unique(netcolors))-1) ){
-        geneChar <- matrix[which(matrix$netcolors == i), 1]
+        geneChar <- matrixdata[which(matrixdata$netcolors == i), 1]
         geneCharVector[i] <- list(geneChar)
         temptext <- paste(temptext, capture.output(cat(geneChar, sep=' ')), sep="\n")
-        # if (i == 1){
-        #   print(geneChar)
-        #   print(temptext)
-        # }
       }
       temptext <- substring(temptext, 2) # remove first \n separater
       text <<- temptext

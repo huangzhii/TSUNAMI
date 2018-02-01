@@ -1,6 +1,6 @@
 # Zhi Huang 01/26/2017
 
-navbarPage(
+navbarPage( theme = "style.css",
   "GeneCoExpression!",
   
   tabPanel("Main Page",
