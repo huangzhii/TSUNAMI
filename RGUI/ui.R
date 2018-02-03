@@ -133,6 +133,12 @@ navbarPage( theme = "style.css",
              
              # Main panel for displaying outputs ----
              mainPanel(
+               h4("Data Summary"),
+               verbatimTextOutput("summary"),
+               fluidRow(
+                 column(6, actionButton("action_platform", "Convert Probe ID to Gene ID with Platform:")),
+                 column(3, textInput("platform_text", NULL, value = "Unknown", width = NULL, placeholder = NULL))
+               ),
                h4("Data Quicklook"),
                tabsetPanel(
                  id = 'tabset2',

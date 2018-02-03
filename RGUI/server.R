@@ -19,14 +19,12 @@ finalExp <- NULL
 finalSym <- NULL
 finalSymChar <- NULL
 text <- NULL
+fname <- NULL # e.g. 12345_at
 
 function(input, output, session) {
-  observe({
-    if(input$action1 > 0){
-      
+  observeEvent(input$action1,{
       print('tab1')
       session$sendCustomMessage("myCallbackHandler", "tab1")
-    }
   })
   output$mytable1 <- DT::renderDataTable({
     showModal(modalDialog(
@@ -55,6 +53,7 @@ function(input, output, session) {
     removeModal()
     DT::datatable(GEO, extensions = 'Responsive', escape=F, selection = 'none')
   })
+  
 observeEvent(input$lastClickId,{
   if (input$lastClickId%like%"analysis"){
   row_of_GEO <- as.numeric(gsub("analysis_","",input$lastClickId))
@@ -82,10 +81,18 @@ observeEvent(input$lastClickId,{
   if (length(gset) > 1) idx <- grep("GPL90", attr(gset, "names")) else idx <- 1
   gset <- gset[[idx]]
   edata <- exprs(gset) #This is the expression matrix
-  pdata <- pData(gset) # data.frame of phenotypic information.
-  fname <- featureNames(gset) # e.g. 12345_at
+  # pdata <- pData(gset) # data.frame of phenotypic information.
+  fname <<- featureNames(gset) # e.g. 12345_at
   data <<- cbind(fname, edata)
   row.names(data) <- seq(1, length(fname))
+  
+  
+  updateTextInput(session, "platform_text", value = paste(annotation(gset), input$controller))
+  output$summary <- renderPrint({
+    print(sprintf("Number of Genes: %d",dim(edata)[1]))
+    print(sprintf("Number of Samples: %d",dim(edata)[2]))
+    print(sprintf("Annotation Platform: %s",annotation(gset)))
+  })
   
   print("GEO file is downloaded to server and processed.")
   removeModal()
@@ -111,9 +118,9 @@ observeEvent(input$lastClickId,{
     print("readingcsv = 1")
     return(is.null(input$csvfile))
   })
-  observe({
-    if(input$action2 > 0) {
-      
+  
+  
+  observeEvent(input$action2,{
       if(is.null(input$csvfile)){
         print("no files!")
         showModal(modalDialog(
@@ -138,6 +145,13 @@ observeEvent(input$lastClickId,{
                           quote = input$quote)
         print("CSV file Processed.")
         removeModal()
+        
+        output$summary <- renderPrint({
+          print(sprintf("Number of Genes: %d",dim(data)[1]))
+          print(sprintf("Number of Samples: %d",(dim(data)[2]-1)))
+          print("Annotation Platform: Unknown")
+        })
+        
         output$mytable4 <- DT::renderDataTable({
           # Expression Value
           DT::datatable(data[1:input$quicklook_row, 1:input$quicklook_col])
@@ -153,10 +167,31 @@ observeEvent(input$lastClickId,{
         print('tab2')
         session$sendCustomMessage("myCallbackHandler", "tab2")
       }
-    }
   })
-  observe({
-    if(input$action3 > 0){
+  
+  observeEvent(input$action_platform,{
+    platform_name <- input$platform_text
+    try(gpl <- getGEO('GPL570'))
+    if("try-error" %in% class(t)) {
+      return()
+    }
+    #https://www.rdocumentation.org/packages/GEOquery/versions/2.38.4/topics/GEOData-class
+    gpltable <- Table(gpl)
+    "1553559_at"
+    fname
+    for (i in 1:length(fname)){
+      which(gpltable$ID == fname[i])
+    }
+    idx <- which(gpltable$ID == "1553559_at")
+    gpltable[idx,]$`Gene Symbol`
+    
+    output$summary <- renderPrint({
+      print(sprintf("%s Platform Loaded."), platform_name)
+    })
+  })
+  
+  
+  observeEvent(input$action3,{
       # source("/Users/zhi/Desktop/GeneCoexpression/RGUI/utils.R")
       source("utils.R")
       
@@ -206,11 +241,10 @@ observeEvent(input$lastClickId,{
       removeModal()
       print('tab3')
       session$sendCustomMessage("myCallbackHandler", "tab3")
-    }
   })
   
-  observe({
-    if(input$action4_lmQCM > 0){
+  
+  observeEvent(input$action4_lmQCM,{
       #lmQCM
       showModal(modalDialog(
         title = "Using lmQCM to calculate merged clusters", footer = NULL,
@@ -255,7 +289,6 @@ observeEvent(input$lastClickId,{
       removeModal()
       print('tab4')
       session$sendCustomMessage("myCallbackHandler", "tab4")
-    }
   })
   observeEvent(input$checkPower, {
     if (length(finalSym) > 0){
@@ -312,8 +345,8 @@ observeEvent(input$lastClickId,{
       removeModal()
     }
   })
-  observe({
-    if(input$action4_WGCNA > 0){
+  
+  observeEvent(input$action4_WGCNA,{
       #WGCNA
       showModal(modalDialog(
         title = "Using WGCNA to calculate merged clusters", footer = NULL,
@@ -348,7 +381,7 @@ observeEvent(input$lastClickId,{
                              verbose = input$verbose)
       
       netcolors = net$colors
-      matrixdata<- data.frame(cbind(finalSym, netcolors))
+      matrixdata<- data.frame(cbind(finalSymChar, netcolors))
       geneCharVector <- matrix(0, nrow = 0, ncol = length(unique(netcolors))-1)
       
       #=====================================================================================
@@ -377,9 +410,12 @@ observeEvent(input$lastClickId,{
       geneCharVector <- matrix(0, nrow = 0, ncol = length(unique(netcolors))-1)
       print("unique netcolors: ")
       print(unique(netcolors))
+      print(matrixdata)
+      print(finalSym)
       temptext <- ""
       for (i in 1: (length(unique(netcolors))-1) ){
         geneChar <- matrixdata[which(matrixdata$netcolors == i), 1]
+        print(geneChar)
         geneCharVector[i] <- list(geneChar)
         temptext <- paste(temptext, capture.output(cat(geneChar, sep=' ')), sep="\n")
       }
@@ -399,7 +435,6 @@ observeEvent(input$lastClickId,{
       
       print('tab4')
       session$sendCustomMessage("myCallbackHandler", "tab4")
-    }
   })
   
   output$downloadData <- downloadHandler(
