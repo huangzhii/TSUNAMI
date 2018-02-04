@@ -84,7 +84,7 @@ observeEvent(input$lastClickId,{
   # pdata <- pData(gset) # data.frame of phenotypic information.
   fname <<- featureNames(gset) # e.g. 12345_at
   data <<- cbind(fname, edata)
-  row.names(data) <- seq(1, length(fname))
+  row.names(data) <<- seq(1, length(fname))
   
   
   updateTextInput(session, "platform_text", value = paste(annotation(gset), input$controller))
@@ -170,24 +170,52 @@ observeEvent(input$lastClickId,{
   })
   
   observeEvent(input$action_platform,{
-    platform_name <- input$platform_text
-    try(gpl <- getGEO('GPL570'))
+    platform_name <- gsub(" ", "", input$platform_text, fixed = TRUE)
+    try(gpl <- getGEO(platform_name))
     if("try-error" %in% class(t)) {
+      print("HTTP error 404")
+      showModal(modalDialog(
+        title = "Important message", footer = modalButton("OK"),
+        sprintf("%s is not available in NCBI GEO Database, please try another!", platform_name), easyClose = TRUE
+      ))
       return()
     }
+    
+    showModal(modalDialog(
+      title = "Converting...", footer = NULL,
+      div(class = "busy",
+          p("We are currently converting probe ID to Gene ID..."),
+          img(src="images/loading.gif"),
+          style = "margin: auto"
+      )
+    ))
+    print("Platform Loaded.")
+    
     #https://www.rdocumentation.org/packages/GEOquery/versions/2.38.4/topics/GEOData-class
     gpltable <- Table(gpl)
-    "1553559_at"
-    fname
+    fname2 <- fname
     for (i in 1:length(fname)){
-      which(gpltable$ID == fname[i])
+      fname2[i] <- gpltable$`Gene Symbol`[which(gpltable$ID == fname[i])]
     }
-    idx <- which(gpltable$ID == "1553559_at")
-    gpltable[idx,]$`Gene Symbol`
-    
-    output$summary <- renderPrint({
-      print(sprintf("%s Platform Loaded."), platform_name)
+    print(dim(data))
+    print(length(fname2))
+    data[,1] <<- fname2
+    row.names(data) <- seq(1, length(fname2))
+    output$mytable4 <- DT::renderDataTable({
+      # Expression Value
+      DT::datatable(data[1:input$quicklook_row, 1:input$quicklook_col])
     })
+    output$mytable5 <- DT::renderDataTable({
+      # Expression Value
+      DT::datatable(data[input$starting_row:input$quicklook_row, input$starting_col:input$quicklook_col])
+    })
+    output$mytable6 <- renderTable({
+      # Gene ID
+      data[input$starting_gene_row:input$quicklook_row, 1]
+    })
+    print("Platform Conversion finished")
+    
+    removeModal()
   })
   
   
@@ -221,23 +249,49 @@ observeEvent(input$lastClickId,{
       RNA_filtered2 = RNA_filtered1[index, ]
       geneID_filtered2 = geneID_filtered1[index]
       
-      expData <- RNA_filtered2
-      res <- highExpressionProbes(geneID_filtered2, geneID_filtered2, expData)
-      ind1 <- res$first
-      uniGene <- res$second
-      tmpExp <-expData[ind1,]
+      # expData <- RNA_filtered2
+      # res <- highExpressionProbes(geneID_filtered2, geneID_filtered2, expData)
+      # ind1 <- res$first
+      # uniGene <- as.character(res$second)
+      # tmpExp <- expData[ind1,]
+      uniGene <- geneID_filtered2
+      tmpExp <- RNA_filtered2
+      
+      if (input$checkbox_NA){
+        tmpExp[is.na(tmpExp)] <- 0
+      }
+      if (input$checkbox_empty){
+        print(sprintf("data dimension before remove gene with empty symbol: %d x %d",dim(tmpExp)[1],dim(tmpExp)[2]))
+        uniGene <- subset(uniGene, nchar(as.character(uniGene)) > 0)
+        tmpExp <- subset(tmpExp, nchar(as.character(uniGene)) > 0)
+        print(sprintf("data dimension after remove gene with empty symbol: %d x %d",dim(tmpExp)[1],dim(tmpExp)[2]))
+      }
+      if (input$checkbox_duplicated){
+        row2remove <- numeric()
+        finalSymCharTable <- table(uniGene)
+        for (i in 1:length(finalSymCharTable)){
+          if (as.numeric(finalSymCharTable[i]) > 1){ # if exist duplicated Gene
+            genename <- names(finalSymCharTable[i])
+            idx_with_max_mean <- which.max(rowMeans(tmpExp[which(uniGene == genename),]))
+            # print(idx_with_max_mean)
+            row2remove <- c( row2remove, (which(uniGene == genename)[-idx_with_max_mean]) )
+          }
+        }
+        if (length(row2remove) > 0){ # Otherwise numerical(0) will remove all data in tmpExp
+          tmpExp <- tmpExp[-row2remove,]
+          uniGene <- uniGene[-row2remove]
+        }
+        print(sprintf("data dimension after remove duplicated gene symbol: %d x %d",dim(tmpExp)[1],dim(tmpExp)[2]))
+        
+      }
       nSample <- ncol(tmpExp)
       res <- sort.int(rowMeans(tmpExp), decreasing = TRUE, index.return=TRUE)
       sortMean <- res$x
       sortInd <- res$ix
       topN <- min(input$max_gene_retain, nrow(tmpExp))
       finalExp <<- tmpExp[sortInd[1:topN], ]
-      print(nrow(tmpExp))
       finalSym <<- uniGene[sortInd[1:topN]]
       finalSymChar <<- as.character(finalSym)
-      if (input$NAconverter){
-        finalExp[is.na(finalExp)] <- 0
-      }
       removeModal()
       print('tab3')
       session$sendCustomMessage("myCallbackHandler", "tab3")
