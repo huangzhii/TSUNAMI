@@ -19,6 +19,7 @@ finalExp <- NULL
 finalSym <- NULL
 finalSymChar <- NULL
 text <- NULL
+eigengene_matrix <- NULL
 fname <- NULL # e.g. 12345_at
 
 function(input, output, session) {
@@ -28,7 +29,7 @@ function(input, output, session) {
   })
   output$mytable1 <- DT::renderDataTable({
     showModal(modalDialog(
-      title = "Loading NCBI GEO database", footer = NULL,
+      title = "Loading NCBI GEO database", footer = modalButton("OK"), easyClose = TRUE,
       div(class = "busy",
           p("Loading NCBI GEO database. Last fetched version: 01/31/2018"),
           img(src="images/loading.gif"),
@@ -321,17 +322,31 @@ observeEvent(input$lastClickId,{
       python.load("main.py")
       mergedCluster <- python.call("mainroutine", step1, as.vector(finalExp), nrow(finalExp), ncol(finalExp), gamma, t, lambda, beta, minClusterSize)
       geneCharVector <- matrix(0, nrow = 0, ncol = length(mergedCluster))
+      temp_eigengene <- matrix(0, nrow = length(mergedCluster), ncol = dim(finalExp)[2]) # Clusters * Samples
       
       temptext <- ""
       for (i in 1:(length(mergedCluster))) {
         vector <- as.matrix(mergedCluster[[i]])
         vector <- vector + 1 # covert python indexing to R indexing
+        geneID <- vector
+        # ===== Calculate Eigengene Start
+        X <- finalExp[geneID,]
+        mu <- rowMeans(X)
+        stddev <- rowSds(as.matrix(X), na.rm=TRUE) # standard deviation with 1/(n-1)
+        #normalize X:
+        XNorm <- sweep(X,1,mu)
+        XNorm <- apply(XNorm, 2, function(x) x/stddev)
+        SVD <- svd(XNorm, LINPACK = FALSE)
+        temp_eigengene[i,] <- t(SVD$v[,1])
+        # ===== Calculate Eigengene Finished
+        
         geneChar <- finalSymChar[vector]
         geneCharVector[i] <- list(geneChar)
         temptext <- paste(temptext, capture.output(cat(geneChar, sep=',')), sep="\n")
       }
       temptext <- substring(temptext, 2) # remove first \n separater
       text <<- temptext
+      eigengene_matrix <<- temp_eigengene
       
       ## Compute maximum length
       max.length <- max(sapply(geneCharVector, length))
@@ -342,6 +357,10 @@ observeEvent(input$lastClickId,{
       
       output$clusterResult <- renderTable({
         return(geneCharVector2)
+      },rownames = TRUE, colnames = FALSE, na = "", bordered = TRUE)
+      
+      output$mytable7 <- renderTable({
+        return(eigengene_matrix)
       },rownames = TRUE, colnames = FALSE, na = "", bordered = TRUE)
       
       removeModal()
@@ -471,14 +490,27 @@ observeEvent(input$lastClickId,{
       print(matrixdata)
       print(finalSym)
       temptext <- ""
+      temp_eigengene <- matrix(0, nrow = length(unique(netcolors))-1, ncol = dim(finalExp)[2]) # Clusters * Samples
       for (i in 1: (length(unique(netcolors))-1) ){
-        geneChar <- matrixdata[which(matrixdata$netcolors == i), 1]
+        geneID <- which(matrixdata$netcolors == i)
+        # ===== Calculate Eigengene Start
+        X <- finalExp[geneID,]
+        mu <- rowMeans(X)
+        stddev <- rowSds(as.matrix(X), na.rm=TRUE) # standard deviation with 1/(n-1)
+        #normalize X:
+        XNorm <- sweep(X,1,mu)
+        XNorm <- apply(XNorm, 2, function(x) x/stddev)
+        SVD <- svd(XNorm, LINPACK = FALSE)
+        temp_eigengene[i,] <- t(SVD$v[,1])
+        # ===== Calculate Eigengene Finished
+        geneChar <- matrixdata[geneID, 1]
         print(geneChar)
         geneCharVector[i] <- list(geneChar)
         temptext <- paste(temptext, capture.output(cat(geneChar, sep=',')), sep="\n")
       }
       temptext <- substring(temptext, 2) # remove first \n separater
       text <<- temptext
+      eigengene_matrix <<- temp_eigengene
       
       ## Compute maximum length
       max.length <- max(sapply(geneCharVector, length))
@@ -491,24 +523,28 @@ observeEvent(input$lastClickId,{
         return(geneCharVector2)
       },rownames = TRUE, colnames = FALSE, na = "", bordered = TRUE)
       
+      output$mytable7 <- renderTable({
+        return(eigengene_matrix)
+      },rownames = TRUE, colnames = FALSE, na = "", bordered = TRUE)
+      
       print('tab4')
       session$sendCustomMessage("myCallbackHandler", "tab4")
   })
   
-  output$downloadData <- downloadHandler(
+  output$downloadData1 <- downloadHandler(
     
     # This function returns a string which tells the client
     # browser what name to use when saving the file.
     filename = function() {
       name = "mergedCluster"
       # name = paste("lmQCMresult","gamma",gamma(),"lambda",lambda(),"t",t(),"beta",beta(),"minClusterSize",minClusterSize(), sep = "_", collapse = NULL)
-      paste(name, input$filetype, sep = ".")
+      paste(name, input$filetype1, sep = ".")
     },
     
     # This function should write data to a file given to it by
     # the argument 'file'.
     content = function(file) {
-      sep <- switch(input$filetype, "csv" = 0, "txt" = 1)
+      sep <- switch(input$filetype1, "csv" = 0, "txt" = 1)
       if (sep == 0){
         text_download = gsub(",", ",", noquote(text))
         write.table(text_download, file, eol = "\r\n", quote = FALSE,
@@ -519,6 +555,26 @@ observeEvent(input$lastClickId,{
         write.table(text_download, file, eol = "\r\n", quote = FALSE,
                     row.names = FALSE, col.names = FALSE)
       }
+    }
+  )
+  output$downloadData2 <- downloadHandler(
+    
+    # This function returns a string which tells the client
+    # browser what name to use when saving the file.
+    filename = function() {
+      name = "EigengeneMatrix"
+      # name = paste("lmQCMresult","gamma",gamma(),"lambda",lambda(),"t",t(),"beta",beta(),"minClusterSize",minClusterSize(), sep = "_", collapse = NULL)
+      paste(name, input$filetype2, sep = ".")
+    },
+    
+    # This function should write data to a file given to it by
+    # the argument 'file'.
+    content = function(file) {
+      separator <- switch(input$filetype2, "csv" = ',', "txt" = '\t')
+      write.table(eigengene_matrix, file = file, append = FALSE, quote = TRUE, sep = separator,
+                  eol = "\r\n", na = "NA", dec = ".", row.names = F,
+                  col.names = F, qmethod = c("escape", "double"),
+                  fileEncoding = "")
     }
   )
 }

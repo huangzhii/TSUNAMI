@@ -18,14 +18,18 @@ navbarPage( theme = "style.css",
                      ),
             tabPanel("Co-Expression Analysis",
                      sidebarLayout(position = "right",
-                                   
                                    sidebarPanel(
+                                     width = 3,
                                      h4("Gene Co-Expression Analysis Panel"),
                                      h4("Lorem ipsum"),
                                      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
                                    ),
                                    
                                    mainPanel(
+                                     width = 9,
+                                     h4("Lorem ipsum"),
+                                     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                                     
                      navbarPage( theme = "style.css",
                        "GeneCoExpression!",
                        
@@ -59,7 +63,7 @@ navbarPage( theme = "style.css",
                                 ),
                        tabPanel("1. DataSet",
                                 # App title ----
-                                titlePanel("Choose GSE Data or Upload Your Own Data"),
+                                # titlePanel("Choose GSE Data or Upload Your Own Data"),
                                 singleton(
                                   tags$head(tags$script(src = "message-handler.js"))
                                 ),
@@ -120,7 +124,7 @@ navbarPage( theme = "style.css",
 
                               ),
                        tabPanel("2. Data Cleaning",
-                                titlePanel("Verifying & Cleaning Data"),
+                                # titlePanel("Verifying & Cleaning Data"),
 
                                 # Sidebar layout with input and output definitions ----
                                 sidebarLayout(
@@ -168,9 +172,10 @@ navbarPage( theme = "style.css",
                                   mainPanel(
                                     h4("Data Summary"),
                                     verbatimTextOutput("summary"),
+                                    h5("Convert Probe ID to Gene Symbol with Platform:"),
                                     fluidRow(
-                                      column(6, actionButton("action_platform", "Convert Probe ID to Gene ID with Platform:")),
-                                      column(3, textInput("platform_text", NULL, value = "Unknown", width = NULL, placeholder = NULL))
+                                      column(6, textInput("platform_text", NULL, value = "Unknown", width = NULL, placeholder = NULL)),
+                                      column(6, actionButton("action_platform", "Convert"))
                                     ),
                                     h4("Data Quicklook"),
                                     tabsetPanel(
@@ -183,7 +188,7 @@ navbarPage( theme = "style.css",
                                 )
                        ),
                        tabPanel("3. Choose Method",
-                                titlePanel("Select Method for Gene Co-Expression Analysis"),
+                                # titlePanel("Select Method for Gene Co-Expression Analysis"),
                                 navlistPanel(
                                   "Method List",
                                   tabPanel("lmQCM",
@@ -245,13 +250,25 @@ navbarPage( theme = "style.css",
                        tabPanel("4. Summary and Download",
                                    mainPanel(
                                      h4("Download Results"),
-                                     radioButtons("filetype", "Choose file type and download processed data:",
-                                                  choices = c("csv", "txt")),
-                                     downloadButton('downloadData', 'Download'),
-                                     # Horizontal line ----
-                                     tags$hr(),
+                                     fluidRow(
+                                       column(6,
+                                              radioButtons("filetype1", "Merged Clusters with Gene Symbol:",
+                                                           choices = c("csv", "txt")),
+                                              downloadButton('downloadData1', 'Download')
+                                              ),
+                                       column(6,
+                                              radioButtons("filetype2", "Eigengene Matrix:",
+                                                           choices = c("csv", "txt")),
+                                              downloadButton('downloadData2', 'Download')
+                                       )
+                                     ),
+                                     
                                      h4("Preview"),
-                                     tableOutput("clusterResult")
+                                     tabsetPanel(
+                                       id = 'tabset',
+                                       tabPanel("Merged Clusters", tableOutput("clusterResult")),
+                                       tabPanel("Eigengene Matrix", tableOutput("mytable7"))
+                                     )
                                    )
                                 )
                      )  #, style='width: 80%'
