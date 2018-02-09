@@ -1,0 +1,273 @@
+# Zhi Huang 02/04/2017
+navbarPage( theme = "style.css",
+            
+            # title="bioinfo tool",
+            # title=div(img(src="images/iulogo.png",
+            #               width = 20,
+            #               style = "margin:0px 0px;"), "BioInfo Suite"),
+            title=div(img(src="images/iulogobioinfo.png",
+                          height = 28,
+                          style = "margin:0px 0px;")),
+            
+            tabPanel("Home",
+                     h4("Index.html"),
+                     h5("Lorem ipsum"),
+                     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                     h5("Section 1.10.32"),
+                     "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?"
+            ),
+            tabPanel("Co-Expression Analysis",
+                                     h5("Lorem ipsum"),
+                                     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                                     
+                                     navlistPanel(widths = c(2, 10),
+                                                #theme = "style.css",
+                                                 #"GeneCoExpression!",
+                                                 
+                                                 tabPanel("Introduction",
+                                                          h4("Gene Co-Expression Analysis Site"),
+                                                          h5("Lorem ipsum"),
+                                                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                                                          h5("Section 1.10.32"),
+                                                          "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?"
+                                                          ,
+                                                          tags$head(tags$script('Shiny.addCustomMessageHandler("myCallbackHandler",
+                                                                                function(typeMessage) {console.log(typeMessage)
+                                                                                if(typeMessage == "tab1"){
+                                                                                console.log("got here");
+                                                                                $("a:contains(1. DataSet)").click();
+                                                                                }
+                                                                                if(typeMessage == "tab2"){
+                                                                                $("a:contains(2. Data Cleaning)").click();
+                                                                                }
+                                                                                if(typeMessage == "tab3"){
+                                                                                $("a:contains(3. Choose Method)").click();
+                                                                                }
+                                                                                if(typeMessage == "tab4"){
+                                                                                $("a:contains(4. Summary and Download)").click();
+                                                                                }
+                                                                                });
+                                                                                ')),
+                                                          # Horizontal line ----
+                                                          tags$hr(),
+                                                          actionButton("action1", "Proceed")
+                                                          ),
+                                                 tabPanel("1. DataSet",
+                                                          # App title ----
+                                                          # titlePanel("Choose GSE Data or Upload Your Own Data"),
+                                                          singleton(
+                                                            tags$head(tags$script(src = "message-handler.js"))
+                                                          ),
+                                                          # Sidebar layout with input and output definitions ----
+                                                          sidebarLayout(
+                                                            position = "right",
+                                                            
+                                                            # Sidebar panel for inputs ----
+                                                            sidebarPanel(
+                                                              # Input: Select a file ----
+                                                              h5("File uploader"),
+                                                              fileInput("csvfile", "Choose CSV File",
+                                                                        multiple = FALSE,
+                                                                        accept = c("text/csv",
+                                                                                   "text/comma-separated-values,text/plain",
+                                                                                   ".csv")),
+                                                              
+                                                              # Include clarifying text ----
+                                                              helpText("Note: Maximum csv file size allowed for uploading is 300MB."),
+                                                              
+                                                              # Input: Checkbox if file has header ----
+                                                              checkboxInput("header", "Header", TRUE),
+                                                              
+                                                              fluidRow(
+                                                                # Input: Select separator ----
+                                                                column(6, radioButtons("sep", "Separator",
+                                                                                       choices = c(Comma = ",",
+                                                                                                   Semicolon = ";",
+                                                                                                   Tab = "\t"),
+                                                                                       selected = ",")),
+                                                                # Input: Select quotes ----
+                                                                column(6, radioButtons("quote", "Quote",
+                                                                                       choices = c(None = "",
+                                                                                                   "Double Quote" = '"',
+                                                                                                   "Single Quote" = "'"),
+                                                                                       selected = '"'))
+                                                              ),
+                                                              
+                                                              # Horizontal line ----
+                                                              tags$hr(),
+                                                              actionButton("action2", "Confirm when Complete")
+                                                            ),
+                                                            
+                                                            # Main panel for displaying outputs ----
+                                                            mainPanel(
+                                                              h5("NCBI GEO Data"),
+                                                              tabsetPanel(
+                                                                id = 'dataset',
+                                                                tabPanel("Series", DT::dataTableOutput("mytable1"))
+                                                                # tabPanel("Datasets", DT::dataTableOutput("mytable2")),
+                                                                # tabPanel("Samples", DT::dataTableOutput("mytable3"))
+                                                              ),
+                                                              
+                                                              tags$script("$(document).on('click', '#mytable1 button', function () {
+                                                                          Shiny.onInputChange('lastClickId',this.id)
+                                                                          });")
+                                  )
+                                                            )
+                                  
+                                                            ),
+                                  tabPanel("2. Data Cleaning",
+                                           # titlePanel("Verifying & Cleaning Data"),
+                                           
+                                           # Sidebar layout with input and output definitions ----
+                                           sidebarLayout(
+                                             position = "right",
+                                             # Sidebar panel for inputs ----
+                                             sidebarPanel(
+                                               # Input: Select a file ----
+                                               h5("Choose Quicklook dimensions"),
+                                               helpText("Quicklook starting from the beginning to specific rows and columns."),
+                                               
+                                               fluidRow(
+                                                 column(6, numericInput("quicklook_row", "# of rows:", 100, step = 1, min = 1)),
+                                                 column(6, numericInput("quicklook_col", "# of columns:", 10, step = 1, min = 1))
+                                               ),
+                                               # Horizontal line ----
+                                               # tags$hr(),
+                                               h5("Verify starting column and row of expression data"),
+                                               helpText("This is assigner. Choose starting column and row for expression data. Index starting from 1."),
+                                               
+                                               fluidRow(
+                                                 column(6, numericInput("starting_row", "starting row:", 1, step = 1, min = 1)),
+                                                 column(6, numericInput("starting_col", "starting column:", 2, step = 1, min = 1))
+                                               ),
+                                               # Horizontal line ----
+                                               # tags$hr(),
+                                               h5("Verify Gene ID"),
+                                               helpText("We suppose Gene ID is in column 1."),
+                                               numericInput("starting_gene_row", "starting row:", 1, step = 1, min = 1),
+                                               # Horizontal line ----
+                                               tags$hr(),
+                                               h5("Remove Genes"),
+                                               helpText("Remove data with lowest percentile absolute expression value shared by all samples. Then remove data with lowest percentile variance across samples."),
+                                               fluidRow(
+                                                 column(6, numericInput("absolute_expval", "Lowest Absolute Percentile (%) To Remove:", 20, step = 1, min = 0)),
+                                                 column(6, numericInput("variance_expval", "Lowest Variance Percentile (%) To Remove:", 10, step = 1, min = 0))
+                                               ),
+                                               checkboxInput("checkbox_NA", "Convert NA value to 0 in Expression Data", TRUE),
+                                               checkboxInput("checkbox_empty", "Remove rows with empty Gene Symbol (Gene ID)", TRUE),
+                                               checkboxInput("checkbox_duplicated", "Keep only one row with largest mean expression value when Gene ID is duplicated", TRUE),
+                                               numericInput("max_gene_retain", "Maximum Number of Genes to Retain:", 20000, step = 1000, min = 0),
+                                               actionButton("action3", "Continue")
+                                             ),
+                                             
+                                             # Main panel for displaying outputs ----
+                                             mainPanel(
+                                               h5("Data Summary"),
+                                               verbatimTextOutput("summary"),
+                                               helpText("Convert Probe ID to Gene Symbol with Platform:"),
+                                               fluidRow(
+                                                 column(6, textInput("platform_text", NULL, value = "Unknown", width = NULL, placeholder = NULL)),
+                                                 column(6, actionButton("action_platform", "Convert"))
+                                               ),
+                                               h5("Data Quicklook"),
+                                               tabsetPanel(
+                                                 id = 'tabset2',
+                                                 tabPanel("Original Data", DT::dataTableOutput("mytable4")),
+                                                 tabPanel("Expression Value", DT::dataTableOutput("mytable5")),
+                                                 tabPanel("Gene ID", tableOutput("mytable6"))
+                                               )
+                                             )
+                                           )
+                                  ),
+                                  tabPanel("3. Choose Method",
+                                           # titlePanel("Select Method for Gene Co-Expression Analysis"),
+                                           
+                                           tabsetPanel(
+                                             id = "MethodList",
+                                             tabPanel("lmQCM",
+                                                      h5("lmQCM"),
+                                                      helpText("An Algorithm for Detecting Weak Quasi-Cliques in Weighted Graph with Applications in Gene Co-Expression Module Discovery in Cancers"),
+                                                      tags$hr(),
+                                                      fluidRow(
+                                                        column(6, numericInput("gamma", "gamma:", 0.55, step = 0.05)),
+                                                        column(6, numericInput("lambda", "lambda", 1, step = 0.05))
+                                                      ),
+                                                      fluidRow(
+                                                        column(6, numericInput("t", "t:", 1, step = 0.05)),
+                                                        column(6, numericInput("beta", "beta:", 0.4, step = 0.05))
+                                                      ),
+                                                      numericInput("minClusterSize", "Minimum Cluster Size:", 10, step = 1, width = NULL),
+                                                      
+                                                      # Horizontal line ----
+                                                      tags$hr(),
+                                                      actionButton("action4_lmQCM", "Confirm and Run!")
+                                             ),
+                                             tabPanel("WGCNA",
+                                                      h5("WGCNA"),
+                                                      helpText("An R package for weighted correlation network analysis"),
+                                                      tags$hr(),
+                                                      
+                                                      h5("Step 1: Power Visualization"),
+                                                      helpText("Visualize the data"),
+                                                      actionButton("checkPower", "Check Power"),
+                                                      uiOutput("WGCNAPowerPlot1and2"),
+                                                      
+                                                      # Horizontal line ----
+                                                      tags$hr(),
+                                                      
+                                                      h5("Step 2: Choose Parameters"),
+                                                      helpText("Choose the power and remaining parameters"),
+                                                      fluidRow(
+                                                        column(6, numericInput("power", "power:", 6, step = 1, min = 1)),
+                                                        column(6, numericInput("reassignThreshold", "Reassign Threshold", 0, step = 0.01))
+                                                      ),
+                                                      fluidRow(
+                                                        column(6, numericInput("mergeCutHeight", "Merge Cut Height:", 0.25, step = 0.01)),
+                                                        column(6, numericInput("verbose", "verbose:", 3, step = 1))
+                                                      ),
+                                                      numericInput("minModuleSize", "Minimum Module Size:", 10, step = 1, width = NULL),
+                                                      
+                                                      # Horizontal line ----
+                                                      tags$hr(),
+                                                      actionButton("action4_WGCNA", "Confirm and Run!"),
+                                                      uiOutput("WGCNAresultUI")
+                                             ),
+                                             tabPanel("More",
+                                                      h5("More..."),
+                                                      helpText("More method to be explore...")
+                                             )
+                                           )
+                                  ),
+                                  tabPanel("4. Result",
+                                           mainPanel(
+                                             h4("Download Results"),
+                                             fluidRow(
+                                               column(6,
+                                                      radioButtons("filetype1", "Merged Clusters with Gene Symbol:",
+                                                                   choices = c("csv", "txt")),
+                                                      downloadButton('downloadData1', 'Download')
+                                               ),
+                                               column(6,
+                                                      radioButtons("filetype2", "Eigengene Matrix:",
+                                                                   choices = c("csv", "txt")),
+                                                      downloadButton('downloadData2', 'Download')
+                                               )
+                                             ),
+                                             
+                                             h4("Preview"),
+                                             tabsetPanel(
+                                               id = 'tabset',
+                                               tabPanel("Merged Clusters", tableOutput("clusterResult")),
+                                               tabPanel("Eigengene Matrix", tableOutput("mytable7"))
+                                             )
+                                           )
+                                  )
+                                                 )  #, style='width: 80%'
+                     
+                     ),
+            navbarMenu(
+              "More",
+              tabPanel("Login",
+                       DT::dataTableOutput("table"))
+            )
+            )
