@@ -244,14 +244,26 @@ observeEvent(input$lastClickId,{
       print(dim(geneID))
       # Remove data with lowest 20% absolute exp value shared by all samples
       percentile <- input$absolute_expval/100.
-      RNA_filtered1 = RNA[apply(RNA,1,max) > quantile(RNA, percentile)[[1]], ]
-      geneID_filtered1 = geneID[apply(RNA,1,max) > quantile(RNA, percentile)[[1]], ]
       
+      if (percentile > 0){
+        RNA_filtered1 = RNA[apply(RNA,1,max) > quantile(RNA, percentile)[[1]], ]
+        geneID_filtered1 = geneID[apply(RNA,1,max) > quantile(RNA, percentile)[[1]], ]
+      }
+      else {
+        RNA_filtered1 = RNA
+        geneID_filtered1 = geneID
+      }
       # Remove data with lowest 10% variance across samples
       percentile <- input$variance_expval/100.
-      index <- varFilter2(eset = RNA_filtered1, var.cutoff = percentile)
-      RNA_filtered2 = RNA_filtered1[index, ]
-      geneID_filtered2 = geneID_filtered1[index]
+      if (percentile > 0){
+        index <- varFilter2(eset = RNA_filtered1, var.cutoff = percentile)
+        RNA_filtered2 = RNA_filtered1[index, ]
+        geneID_filtered2 = geneID_filtered1[index]
+      }
+      else {
+        RNA_filtered2 = RNA_filtered1
+        geneID_filtered2 = geneID_filtered1
+      }
       
       # expData <- RNA_filtered2
       # res <- highExpressionProbes(geneID_filtered2, geneID_filtered2, expData)
@@ -329,6 +341,8 @@ observeEvent(input$lastClickId,{
         vector <- as.matrix(mergedCluster[[i]])
         vector <- vector + 1 # covert python indexing to R indexing
         geneID <- vector
+        print(i)
+        print(vector)
         # ===== Calculate Eigengene Start
         X <- finalExp[geneID,]
         mu <- rowMeans(X)

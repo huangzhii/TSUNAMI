@@ -25,7 +25,8 @@ geoFile = 'Stomach_Cancer.txt';
 [mask, geoDataFilter, geneSymFilter]= genelowvalfilter(transpose(rna),geneId,'percentile',20);
 %remove data with lowest 10% variance across samples
 [mask2, geoDataFilter2, geneSymFilter2] = genevarfilter(geoDataFilter,geneSymFilter);
-
+% geoDataFilter2 = geoDataFilter;
+% geneSymFilter2 = geneSymFilter;
 expData = double(geoDataFilter2);
 
 
@@ -37,12 +38,12 @@ tmpExp = expData(ind1,:); %rows re-sorted to the alphabetic order of uniGene.
 
 nSample = size(tmpExp, 2);
 
-[sortMean, sortInd] = sort(mean(tmpExp, 2), 'descend');
+[sortMean, sortInd1] = sort(mean(tmpExp, 2), 'descend');
 
 topN = min(2000,size(tmpExp,1));
 
-finalExp = tmpExp(sortInd(1:topN), :); % sorted expression
-finalSym = uniGene(sortInd(1:topN));
+finalExp = tmpExp(sortInd1(1:topN), :); % sorted expression
+finalSym = uniGene(sortInd1(1:topN));
 
 tic
 
@@ -71,7 +72,7 @@ toc
 %%%%%%%% Step 2 - identify co-expression modules %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%% Algorithm parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-for gamma = 0.5:0.05:0.5
+for gamma = 0.55:0.05:0.55
 % for gamma = 0.5:0.05:0.85
 % for gamma = 0.2:0.05:0.45
 
@@ -156,7 +157,7 @@ for gamma = 0.5:0.05:0.5
         fprintf(fid,'%s\t%d\t',strcat('cluster ',num2str(i)),length(tmp));
         for j = 1 : length(tmp)
             fprintf(fid, '%s\t', finalSym{tmp(j)});
-            coexpression_name{i}{j}= finalSym{tmp(j)};
+            coexpression_name{i}{j}= tmp(j);
         end;
         fprintf(fid, '\r\n');
         coexpression_value{i} = finalExp(tmp,:);

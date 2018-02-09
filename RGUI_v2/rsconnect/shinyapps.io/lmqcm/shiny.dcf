@@ -5,9 +5,9 @@ account: lmqcm
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 258883
-bundleId: 1210717
+bundleId: 1211167
 url: https://lmqcm.shinyapps.io/shiny/
-when: 1517949420.94388
+when: 1517973564.09233
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: COAD.pdf

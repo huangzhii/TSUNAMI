@@ -1,6 +1,6 @@
 ## Step 2 (around 10 min in Y710 windows)
 # setwd("E:/GeneCoexpression/shiny"); #win
-setwd("/Users/zhi/Desktop/GeneCoexpression/shiny"); #mac
+setwd("/Users/zhi/Desktop/GeneCoexpression/RGUI_v2/lmQCM"); #mac
 load(file = "../../cMatrix.RData")
 source("utils.R")
 source("localMaximumQCM.R")

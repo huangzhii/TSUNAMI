@@ -3,7 +3,7 @@ library(Biobase)
 library(rPython)
 
 # setwd("/media/zhi/Drive3/GeneCoexpression/matlab_old");
-setwd("/Users/zhi/Desktop/GeneCoexpression/lmQCM"); #mac
+setwd("/Users/zhi/Desktop/GeneCoexpression/RGUI_v2"); #mac
 # setwd("E:/GeneCoexpression/shiny"); #win
 source("utils.R")
 
@@ -28,7 +28,7 @@ nSample <- ncol(tmpExp)
 res <- sort.int(rowMeans(tmpExp), decreasing = TRUE, index.return=TRUE)
 sortMean <- res$x
 sortInd <- res$ix
-topN <- min(20000, nrow(tmpExp))
+topN <- min(2000, nrow(tmpExp))
 finalExp <- tmpExp[sortInd[1:topN], ]
 finalExp[is.nan(finalExp)] <- 0
 finalSym <- uniGene[sortInd[1:topN]]
@@ -39,7 +39,7 @@ finalExp[is.na(finalExp)] <- 0
 # ptm <- proc.time()
 
 step1 = 1
-gamma = 0.5
+gamma = 0.55
 t = 1
 lambda = 1
 beta = 0.4
