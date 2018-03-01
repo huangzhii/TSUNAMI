@@ -26,12 +26,3 @@ if (nRow > 1)
 else
     PCC_mat = corr(dataMat(1, ind), dataVec(1, ind));
 end;
-
-
-
-
-
-
-
-
-

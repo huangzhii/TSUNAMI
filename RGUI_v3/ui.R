@@ -83,7 +83,8 @@ navbarPage( theme = "style.css",
                                                                 column(6, radioButtons("sep", "Separator",
                                                                                        choices = c(Comma = ",",
                                                                                                    Semicolon = ";",
-                                                                                                   Tab = "\t"),
+                                                                                                   Tab = "\t",
+                                                                                                   Space = " "),
                                                                                        selected = ",")),
                                                                 # Input: Select quotes ----
                                                                 column(6, radioButtons("quote", "Quote",
@@ -115,7 +116,7 @@ navbarPage( theme = "style.css",
                                                             )
                                   
                                                             ),
-                                  tabPanel("2. Data Cleaning",
+                                  tabPanel("2. Data Preprocessing",
                                            # titlePanel("Verifying & Cleaning Data"),
                                            
                                            # Sidebar layout with input and output definitions ----
@@ -124,8 +125,8 @@ navbarPage( theme = "style.css",
                                              # Sidebar panel for inputs ----
                                              sidebarPanel(
                                                # Input: Select a file ----
-                                               h5("Choose Quicklook dimensions"),
-                                               helpText("Quicklook starting from the beginning to specific rows and columns."),
+                                               h5("Choose Preview dimensions"),
+                                               helpText("Preview starting from the beginning to specific rows and columns."),
                                                
                                                fluidRow(
                                                  column(6, numericInput("quicklook_row", "# of rows:", 100, step = 1, min = 1)),
@@ -169,7 +170,7 @@ navbarPage( theme = "style.css",
                                                  column(6, textInput("platform_text", NULL, value = "Unknown", width = NULL, placeholder = NULL)),
                                                  column(6, actionButton("action_platform", "Convert"))
                                                ),
-                                               h5("Data Quicklook"),
+                                               h5("Data Preview"),
                                                tabsetPanel(
                                                  id = 'tabset2',
                                                  tabPanel("Original Data", DT::dataTableOutput("mytable4")),
@@ -261,6 +262,11 @@ navbarPage( theme = "style.css",
                                                tabPanel("Eigengene Matrix", tableOutput("mytable7"))
                                              )
                                            )
+                                  ),
+                                  tabPanel("5. GO Enrichment Analysis",
+                                           mainPanel(
+                                             h4("Enrichment Analysis")
+                                             )
                                   )
                                                  )  #, style='width: 80%'
                      
