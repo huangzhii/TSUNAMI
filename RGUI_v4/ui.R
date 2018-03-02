@@ -1,10 +1,11 @@
-# Zhi Huang 02/04/2017
+# Zhi Huang 03/02/2017
 navbarPage( theme = "style.css",
             
             # title="bioinfo tool",
             # title=div(img(src="images/iulogo.png",
             #               width = 20,
             #               style = "margin:0px 0px;"), "BioInfo Suite"),
+            
             title=div(img(src="images/iulogobioinfo.png",
                           height = 28,
                           style = "margin:0px 0px;")),
@@ -31,6 +32,15 @@ navbarPage( theme = "style.css",
                                                           h5("Section 1.10.32"),
                                                           "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?"
                                                           ,
+                                                          tags$head(
+                                                            tags$script(HTML("(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                                                                             m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                                                                             })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+                                                                             
+                                                                             ga('create', 'UA-113406500-2', 'auto');
+                                                                             ga('send', 'pageview');"))
+                                                                    ),
+                                                          tags$head(tags$script(HTML("document.title = 'Bioinfo Suite';"))), # rename the title by JS
                                                           tags$head(tags$script('Shiny.addCustomMessageHandler("myCallbackHandler",
                                                                                 function(typeMessage) {console.log(typeMessage)
                                                                                 if(typeMessage == "tab1"){
