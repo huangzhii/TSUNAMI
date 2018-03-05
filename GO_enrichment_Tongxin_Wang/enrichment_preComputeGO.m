@@ -11,7 +11,7 @@ GPLFile = 'GPL570-55999.txt'; %GPL10295.txt %GPL14951-11332.txt %GPL570-55999.tx
 %%%%%%%%%%
 uniGene = unique(geneSymbol);
 
-GO = geneont('live',true);
+GO = geneont('live',true); %if live, everytime the annotation will be update from GO Consortium website
 totalGO = GO.Terms(end).id;
 HGann = goannotread('goa_human.gaf','Fields',{'DB_Object_Symbol','GOid'});
 HGmap = containers.Map();

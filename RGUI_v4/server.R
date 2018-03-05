@@ -7,6 +7,7 @@ library(Biobase)
 library(rPython)
 library(WGCNA)
 library(GEOquery)
+library(dplyr)
 
 options(shiny.maxRequestSize=300*1024^2) # to the top of server.R would increase the limit to 300MB
 options(shiny.sanitize.errors = FALSE)
@@ -49,16 +50,16 @@ function(input, output, session) {
     GEO <<- load_data(GEO_DB_csvpath)
     GEO[["Actions"]] <- paste0('
     <div>
-    <button type="button" class="btn-analysis" id=analysis_',1:nrow(GEO),'>Analyze</button></div>
+    <button type="button" class="btn-analysis" id=dataset_analysis_',1:nrow(GEO),'>Analyze</button></div>
     ')
     print("GEO data loaded from ./NCBI_GEO_SERIES_20180131_DOWNLOADED")
     removeModal()
     DT::datatable(GEO, extensions = 'Responsive', escape=F, selection = 'none')
   })
   
-observeEvent(input$lastClickId,{
-  if (input$lastClickId%like%"analysis"){
-  row_of_GEO <- as.numeric(gsub("analysis_","",input$lastClickId))
+observeEvent(input$dataset_lastClickId,{
+  if (input$dataset_lastClickId%like%"dataset_analysis"){
+  row_of_GEO <- as.numeric(gsub("dataset_analysis_","",input$dataset_lastClickId))
   myGSE <- as.character(GEO[row_of_GEO,1])
   print(myGSE)
   
@@ -75,7 +76,7 @@ observeEvent(input$lastClickId,{
     print("HTTP error 404")
     showModal(modalDialog(
       title = "Important message", footer = modalButton("OK"),
-      sprintf("%s is not available in NCBI GEO Database, please try another!",myGSE), easyClose = TRUE
+      sprintf("%s is not available in NCBI GEO Database, please try another! (Hint: Maybe bad Internet connection)",myGSE), easyClose = TRUE
     ))
     return()
   }
@@ -180,7 +181,7 @@ observeEvent(input$lastClickId,{
     showModal(modalDialog(
       title = "Converting...", footer = NULL,
       div(class = "busy",
-          p("We are currently converting probe ID to Gene ID..."),
+          p("We are currently converting probe ID to Gene Symbol..."),
           img(src="images/loading.gif"),
           style = "margin: auto"
       )
@@ -554,10 +555,33 @@ observeEvent(input$lastClickId,{
       ## Rbind
       geneCharVector2 <- data.frame(do.call(rbind, geneCharVector2))
       
-      output$clusterResult <- renderTable({
-        return(geneCharVector2)
-      },rownames = FALSE, colnames = FALSE, na = "", bordered = TRUE)
+      # output$clusterResult <- renderTable({
+      #   return(geneCharVector2)
+      # },rownames = FALSE, colnames = FALSE, na = "", bordered = TRUE)
       
+      output$clusterResult <- DT::renderDataTable({
+        
+        geneCharVector2[["Actions"]] <- paste0('<div><button type="button" class="btn-analysis" id=go_analysis_',1:nrow(geneCharVector2),'>GO</button></div>')
+        geneCharVector2 <- geneCharVector2 %>%
+          select("Actions", everything())
+        # print(head(geneCharVector2))
+        DT::datatable(geneCharVector2, selection="none", escape=FALSE,
+                      options = list(paging = F, searching = F, dom='t',ordering=F),
+                      rownames = F#, colnames = NULL
+        )
+      })
+      observeEvent(input$go_lastClickId,{
+        if (input$go_lastClickId%like%"go_analysis"){
+          row_of_final_cluster <- as.numeric(gsub("go_analysis_","",input$go_lastClickId))
+
+          print("row_of_final_cluster:")
+          print(row_of_final_cluster)
+          
+          python.load("Enrichr_analysis.py")
+          mergedCluster <- python.call("mainroutine", step1, as.vector(finalExp), nrow(finalExp), ncol(finalExp), gamma, t, lambda, beta, minClusterSize, input$massiveCC)
+          
+        }
+      })
       output$mytable7 <- renderTable({
         return(eigengene_matrix)
       },rownames = FALSE, colnames = FALSE, na = "", bordered = TRUE)
@@ -612,4 +636,7 @@ observeEvent(input$lastClickId,{
                   fileEncoding = "")
     }
   )
+  
+
+  
 }

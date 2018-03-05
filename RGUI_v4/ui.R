@@ -115,12 +115,10 @@ navbarPage( theme = "style.css",
                                                               tabsetPanel(
                                                                 id = 'dataset',
                                                                 tabPanel("Series", DT::dataTableOutput("mytable1"))
-                                                                # tabPanel("Datasets", DT::dataTableOutput("mytable2")),
-                                                                # tabPanel("Samples", DT::dataTableOutput("mytable3"))
                                                               ),
                                                               
                                                               tags$script("$(document).on('click', '#mytable1 button', function () {
-                                                                          Shiny.onInputChange('lastClickId',this.id)
+                                                                          Shiny.onInputChange('dataset_lastClickId',this.id)
                                                                           });")
                                   )
                                                             )
@@ -153,8 +151,8 @@ navbarPage( theme = "style.css",
                                                ),
                                                # Horizontal line ----
                                                # tags$hr(),
-                                               h5("Verify Gene ID"),
-                                               helpText("We suppose Gene ID is in column 1."),
+                                               h5("Verify Gene Symbol"),
+                                               helpText("We suppose Gene Symbol is in column 1."),
                                                numericInput("starting_gene_row", "starting row:", 1, step = 1, min = 1),
                                                # Horizontal line ----
                                                tags$hr(),
@@ -286,14 +284,27 @@ navbarPage( theme = "style.css",
                                              h4("Preview"),
                                              tabsetPanel(
                                                id = 'tabset',
-                                               tabPanel("Merged Clusters", tableOutput("clusterResult")),
+                                               tabPanel("Merged Clusters", DT::dataTableOutput("clusterResult")),
                                                tabPanel("Eigengene Matrix", tableOutput("mytable7"))
-                                             )
+                                             ),
+                                             
+                                             tags$script("$(document).on('click', '#clusterResult button', function () {
+                                                         Shiny.onInputChange('go_lastClickId',this.id)
+                                                         });")
                                            )
                                   ),
                                   tabPanel("5. GO Enrichment Analysis",
                                            mainPanel(
-                                             h4("Enrichment Analysis")
+                                             h4("Enrichment Analysis - by Enrichr"),
+                                             h5("Why our bioinfo suite choose Enrichr?"),
+                                             helpText("Jose Manuel García-Manteiga comments at ResearchGate.net:1. Online HTML5 super easy and reeeally fast.
+                                                      2. Plenty of Gene Category Databases, even newest, Roadmap Epigenomics, ENCODE
+                                                      3. Z-score  Permutation Background Correction on FisherET p-value specially for large genesets
+                                                      4. KEGG 2015!!! and keeping all databases updated (DAVID???)
+                                                      5. API and programmatic access which gives you the opportunity to attach enrichr enrichments to your favourite pipeline of analysis and evaluate multiple enrichments without multiple clickings rather easily.
+                                                      Hope the guys at Mayan's Lab keep on being funded in the future to sustain such a nice tool free.
+                                                      PS. Also Toppgene suite is worth trying."),
+                                             DT::dataTableOutput("mytable8")
                                              )
                                   )
                                                  )  #, style='width: 80%'
