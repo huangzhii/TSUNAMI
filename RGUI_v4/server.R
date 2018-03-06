@@ -343,7 +343,7 @@ observeEvent(input$dataset_lastClickId,{
       massiveCC = input$massiveCC
       system("which python") # python version should be from Anaconda2
       # system("/Users/zhi/anaconda2/bin/python main.py")
-      python.load("main_old.py")
+      python.load("main.py")
       mergedCluster <- python.call("mainroutine", step1, as.vector(finalExp), nrow(finalExp), ncol(finalExp), gamma, t, lambda, beta, minClusterSize, input$massiveCC)
       geneCharVector <- matrix(0, nrow = 0, ncol = length(mergedCluster))
       geneCharVector_global <<- geneCharVector

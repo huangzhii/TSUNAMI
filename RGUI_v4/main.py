@@ -10,9 +10,9 @@ def massivePCC(finalExpArray, nRow, nCol, method):
 	df = pandas.DataFrame(finalExp)
 	if nRow > 1:
 		if method == "Pearson":
-			return df.corr("pearson").as_matrix
+			return np.asarray(df.corr("pearson"))
 		if method == "Spearman":
-			return df.corr("spearman").as_matrix
+			return np.asarray(df.corr("spearman"))
 
 def localMaximumQCM(cMatrix, gamma, t, lambda_val):
     C = []
@@ -98,7 +98,7 @@ def mainroutine(step1, inputdata, nRow, nCol, gamma, t, lambda_val, beta, minClu
         # step 1: get PCC mat
         tm = time.time()
         cMatrix = massivePCC(inputdata, nRow, nCol, method)
-        print "step 1: get PCC mat elapsed time: " + str("{0:.2f}".format(time.time() - tm)) + " seconds"
+        print "step 1: get " + method + " Correlation Cefficient mat elapsed time: " + str("{0:.2f}".format(time.time() - tm)) + " seconds"
     else:
         cMatrix = inputdata
     
