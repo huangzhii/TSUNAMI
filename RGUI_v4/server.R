@@ -20,6 +20,7 @@ finalExp <- NULL
 finalSym <- NULL
 finalSymChar <- NULL
 text <- NULL
+geneCharVector_global <- NULL
 eigengene_matrix <- NULL
 fname <- NULL # e.g. 12345_at
 
@@ -345,6 +346,7 @@ observeEvent(input$dataset_lastClickId,{
       python.load("main_old.py")
       mergedCluster <- python.call("mainroutine", step1, as.vector(finalExp), nrow(finalExp), ncol(finalExp), gamma, t, lambda, beta, minClusterSize, input$massiveCC)
       geneCharVector <- matrix(0, nrow = 0, ncol = length(mergedCluster))
+      geneCharVector_global <<- geneCharVector
       temp_eigengene <- matrix(0, nrow = length(mergedCluster), ncol = dim(finalExp)[2]) # Clusters * Samples
       
       temptext <- ""
@@ -545,6 +547,7 @@ observeEvent(input$dataset_lastClickId,{
         temptext <- paste(temptext, capture.output(cat(geneChar, sep=',')), sep="\n")
       }
       temptext <- substring(temptext, 2) # remove first \n separater
+      geneCharVector_global <<- geneCharVector
       text <<- temptext
       eigengene_matrix <<- temp_eigengene
       
@@ -572,13 +575,14 @@ observeEvent(input$dataset_lastClickId,{
       })
       observeEvent(input$go_lastClickId,{
         if (input$go_lastClickId%like%"go_analysis"){
-          row_of_final_cluster <- as.numeric(gsub("go_analysis_","",input$go_lastClickId))
+          cluster <- as.numeric(gsub("go_analysis_","",input$go_lastClickId))
 
           print("row_of_final_cluster:")
-          print(row_of_final_cluster)
+          print(cluster)
           
           python.load("Enrichr_analysis.py")
-          mergedCluster <- python.call("mainroutine", step1, as.vector(finalExp), nrow(finalExp), ncol(finalExp), gamma, t, lambda, beta, minClusterSize, input$massiveCC)
+          print(geneCharVector_global[cluster])
+          # mergedCluster <- python.call("enrichr_main", )
           
         }
       })
