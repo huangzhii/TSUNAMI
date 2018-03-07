@@ -34,9 +34,21 @@ server <- function(input, output) {
 
   # choose columns to display
   diamonds2 = diamonds[sample(nrow(diamonds), 1000), ]
-  output$mytable1 <- DT::renderDataTable({
-    DT::datatable(diamonds2[, input$show_vars, drop = FALSE])
-  })
+
+  load(file='~/Desktop/enrichment_result.Rdata')
+
+  for (i in 1:length(enrichment_result)){
+    enrichment_result[[i]][[6]] = paste(enrichment_result[[i]][[6]], collapse = ',')
+  }
+
+  enrichment_result2 = unlist(enrichment_result)
+
+  enrichment_result2 = data.frame(t(matrix(enrichment_result2, nrow = length(enrichment_result[[1]]), byrow = F)))
+  print(enrichment_result2)
+  output$mytable1 <- DT::renderDataTable({DT::datatable( enrichment_result2, selection="none", escape=FALSE,
+                                       options = list(paging = F, searching = F, autoWidth = TRUE, dom='t',ordering=F),
+                                       rownames = F)
+    })
 
   # sorted columns are colored now because CSS are attached to them
   output$mytable2 <- DT::renderDataTable({

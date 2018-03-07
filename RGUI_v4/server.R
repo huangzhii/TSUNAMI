@@ -581,9 +581,51 @@ observeEvent(input$dataset_lastClickId,{
           print(cluster)
           
           python.load("Enrichr_analysis.py")
-          print(geneCharVector_global[cluster])
-          # mergedCluster <- python.call("enrichr_main", )
+          # print(geneCharVector_global[[cluster]])
+          genes_str <- geneCharVector_global[[cluster]]
+          genes_str <- paste(genes_str[-1], collapse = '\n')
+          # genes_str <- paste(c('PHF14','RBM3','Nlrx1','MSL1','PHF21A','ARL10','INSR'), collapse = '\n')
           
+          # save(enrichment_result, file='~/Desktop/enrichment_result.Rdata')
+          GO_colnames = c("Index", "Term", "P-value","Z-score","Combined Score","Genes", "Adjusted P-value", "Old P-value","Old Adjusted P-value")
+          gene_set_library = 'GO_Biological_Process_2017b'
+          # 'KEGG_2016' 'GO_Molecular_Function_2017b' 'GO_Cellular_Component_2017b' 'GO_Biological_Process_2017b'
+          enrichment_result <- python.call("enrichr_main", genes_str, gene_set_library)
+          for (i in 1:length(enrichment_result)){enrichment_result[[i]][[6]] = paste(enrichment_result[[i]][[6]], collapse = ', ')}
+          enrichment_result2 = data.frame(t(matrix(unlist(enrichment_result), nrow = length(enrichment_result[[1]]), byrow = F)))
+          print(enrichment_result2)
+          colnames(enrichment_result2) <- GO_colnames
+          output$mytable_GOBP <- DT::renderDataTable({DT::datatable(as.matrix(enrichment_result2), selection="none", escape=FALSE,
+                        options = list(paging = F, searching = F, dom='t',ordering=F),
+                        rownames = F)
+          })
+          
+          gene_set_library = 'GO_Molecular_Function_2017b'
+          # 'KEGG_2016' 'GO_Molecular_Function_2017b' 'GO_Cellular_Component_2017b' 'GO_Biological_Process_2017b'
+          enrichment_result <- python.call("enrichr_main", genes_str, gene_set_library)
+          for (i in 1:length(enrichment_result)){enrichment_result[[i]][[6]] = paste(enrichment_result[[i]][[6]], collapse = ', ')}
+          enrichment_result2 = data.frame(t(matrix(unlist(enrichment_result), nrow = length(enrichment_result[[1]]), byrow = F)))
+          print(enrichment_result2)
+          colnames(enrichment_result2) <- GO_colnames
+          output$mytable_GOMF <- DT::renderDataTable({DT::datatable(as.matrix(enrichment_result2), selection="none", escape=FALSE,
+                                                                    options = list(paging = F, searching = F, dom='t',ordering=F),
+                                                                    rownames = F)
+          })
+          
+          gene_set_library = 'GO_Cellular_Component_2017b'
+          # 'KEGG_2016' 'GO_Molecular_Function_2017b' 'GO_Cellular_Component_2017b' 'GO_Biological_Process_2017b'
+          enrichment_result <- python.call("enrichr_main", genes_str, gene_set_library)
+          for (i in 1:length(enrichment_result)){enrichment_result[[i]][[6]] = paste(enrichment_result[[i]][[6]], collapse = ', ')}
+          enrichment_result2 = data.frame(t(matrix(unlist(enrichment_result), nrow = length(enrichment_result[[1]]), byrow = F)))
+          print(enrichment_result2)
+          colnames(enrichment_result2) <- GO_colnames
+          output$mytable_GOCC <- DT::renderDataTable({DT::datatable(as.matrix(enrichment_result2), selection="none", escape=FALSE,
+                                                                    options = list(paging = F, searching = F, dom='t',ordering=F),
+                                                                    rownames = F, colnames = GO_colnames)
+          })
+          
+          print('tab5')
+          session$sendCustomMessage("myCallbackHandler", "tab5")
         }
       })
       output$mytable7 <- renderTable({

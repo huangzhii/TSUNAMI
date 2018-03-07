@@ -56,6 +56,9 @@ navbarPage( theme = "style.css",
                                                                                 if(typeMessage == "tab4"){
                                                                                 $("a:contains(4. Result)").click();
                                                                                 }
+                                                                                if(typeMessage == "tab5"){
+                                                                                $("a:contains(5. GO Enrichment Analysis)").click();
+                                                                                }
                                                                                 });
                                                                                 ')),
                                                           # Horizontal line ----
@@ -300,12 +303,20 @@ navbarPage( theme = "style.css",
                                              helpText("Jose Manuel García-Manteiga comments at ResearchGate.net:1. Online HTML5 super easy and reeeally fast.
                                                       2. Plenty of Gene Category Databases, even newest, Roadmap Epigenomics, ENCODE
                                                       3. Z-score  Permutation Background Correction on FisherET p-value specially for large genesets
-                                                      4. KEGG 2015!!! and keeping all databases updated (DAVID???)
+                                                      4. KEGG 2016! and keeping all databases updated
                                                       5. API and programmatic access which gives you the opportunity to attach enrichr enrichments to your favourite pipeline of analysis and evaluate multiple enrichments without multiple clickings rather easily.
                                                       Hope the guys at Mayan's Lab keep on being funded in the future to sustain such a nice tool free.
                                                       PS. Also Toppgene suite is worth trying."),
-                                             DT::dataTableOutput("mytable8")
+                                             tabsetPanel(
+                                               id = 'tabset',
+                                               tabPanel("GO_Biological_Process_2017b", 
+                                                        DT::dataTableOutput("mytable_GOBP")),
+                                               tabPanel("GO_Molecular_Function_2017b", 
+                                                        DT::dataTableOutput("mytable_GOMF")),
+                                               tabPanel("GO_Cellular_Component_2017b", 
+                                                        DT::dataTableOutput("mytable_GOCC"))
                                              )
+                                           )
                                   )
                                                  )  #, style='width: 80%'
                      

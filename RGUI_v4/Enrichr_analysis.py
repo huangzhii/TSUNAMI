@@ -1,7 +1,7 @@
 import json
 import requests
 
-def enrichr_main(genes_str)
+def enrichr_main(genes_str, gene_set_library):
     ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/addList'
     # genes_str = '\n'.join([
     #     'PHF14', 'RBM3', 'MSL1', 'PHF21A', 'ARL10', 'INSR', 'JADE2', 'P2RX7',
@@ -21,6 +21,7 @@ def enrichr_main(genes_str)
         raise Exception('Error analyzing gene list')
 
     data = json.loads(response.text)
+    print("Example Gene List")
     print(data)
 
     user_list_id = data['userListId']
@@ -32,12 +33,14 @@ def enrichr_main(genes_str)
         raise Exception('Error getting gene list')
         
     data = json.loads(response.text)
+    print("View added gene list")
     print(data)
 
     ## Get enrichment results
     ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/enrich'
     query_string = '?userListId=%s&backgroundType=%s'
-    gene_set_library = 'KEGG_2015'
+    # gene_set_library = 'GO_Biological_Process_2017b'
+    #'KEGG_2016' 'GO_Molecular_Function_2017b' 'GO_Cellular_Component_2017b' 'GO_Biological_Process_2017b'
     response = requests.get(
         ENRICHR_URL + query_string % (user_list_id, gene_set_library)
      )
@@ -45,5 +48,6 @@ def enrichr_main(genes_str)
         raise Exception('Error fetching enrichment results')
 
     data = json.loads(response.text)
-    # print(data)
+    print("Enrichment Results:")
+    print(data)
     return(data)
