@@ -382,9 +382,17 @@ observeEvent(input$dataset_lastClickId,{
       ## Rbind
       geneCharVector2 <- data.frame(do.call(rbind, geneCharVector2))
       
-      output$clusterResult <- renderTable({
-        return(geneCharVector2)
-      },rownames = FALSE, colnames = FALSE, na = "", bordered = TRUE)
+      output$clusterResult <- DT::renderDataTable({
+        
+        geneCharVector2[["Actions"]] <- paste0('<div><button type="button" class="btn-analysis" id=go_analysis_',1:nrow(geneCharVector2),'>GO</button></div>')
+        geneCharVector2 <- geneCharVector2 %>%
+          select("Actions", everything())
+        # print(head(geneCharVector2))
+        DT::datatable(geneCharVector2, selection="none", escape=FALSE,
+                      options = list(paging = F, searching = F, dom='t',ordering=F),
+                      rownames = F#, colnames = NULL
+        )
+      })
       
       output$mytable7 <- renderTable({
         return(eigengene_matrix)
@@ -581,11 +589,11 @@ observeEvent(input$dataset_lastClickId,{
           print(cluster)
           
           python.load("Enrichr_analysis.py")
-          # print(geneCharVector_global[[cluster]])
+          print(geneCharVector_global[[cluster]])
           genes_str <- geneCharVector_global[[cluster]]
           genes_str <- paste(genes_str[-1], collapse = '\n')
           # genes_str <- paste(c('PHF14','RBM3','Nlrx1','MSL1','PHF21A','ARL10','INSR'), collapse = '\n')
-          
+          print(genes_str)
           # save(enrichment_result, file='~/Desktop/enrichment_result.Rdata')
           GO_colnames = c("Index", "Term", "P-value","Z-score","Combined Score","Genes", "Adjusted P-value", "Old P-value","Old Adjusted P-value")
           gene_set_library = 'GO_Biological_Process_2017b'
