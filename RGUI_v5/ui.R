@@ -166,8 +166,8 @@ navbarPage( theme = "style.css",
                                                  column(6, numericInput("variance_expval", "Lowest Variance Percentile (%) To Remove:", 10, step = 1, min = 0))
                                                ),
                                                checkboxInput("checkbox_NA", "Convert NA value to 0 in Expression Data", TRUE),
-                                               checkboxInput("checkbox_empty", "Remove rows with empty Gene Symbol (Gene ID)", TRUE),
-                                               checkboxInput("checkbox_duplicated", "Keep only one row with largest mean expression value when Gene ID is duplicated", TRUE),
+                                               checkboxInput("checkbox_empty", "Remove rows with empty Gene Symbol", TRUE),
+                                               checkboxInput("checkbox_duplicated", "Keep only one row with largest mean expression value when Gene Symbol is duplicated", TRUE),
                                                numericInput("max_gene_retain", "Maximum Number of Genes to Retain:", 20000, step = 1000, min = 0),
                                                actionButton("action3", "Continue")
                                              ),
@@ -186,7 +186,7 @@ navbarPage( theme = "style.css",
                                                  id = 'tabset2',
                                                  tabPanel("Original Data", DT::dataTableOutput("mytable4")),
                                                  tabPanel("Expression Value", DT::dataTableOutput("mytable5")),
-                                                 tabPanel("Gene ID", tableOutput("mytable6"))
+                                                 tabPanel("Gene Symbol", tableOutput("mytable6"))
                                                )
                                              )
                                            )
@@ -223,7 +223,8 @@ navbarPage( theme = "style.css",
                                                       
                                                       # Horizontal line ----
                                                       tags$hr(),
-                                                      actionButton("action4_lmQCM", "Confirm and Run!")
+                                                      actionButton("action4_lmQCM", "Confirm and Run!"),
+                                                      tags$hr()
                                              ),
                                              tabPanel("WGCNA",
                                                       h5("WGCNA: An R package for weighted correlation network analysis"),
@@ -260,7 +261,8 @@ navbarPage( theme = "style.css",
                                                       # Horizontal line ----
                                                       tags$hr(),
                                                       actionButton("action4_WGCNA", "Confirm and Run!"),
-                                                      uiOutput("WGCNAresultUI")
+                                                      uiOutput("WGCNAresultUI"),
+                                                      tags$hr()
                                              ),
                                              tabPanel("More",
                                                       h5("More..."),
@@ -310,11 +312,21 @@ navbarPage( theme = "style.css",
                                              tabsetPanel(
                                                id = 'tabset',
                                                tabPanel("GO_Biological_Process_2017b", 
-                                                        DT::dataTableOutput("mytable_GOBP")),
+                                                        DT::dataTableOutput("mytable_GO_1")),
                                                tabPanel("GO_Molecular_Function_2017b", 
-                                                        DT::dataTableOutput("mytable_GOMF")),
+                                                        DT::dataTableOutput("mytable_GO_2")),
                                                tabPanel("GO_Cellular_Component_2017b", 
-                                                        DT::dataTableOutput("mytable_GOCC"))
+                                                        DT::dataTableOutput("mytable_GO_3")),
+                                               tabPanel("Jensen_DISEASES", 
+                                                        DT::dataTableOutput("mytable_GO_4")),
+                                               tabPanel("Reactome_2016", 
+                                                        DT::dataTableOutput("mytable_GO_5")),
+                                               tabPanel("KEGG_2016", 
+                                                        DT::dataTableOutput("mytable_GO_6")),
+                                               tabPanel("Transcription_Factor_PPIs", 
+                                                        DT::dataTableOutput("mytable_GO_7")),
+                                               tabPanel("TargetScan_microRNA_2017", 
+                                                        DT::dataTableOutput("mytable_GO_8"))
                                              )
                                            )
                                   )

@@ -1,6 +1,7 @@
 library(shiny)
 library(ggplot2)  # for the diamonds dataset
-
+library(enrichR)
+library(DT)
 ui <- fluidPage(
   title = "Examples of DataTables",
   sidebarLayout(
@@ -23,7 +24,9 @@ ui <- fluidPage(
       tabsetPanel(
         id = 'dataset',
         tabPanel("diamonds", DT::dataTableOutput("mytable1")),
-        tabPanel("mtcars", DT::dataTableOutput("mytable2")),
+        tabPanel("mtcars", DT::dataTableOutput("a")),
+        tabPanel("mtcars", DT::dataTableOutput("b")),
+        tabPanel("mtcars", DT::dataTableOutput("c")),
         tabPanel("iris", DT::dataTableOutput("mytable3"))
       )
     )
@@ -35,25 +38,32 @@ server <- function(input, output) {
   # choose columns to display
   diamonds2 = diamonds[sample(nrow(diamonds), 1000), ]
 
-  load(file='~/Desktop/enrichment_result.Rdata')
+  enrichr_dbs <- c("GO_Biological_Process_2017b", "GO_Molecular_Function_2017b", "GO_Cellular_Component_2017b")
+  # print(geneCharVector_global[[cluster]])
+  # genes_str <- geneCharVector_global[[cluster]]
+  genes_str <- c('PHF14','RBM3','Nlrx1','MSL1','PHF21A','ARL10','INSR')
+  enriched <- enrichr(genes_str[-1], enrichr_dbs)
+  print(genes_str)
 
-  for (i in 1:length(enrichment_result)){
-    enrichment_result[[i]][[6]] = paste(enrichment_result[[i]][[6]], collapse = ',')
-  }
-
-  enrichment_result2 = unlist(enrichment_result)
-
-  enrichment_result2 = data.frame(t(matrix(enrichment_result2, nrow = length(enrichment_result[[1]]), byrow = F)))
-  print(enrichment_result2)
-  output$mytable1 <- DT::renderDataTable({DT::datatable( enrichment_result2, selection="none", escape=FALSE,
+  output$mytable1 <- DT::renderDataTable({DT::datatable( enriched[["GO_Biological_Process_2017b"]], selection="none", escape=FALSE,
                                        options = list(paging = F, searching = F, autoWidth = TRUE, dom='t',ordering=F),
                                        rownames = F)
     })
 
   # sorted columns are colored now because CSS are attached to them
   output$mytable2 <- DT::renderDataTable({
-    DT::datatable(mtcars, options = list(orderClasses = TRUE))
+    DT::datatable(mtcars, options = list(orderClasses = TRUE)) %>%
+      formatStyle('mpg', backgroundColor = 'yellow') %>% formatRound(colnames(mtcars), digits=3)
   })
+  cname <- letters[1:3]
+  Map(function(name) {
+    if (name=="a"){db = mtcars}
+    if (name=="b"){db = mpg}
+    if (name=="c"){db = iris}
+    output[[name]]<- DT::renderDataTable({
+      DT::datatable(db, options = list(orderClasses = TRUE))
+    })
+  },cname)
 
   # customize the length drop-down menu; display 5 rows per page by default
   output$mytable3 <- DT::renderDataTable({

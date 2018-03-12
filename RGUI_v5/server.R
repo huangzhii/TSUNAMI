@@ -9,6 +9,7 @@ library(WGCNA)
 library(GEOquery)
 library(dplyr)
 library(enrichR)
+library(DT)
 
 options(shiny.maxRequestSize=300*1024^2) # to the top of server.R would increase the limit to 300MB
 options(shiny.sanitize.errors = FALSE)
@@ -403,6 +404,14 @@ observeEvent(input$dataset_lastClickId,{
       print('tab4')
       session$sendCustomMessage("myCallbackHandler", "tab4")
   })
+  
+  
+  #=================================================
+  #===================           ===================
+  #==================  W G C N A  ==================
+  #===================           ===================
+  #=================================================
+  
   observeEvent(input$checkPower, {
     if (length(finalSym) > 0){
       #WGCNA
@@ -586,33 +595,43 @@ observeEvent(input$dataset_lastClickId,{
       observeEvent(input$go_lastClickId,{
         if (input$go_lastClickId%like%"go_analysis"){
           cluster <- as.numeric(gsub("go_analysis_","",input$go_lastClickId))
-
+          
+          showModal(modalDialog(
+            title = "Performing GO Enrichment Analysis...", footer = NULL,
+            div(class = "busy",
+                p("Loading ..."),
+                img(src="images/loading.gif"),
+                style = "margin: auto"
+            )
+          ))
           print("row_of_final_cluster:")
           print(cluster)
-          
-          enrichr_dbs <- c("GO_Biological_Process_2017b", "GO_Molecular_Function_2017b", "GO_Cellular_Component_2017b")
+          # listEnrichrDbs()
+          enrichr_dbs <- c("GO_Biological_Process_2017b",
+                           "GO_Molecular_Function_2017b",
+                           "GO_Cellular_Component_2017b",
+                           "Jensen_DISEASES",
+                           "Reactome_2016",
+                           "KEGG_2016",
+                           "Transcription_Factor_PPIs",
+                           "TargetScan_microRNA_2017")
           # print(geneCharVector_global[[cluster]])
           genes_str <- geneCharVector_global[[cluster]]
           # genes_str <- c('PHF14','RBM3','Nlrx1','MSL1','PHF21A','ARL10','INSR')
-          enriched <- enrichr(genes_str[-1], dbs)
-          print(genes_str)
-          # save(enrichment_result, file='~/Desktop/enrichment_result.Rdata')
-          gene_set_library = 'GO_Biological_Process_2017b'
+          print("genes_str for enrich analysis: ")
+          print(genes_str[-1])
+          enriched <- enrichr(genes_str[-1], enrichr_dbs)
           
-
-          output$mytable_GOBP <- DT::renderDataTable({DT::datatable(enriched[["GO_Biological_Process_2017b"]], selection="none", escape=FALSE,
-                        options = list(paging = F, searching = F, dom='t',ordering=F),
-                        rownames = F)
-          })
-          output$mytable_GOMF <- DT::renderDataTable({DT::datatable(enriched[["GO_Molecular_Function_2017b"]], selection="none", escape=FALSE,
-                        options = list(paging = F, searching = F, dom='t',ordering=F),
-                        rownames = F)
-          })
-          output$mytable_GOCC <- DT::renderDataTable({DT::datatable(enriched[["GO_Cellular_Component_2017b"]], selection="none", escape=FALSE,
-                        options = list(paging = F, searching = F, dom='t',ordering=F),
-                        rownames = F, colnames = GO_colnames)
-          })
-          
+          Map(function(id) {
+            local({
+              dbres = enriched[[enrichr_dbs[id]]]
+              output[[paste("mytable_GO",id,sep="_")]] <- DT::renderDataTable({DT::datatable(dbres, selection="none", escape=FALSE,
+                          options = list(paging = F, searching = F, dom='t',ordering=T),
+                          rownames = T) %>% formatRound(colnames(dbres)[3:dim(dbres)[2]], digits=5)
+              })
+            })
+          }, 1:8)
+          removeModal()
           print('tab5')
           session$sendCustomMessage("myCallbackHandler", "tab5")
         }
