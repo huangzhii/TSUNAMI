@@ -633,8 +633,13 @@ observeEvent(input$dataset_lastClickId,{
                        "TargetScan_microRNA_2017")
       # print(geneCharVector_global[[cluster]])
       genes_str <- geneCharVector_global[[cluster]]
+      
       genes_str <- unlist(strsplit(genes_str, " /// "))
-      # genes_str <- c('PHF14 /// RBM32','RBM3','Nlrx1','MSL1','PHF21A','ARL10','INSR')
+      #Remove gene symbol after vertical line: from ABC|123 to ABC:
+      genes_str <- gsub("\\|.*$","",genes_str)
+      
+      
+      # genes_str <- c('PHF|14','RBM|3','Nlrx1','MSL1','PHF21A','ARL10','INSR')
       print("genes_str for enrich analysis: ")
       print(genes_str[-1])
       enriched <- enrichr(genes_str[-1], enrichr_dbs)
