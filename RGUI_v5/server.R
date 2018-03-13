@@ -10,6 +10,7 @@ library(GEOquery)
 library(dplyr)
 library(enrichR)
 library(DT)
+library(topGO)
 
 options(shiny.maxRequestSize=300*1024^2) # to the top of server.R would increase the limit to 300MB
 options(shiny.sanitize.errors = FALSE)
@@ -286,6 +287,10 @@ observeEvent(input$dataset_lastClickId,{
       
       if (input$checkbox_NA){
         tmpExp[is.na(tmpExp)] <- 0
+      }
+      if (input$checkbox_logarithm){
+        tmpExp[tmpExp <= 0] <- 0.000001
+        tmpExp <- log(tmpExp)
       }
       if (input$checkbox_empty){
         print(sprintf("data dimension before remove gene with empty symbol: %d x %d",dim(tmpExp)[1],dim(tmpExp)[2]))
@@ -572,7 +577,7 @@ observeEvent(input$dataset_lastClickId,{
       ## Compute maximum length
       max.length <- max(sapply(geneCharVector, length))
       ## Add NA values to list elements
-      geneCharVector2 <- lapply(geneCharVector, function(v) { c(v, rep(NA, max.length-length(v)))})
+      geneCharVector2 <- lapply(geneCharVector, function(v) { c(v, labels2colors(v), rep(NA, max.length-length(v)))})
       ## Rbind
       geneCharVector2 <- data.frame(do.call(rbind, geneCharVector2))
       
@@ -623,14 +628,14 @@ observeEvent(input$dataset_lastClickId,{
           enriched <- enrichr(genes_str[-1], enrichr_dbs)
           
           Map(function(id) {
-            local({
               dbres = enriched[[enrichr_dbs[id]]]
-              output[[paste("mytable_GO",id,sep="_")]] <- DT::renderDataTable({DT::datatable(dbres, selection="none", escape=FALSE,
+              dbres = dbres[ , -which(names(dbres) %in% c("Old.P.value","	Old.Adjusted.P.value"))]
+              output[[paste("mytable_Enrichr",id,sep="_")]] <- DT::renderDataTable({DT::datatable(dbres, selection="none", escape=FALSE,
                           options = list(paging = F, searching = F, dom='t',ordering=T),
                           rownames = T) %>% formatRound(colnames(dbres)[3:dim(dbres)[2]], digits=5)
               })
-            })
           }, 1:8)
+          # TopGO
           removeModal()
           print('tab5')
           session$sendCustomMessage("myCallbackHandler", "tab5")

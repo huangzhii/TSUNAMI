@@ -166,9 +166,10 @@ navbarPage( theme = "style.css",
                                                  column(6, numericInput("variance_expval", "Lowest Variance Percentile (%) To Remove:", 10, step = 1, min = 0))
                                                ),
                                                checkboxInput("checkbox_NA", "Convert NA value to 0 in Expression Data", TRUE),
+                                               checkboxInput("checkbox_logarithm", "Take the log (e) of Expression Data (Default: Unchecked)", FALSE),
                                                checkboxInput("checkbox_empty", "Remove rows with empty Gene Symbol", TRUE),
                                                checkboxInput("checkbox_duplicated", "Keep only one row with largest mean expression value when Gene Symbol is duplicated", TRUE),
-                                               numericInput("max_gene_retain", "Maximum Number of Genes to Retain:", 20000, step = 1000, min = 0),
+                                               numericInput("max_gene_retain", "Maximum Number of Genes to Retain:", 10000, step = 1000, min = 0),
                                                actionButton("action3", "Continue")
                                              ),
                                              
@@ -263,10 +264,6 @@ navbarPage( theme = "style.css",
                                                       actionButton("action4_WGCNA", "Confirm and Run!"),
                                                       uiOutput("WGCNAresultUI"),
                                                       tags$hr()
-                                             ),
-                                             tabPanel("More",
-                                                      h5("More..."),
-                                                      helpText("More method to be explore...")
                                              )
                                            )
                                   ),
@@ -300,34 +297,66 @@ navbarPage( theme = "style.css",
                                   ),
                                   tabPanel("5. GO Enrichment Analysis",
                                            mainPanel(
-                                             h4("Enrichment Analysis - by Enrichr"),
-                                             h5("Why our bioinfo suite choose Enrichr?"),
-                                             helpText("Jose Manuel García-Manteiga comments at ResearchGate.net:1. Online HTML5 super easy and reeeally fast.
-                                                      2. Plenty of Gene Category Databases, even newest, Roadmap Epigenomics, ENCODE
-                                                      3. Z-score  Permutation Background Correction on FisherET p-value specially for large genesets
-                                                      4. KEGG 2016! and keeping all databases updated
-                                                      5. API and programmatic access which gives you the opportunity to attach enrichr enrichments to your favourite pipeline of analysis and evaluate multiple enrichments without multiple clickings rather easily.
-                                                      Hope the guys at Mayan's Lab keep on being funded in the future to sustain such a nice tool free.
-                                                      PS. Also Toppgene suite is worth trying."),
+                                             
                                              tabsetPanel(
-                                               id = 'tabset',
-                                               tabPanel("GO_Biological_Process_2017b", 
-                                                        DT::dataTableOutput("mytable_GO_1")),
-                                               tabPanel("GO_Molecular_Function_2017b", 
-                                                        DT::dataTableOutput("mytable_GO_2")),
-                                               tabPanel("GO_Cellular_Component_2017b", 
-                                                        DT::dataTableOutput("mytable_GO_3")),
-                                               tabPanel("Jensen_DISEASES", 
-                                                        DT::dataTableOutput("mytable_GO_4")),
-                                               tabPanel("Reactome_2016", 
-                                                        DT::dataTableOutput("mytable_GO_5")),
-                                               tabPanel("KEGG_2016", 
-                                                        DT::dataTableOutput("mytable_GO_6")),
-                                               tabPanel("Transcription_Factor_PPIs", 
-                                                        DT::dataTableOutput("mytable_GO_7")),
-                                               tabPanel("TargetScan_microRNA_2017", 
-                                                        DT::dataTableOutput("mytable_GO_8"))
+                                               id = 'tabset_GOEA',
+                                               tabPanel("Enrichr", 
+                                                        h4("Enrichment Analysis - by Enrichr"),
+                                                        h5("Adjusted P-value (q-value):"),
+                                                        helpText("The q-value is an adjusted p-value using the Benjamini-Hochberg method for correction for multiple hypotheses testing. Users can read more about this method, and why it is needed here:"),
+                                                        helpText("Yoav Benjamini and Yosef Hochberg. Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing. Journal of the Royal Statistical Society. Series B (Methodological)
+                                                                 Vol. 57, No. 1 (1995), pp. 289-300"),
+                                                        h5("Relationship between P-value, Z-score, and combined score:"),
+                                                        helpText("The combined score is a combination of the p-value and z-score calculated by multiplying the two scores as follows:
+                                                                 c = ln(p) * z
+                                                                 Where c is the combined score, p is the p-value computed using Fisher's exact test, and z is the z-score computed to assess the deviation from the expected rank. The combined score provides a compromise between both methods and in several benchmarks we show that it reports the best rankings when compared with the other scoring schemes."),
+                                                        tabsetPanel(
+                                                          id = 'tabset',
+                                                          tabPanel("GO_Biological_Process_2017b", 
+                                                                   DT::dataTableOutput("mytable_Enrichr_1")),
+                                                          tabPanel("GO_Molecular_Function_2017b", 
+                                                                   DT::dataTableOutput("mytable_Enrichr_2")),
+                                                          tabPanel("GO_Cellular_Component_2017b", 
+                                                                   DT::dataTableOutput("mytable_Enrichr_3")),
+                                                          tabPanel("Jensen_DISEASES", 
+                                                                   DT::dataTableOutput("mytable_Enrichr_4")),
+                                                          tabPanel("Reactome_2016", 
+                                                                   DT::dataTableOutput("mytable_Enrichr_5")),
+                                                          tabPanel("KEGG_2016", 
+                                                                   DT::dataTableOutput("mytable_Enrichr_6")),
+                                                          tabPanel("Transcription_Factor_PPIs", 
+                                                                   DT::dataTableOutput("mytable_Enrichr_7")),
+                                                          tabPanel("TargetScan_microRNA_2017", 
+                                                                   DT::dataTableOutput("mytable_Enrichr_8"))
+                                                        )
+                                                ),
+                                               
+                                               tabPanel("TopGO", 
+                                                        h4("Enrichment Analysis - by TopGO"),
+                                                        h5("Why our bioinfo suite choose TopGO?"),
+                                                        helpText("It is just good."),
+                                                        tabsetPanel(
+                                                          id = 'tabset',
+                                                          tabPanel("GO_Biological_Process_2017b", 
+                                                                   DT::dataTableOutput("mytable_topGO_1")),
+                                                          tabPanel("GO_Molecular_Function_2017b", 
+                                                                   DT::dataTableOutput("mytable_topGO_2")),
+                                                          tabPanel("GO_Cellular_Component_2017b", 
+                                                                   DT::dataTableOutput("mytable_topGO_3")),
+                                                          tabPanel("Jensen_DISEASES", 
+                                                                   DT::dataTableOutput("mytable_topGO_4")),
+                                                          tabPanel("Reactome_2016", 
+                                                                   DT::dataTableOutput("mytable_topGO_5")),
+                                                          tabPanel("KEGG_2016", 
+                                                                   DT::dataTableOutput("mytable_topGO_6")),
+                                                          tabPanel("Transcription_Factor_PPIs", 
+                                                                   DT::dataTableOutput("mytable_topGO_7")),
+                                                          tabPanel("TargetScan_microRNA_2017", 
+                                                                   DT::dataTableOutput("mytable_topGO_8"))
+                                                        )
+                                               )
                                              )
+                                             
                                            )
                                   )
                                                  )  #, style='width: 80%'
@@ -335,7 +364,9 @@ navbarPage( theme = "style.css",
                      ),
             navbarMenu(
               "More",
-              tabPanel("Login",
-                       DT::dataTableOutput("table"))
+              tabPanel("Developer",
+                       h4("Author Information"),
+                       h5("Indiana University School of Medicine")
+                       )
             )
             )

@@ -10,8 +10,8 @@ geneID <- data[,1]
 row.names(RNA) <- geneID
 datExpr <- t(RNA) # gene should be colnames, sample should be rownames
 # datExpr <- log(datExpr + 1) # uncomment if don't need logarithm
+datExpr = datExpr[,1:2000]
 dim(datExpr)
-
 
 #=====================================================================================
 #

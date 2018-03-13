@@ -24,9 +24,9 @@ ui <- fluidPage(
       tabsetPanel(
         id = 'dataset',
         tabPanel("diamonds", DT::dataTableOutput("mytable1")),
-        tabPanel("mtcars", DT::dataTableOutput("a")),
-        tabPanel("mtcars", DT::dataTableOutput("b")),
-        tabPanel("mtcars", DT::dataTableOutput("c")),
+        tabPanel("mtcars", DT::dataTableOutput("mytable_GO_1")),
+        tabPanel("mtcars", DT::dataTableOutput("mytable_GO_2")),
+        tabPanel("mtcars", DT::dataTableOutput("mytable_GO_3")),
         tabPanel("iris", DT::dataTableOutput("mytable3"))
       )
     )
@@ -56,14 +56,14 @@ server <- function(input, output) {
       formatStyle('mpg', backgroundColor = 'yellow') %>% formatRound(colnames(mtcars), digits=3)
   })
   cname <- letters[1:3]
-  Map(function(name) {
-    if (name=="a"){db = mtcars}
-    if (name=="b"){db = mpg}
-    if (name=="c"){db = iris}
-    output[[name]]<- DT::renderDataTable({
+  Map(function(id) {
+    if (id==1){db = mtcars}
+    if (id==2){db = mpg}
+    if (id==3){db = iris}
+    output[[paste("mytable_GO",id,sep="_")]]<- DT::renderDataTable({
       DT::datatable(db, options = list(orderClasses = TRUE))
     })
-  },cname)
+  },1:3)
 
   # customize the length drop-down menu; display 5 rows per page by default
   output$mytable3 <- DT::renderDataTable({
