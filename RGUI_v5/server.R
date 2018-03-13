@@ -168,8 +168,12 @@ observeEvent(input$dataset_lastClickId,{
         data_temp = strsplit(data_temp, split=input$sep)
         max.length <- max(sapply(data_temp, length))
         data_temp <- lapply(data_temp, function(v) { c(v, rep(NA, max.length-length(v)))})
-        data <<- data.frame(do.call(rbind, data_temp))
-        
+        data_temp <- data.frame(do.call(rbind, data_temp))
+        if(data_temp[dim(data_temp)[1],1] == "!series_matrix_table_end"){
+          print("remove last row with \"!series_matrix_table_end\" ")
+          data_temp = data_temp[-dim(data_temp)[1],]
+        }
+        data <<- data_temp
         print("CSV / txt file Processed.")
         removeModal()
         
@@ -232,6 +236,13 @@ observeEvent(input$dataset_lastClickId,{
     
     #https://www.rdocumentation.org/packages/GEOquery/versions/2.38.4/topics/GEOData-class
     gpltable <- Table(gpl)
+    if (is.null(fname)){
+      # data is not from GEO
+      print("data is self-uploaded, so no fname defined.")
+      fname <- data[input$starting_gene_row:dim(data)[1], 1]# Gene ID
+      fname <- gsub("\"","",fname) # convert "\"1553418_a_at\"" to "1553418_a_at"
+      # save(fname,file="/Users/zhi/Desktop/fname.Rdata")
+    }
     fname2 <- fname
     if (!is.null(gpltable$`Gene Symbol`)){
       print("load GPL table with name \"Gene Symbol\"")
@@ -257,7 +268,7 @@ observeEvent(input$dataset_lastClickId,{
     
     print(dim(data))
     print(length(fname2))
-    data[,1] <<- fname2
+    data[input$starting_gene_row:dim(data)[1],1] <<- fname2
     # row.names(data) <- seq(1, length(fname2))
     output$mytable4 <- DT::renderDataTable({
       # Expression Value
@@ -298,9 +309,15 @@ observeEvent(input$dataset_lastClickId,{
       geneID <- data.frame(data[input$starting_gene_row:dim(data)[1], 1])
       print(dim(RNA))
       print(dim(geneID))
+      
+      if (input$checkbox_NA){
+        # convert na to 0
+        RNA[is.na(RNA)] <- 0
+      }
+      
       # Remove data with lowest 20% absolute exp value shared by all samples
       percentile <- input$absolute_expval/100.
-      save(RNA, '/Users/Zhi/Desktop/RNA.Rdata')
+      # save(RNA, file="/Users/zhi/Desktop/RNA.Rdata")
       if (percentile > 0){
         RNA_filtered1 = RNA[apply(RNA,1,max) > quantile(RNA, percentile)[[1]], ]
         geneID_filtered1 = geneID[apply(RNA,1,max) > quantile(RNA, percentile)[[1]], ]
@@ -329,10 +346,6 @@ observeEvent(input$dataset_lastClickId,{
       uniGene <- geneID_filtered2
       tmpExp <- RNA_filtered2
       
-      if (input$checkbox_NA){
-        # convert na to 0
-        tmpExp[is.na(tmpExp)] <- 0
-      }
       if (input$checkbox_logarithm){
         tmpExp[tmpExp <= 0] <- 0.000001
         tmpExp <- log(tmpExp)

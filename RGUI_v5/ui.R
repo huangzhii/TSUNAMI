@@ -106,7 +106,6 @@ navbarPage( theme = "style.css",
                                                                                                    "Single Quote" = "'"),
                                                                                        selected = '"'))
                                                               ),
-                                                              
                                                               # Horizontal line ----
                                                               tags$hr(),
                                                               actionButton("action2", "Confirm when Complete")
@@ -178,6 +177,7 @@ navbarPage( theme = "style.css",
                                                h5("Data Summary"),
                                                verbatimTextOutput("summary"),
                                                helpText("Convert Probe ID to Gene Symbol with Platform:"),
+                                               helpText("Be sure to verify (modify) Gene Symbol starting row!"),
                                                fluidRow(
                                                  column(6, textInput("platform_text", NULL, value = "Unknown", width = NULL, placeholder = NULL)),
                                                  column(6, actionButton("action_platform", "Convert"))
