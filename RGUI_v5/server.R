@@ -375,10 +375,10 @@ observeEvent(input$dataset_lastClickId,{
         
         geneChar <- c(toString(i), finalSymChar[vector])
         geneCharVector[i] <- list(geneChar)
-        geneCharVector_global <<- geneCharVector
         temptext <- paste(temptext, capture.output(cat(geneChar, sep=',')), sep="\n")
       }
       temptext <- substring(temptext, 2) # remove first \n separater
+      geneCharVector_global <<- geneCharVector
       text <<- temptext
       eigengene_matrix <<- temp_eigengene
       
