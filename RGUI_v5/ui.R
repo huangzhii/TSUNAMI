@@ -331,29 +331,9 @@ navbarPage( theme = "style.css",
                                                         )
                                                 ),
                                                
-                                               tabPanel("TopGO", 
-                                                        h4("Enrichment Analysis - by TopGO"),
-                                                        h5("Why our bioinfo suite choose TopGO?"),
-                                                        helpText("It is just good."),
-                                                        tabsetPanel(
-                                                          id = 'tabset',
-                                                          tabPanel("GO_Biological_Process_2017b", 
-                                                                   DT::dataTableOutput("mytable_topGO_1")),
-                                                          tabPanel("GO_Molecular_Function_2017b", 
-                                                                   DT::dataTableOutput("mytable_topGO_2")),
-                                                          tabPanel("GO_Cellular_Component_2017b", 
-                                                                   DT::dataTableOutput("mytable_topGO_3")),
-                                                          tabPanel("Jensen_DISEASES", 
-                                                                   DT::dataTableOutput("mytable_topGO_4")),
-                                                          tabPanel("Reactome_2016", 
-                                                                   DT::dataTableOutput("mytable_topGO_5")),
-                                                          tabPanel("KEGG_2016", 
-                                                                   DT::dataTableOutput("mytable_topGO_6")),
-                                                          tabPanel("Transcription_Factor_PPIs", 
-                                                                   DT::dataTableOutput("mytable_topGO_7")),
-                                                          tabPanel("TargetScan_microRNA_2017", 
-                                                                   DT::dataTableOutput("mytable_topGO_8"))
-                                                        )
+                                               tabPanel("Target Gene Symbols", 
+                                                        h5("The target gene symbols allow users to copy and use in other GO analysis website."),
+                                                        textAreaInput("textareainput_GOEA", "Gene Symbols", value = "", width = '300px', height = '400px', placeholder = NULL)
                                                )
                                              )
                                              
@@ -366,7 +346,9 @@ navbarPage( theme = "style.css",
               "More",
               tabPanel("Developer",
                        h4("Author Information"),
-                       h5("Indiana University School of Medicine")
+                       helpText("Indiana University School of Medicine"),
+                       h4("Publication"),
+                       helpText("Please cite ...")
                        )
             )
             )

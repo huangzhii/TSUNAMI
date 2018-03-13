@@ -56,6 +56,8 @@ function(input, output, session) {
     <div>
     <button type="button" class="btn-analysis" id=dataset_analysis_',1:nrow(GEO),'>Analyze</button></div>
     ')
+    GEO <- GEO %>% select("Actions", everything())
+    
     print("GEO data loaded from ./NCBI_GEO_SERIES_20180131_DOWNLOADED")
     removeModal()
     DT::datatable(GEO, extensions = 'Responsive', escape=F, selection = 'none')
@@ -77,6 +79,7 @@ observeEvent(input$dataset_lastClickId,{
   ))
   t <- try(gset <- getGEO(myGSE, GSEMatrix=TRUE, AnnotGPL=FALSE)) #AnnotGPL default is FALSE
   if("try-error" %in% class(t)) {
+    removeModal()
     print("HTTP error 404")
     showModal(modalDialog(
       title = "Important message", footer = modalButton("OK"),
@@ -88,6 +91,15 @@ observeEvent(input$dataset_lastClickId,{
   if (length(gset) > 1) idx <- grep("GPL90", attr(gset, "names")) else idx <- 1
   gset <- gset[[idx]]
   edata <- exprs(gset) #This is the expression matrix
+  if (dim(edata)[1] == 0){
+    removeModal()
+    print("No expression data")
+    showModal(modalDialog(
+      title = "Important message", footer = modalButton("OK"),
+      sprintf("%s contains no expression data, please try another!", myGSE), easyClose = TRUE
+    ))
+    return()
+  }
   # pdata <- pData(gset) # data.frame of phenotypic information.
   fname <<- featureNames(gset) # e.g. 12345_at
   data <<- cbind(fname, edata)
@@ -148,11 +160,17 @@ observeEvent(input$dataset_lastClickId,{
               style = "margin: auto"
           )
         ))
-        data <<- read.csv(input$csvfile$datapath,
-                          header = input$header,
-                          sep = input$sep,
-                          quote = input$quote)
-        print("CSV file Processed.")
+        # data <<- read.csv(input$csvfile$datapath,
+        #                   header = input$header,
+        #                   sep = input$sep,
+        #                   quote = input$quote)
+        data_temp = as.matrix(readLines(input$csvfile$datapath), sep = '\n')
+        data_temp = strsplit(data_temp, split=input$sep)
+        max.length <- max(sapply(data_temp, length))
+        data_temp <- lapply(data_temp, function(v) { c(v, rep(NA, max.length-length(v)))})
+        data <<- data.frame(do.call(rbind, data_temp))
+        
+        print("CSV / txt file Processed.")
         removeModal()
         
         output$summary <- renderPrint({
@@ -160,7 +178,14 @@ observeEvent(input$dataset_lastClickId,{
           print(sprintf("Number of Samples: %d",(dim(data)[2]-1)))
           print("Annotation Platform: Unknown")
         })
-        
+        if ((dim(data)[2]-1) == 0){
+          print("Number of samples 0!")
+          showModal(modalDialog(
+            title = "Important message", footer = modalButton("OK"),
+            sprintf("Target file contains no sample. This problem could because user pick a not matched separator (default: Comma), please try another seperator (e.g. Tab or Space)."), easyClose = TRUE
+          ))
+          return()
+        }
         output$mytable4 <- DT::renderDataTable({
           # Expression Value
           DT::datatable(data[1:input$quicklook_row, 1:input$quicklook_col],
@@ -193,7 +218,7 @@ observeEvent(input$dataset_lastClickId,{
     platform_name <- gsub(" ", "", input$platform_text, fixed = TRUE)
     
     print(sprintf("Platform: %s",platform_name))
-    try(gpl <- getGEO(platform_name))
+    t <- try(gpl <- getGEO(platform_name))
     if("try-error" %in% class(t)) {
       removeModal()
       print("HTTP error 404")
@@ -208,9 +233,28 @@ observeEvent(input$dataset_lastClickId,{
     #https://www.rdocumentation.org/packages/GEOquery/versions/2.38.4/topics/GEOData-class
     gpltable <- Table(gpl)
     fname2 <- fname
-    for (i in 1:length(fname)){
-      fname2[i] <- gpltable$`Gene Symbol`[which(gpltable$ID == fname[i])]
+    if (!is.null(gpltable$`Gene Symbol`)){
+      print("load GPL table with name \"Gene Symbol\"")
+      for (i in 1:length(fname)){
+        fname2[i] <- gpltable$`Gene Symbol`[which(gpltable$ID == fname[i])]
+      }
     }
+    else if (!is.null(gpltable$`GENE_SYMBOL`)){
+      print("load GPL table with name \"GENE_SYMBOL\"")
+      for (i in 1:length(fname)){
+        fname2[i] <- gpltable$`GENE_SYMBOL`[which(gpltable$ID == fname[i])]
+      }
+    }
+    else {
+        removeModal()
+        print("HTTP error 404")
+        showModal(modalDialog(
+          title = "Important message", footer = modalButton("OK"),
+          sprintf("Error occured while loading %s. This issue could be different name defined on Gene Symbol (GENE_SYMBOL or others) in the platform.", platform_name), easyClose = TRUE
+        ))
+        return()
+    }
+    
     print(dim(data))
     print(length(fname2))
     data[,1] <<- fname2
@@ -256,7 +300,7 @@ observeEvent(input$dataset_lastClickId,{
       print(dim(geneID))
       # Remove data with lowest 20% absolute exp value shared by all samples
       percentile <- input$absolute_expval/100.
-      
+      save(RNA, '/Users/Zhi/Desktop/RNA.Rdata')
       if (percentile > 0){
         RNA_filtered1 = RNA[apply(RNA,1,max) > quantile(RNA, percentile)[[1]], ]
         geneID_filtered1 = geneID[apply(RNA,1,max) > quantile(RNA, percentile)[[1]], ]
@@ -286,6 +330,7 @@ observeEvent(input$dataset_lastClickId,{
       tmpExp <- RNA_filtered2
       
       if (input$checkbox_NA){
+        # convert na to 0
         tmpExp[is.na(tmpExp)] <- 0
       }
       if (input$checkbox_logarithm){
@@ -642,6 +687,9 @@ observeEvent(input$dataset_lastClickId,{
       # genes_str <- c('PHF|14','RBM|3','Nlrx1','MSL1','PHF21A','ARL10','INSR')
       print("genes_str for enrich analysis: ")
       print(genes_str[-1])
+      output$textareainput_GOEA <- renderText({ 
+        paste(genes_str, collapse = '\n')
+      })
       enriched <- enrichr(genes_str[-1], enrichr_dbs)
       
       Map(function(id) {
@@ -652,7 +700,6 @@ observeEvent(input$dataset_lastClickId,{
                                                                                             rownames = T) %>% formatRound(colnames(dbres)[3:dim(dbres)[2]], digits=5)
         })
       }, 1:8)
-      # TopGO
       removeModal()
       print('tab5')
       session$sendCustomMessage("myCallbackHandler", "tab5")
