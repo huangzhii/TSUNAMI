@@ -372,7 +372,6 @@ observeEvent(input$dataset_lastClickId,{
         SVD <- svd(XNorm, LINPACK = FALSE)
         temp_eigengene[i,] <- t(SVD$v[,1])
         # ===== Calculate Eigengene Finished
-        
         geneChar <- c(toString(i), finalSymChar[vector])
         geneCharVector[i] <- list(geneChar)
         temptext <- paste(temptext, capture.output(cat(geneChar, sep=',')), sep="\n")
@@ -600,58 +599,59 @@ observeEvent(input$dataset_lastClickId,{
         )
       })
       
-      observeEvent(input$go_lastClickId,{
-        print("lastClickedId received.")
-        if (input$go_lastClickId%like%"go_analysis"){
-          cluster <- as.numeric(gsub("go_analysis_","",input$go_lastClickId))
-          
-          showModal(modalDialog(
-            title = "Performing GO Enrichment Analysis...", footer = NULL,
-            div(class = "busy",
-                p("Loading ..."),
-                img(src="images/loading.gif"),
-                style = "margin: auto"
-            )
-          ))
-          print("row_of_final_cluster:")
-          print(cluster)
-          # listEnrichrDbs()
-          enrichr_dbs <- c("GO_Biological_Process_2017b",
-                           "GO_Molecular_Function_2017b",
-                           "GO_Cellular_Component_2017b",
-                           "Jensen_DISEASES",
-                           "Reactome_2016",
-                           "KEGG_2016",
-                           "Transcription_Factor_PPIs",
-                           "TargetScan_microRNA_2017")
-          # print(geneCharVector_global[[cluster]])
-          genes_str <- geneCharVector_global[[cluster]]
-          genes_str <- unlist(strsplit(genes_str, " /// "))
-          # genes_str <- c('PHF14 /// RBM32','RBM3','Nlrx1','MSL1','PHF21A','ARL10','INSR')
-          print("genes_str for enrich analysis: ")
-          print(genes_str[-1])
-          enriched <- enrichr(genes_str[-1], enrichr_dbs)
-          
-          Map(function(id) {
-              dbres = enriched[[enrichr_dbs[id]]]
-              dbres = dbres[ , -which(names(dbres) %in% c("Old.P.value","	Old.Adjusted.P.value"))]
-              output[[paste("mytable_Enrichr",id,sep="_")]] <- DT::renderDataTable({DT::datatable(dbres, selection="none", escape=FALSE,
-                          options = list(paging = F, searching = F, dom='t',ordering=T),
-                          rownames = T) %>% formatRound(colnames(dbres)[3:dim(dbres)[2]], digits=5)
-              })
-          }, 1:8)
-          # TopGO
-          removeModal()
-          print('tab5')
-          session$sendCustomMessage("myCallbackHandler", "tab5")
-        }
-      })
       output$mytable7 <- renderTable({
         return(eigengene_matrix)
       },rownames = FALSE, colnames = FALSE, na = "", bordered = TRUE)
       
       print('tab4')
       session$sendCustomMessage("myCallbackHandler", "tab4")
+  })
+  
+  observeEvent(input$go_lastClickId,{
+    print("lastClickedId received.")
+    if (input$go_lastClickId%like%"go_analysis"){
+      cluster <- as.numeric(gsub("go_analysis_","",input$go_lastClickId))
+      
+      showModal(modalDialog(
+        title = "Performing GO Enrichment Analysis...", footer = NULL,
+        div(class = "busy",
+            p("Loading ..."),
+            img(src="images/loading.gif"),
+            style = "margin: auto"
+        )
+      ))
+      print("row_of_final_cluster:")
+      print(cluster)
+      # listEnrichrDbs()
+      enrichr_dbs <- c("GO_Biological_Process_2017b",
+                       "GO_Molecular_Function_2017b",
+                       "GO_Cellular_Component_2017b",
+                       "Jensen_DISEASES",
+                       "Reactome_2016",
+                       "KEGG_2016",
+                       "Transcription_Factor_PPIs",
+                       "TargetScan_microRNA_2017")
+      # print(geneCharVector_global[[cluster]])
+      genes_str <- geneCharVector_global[[cluster]]
+      genes_str <- unlist(strsplit(genes_str, " /// "))
+      # genes_str <- c('PHF14 /// RBM32','RBM3','Nlrx1','MSL1','PHF21A','ARL10','INSR')
+      print("genes_str for enrich analysis: ")
+      print(genes_str[-1])
+      enriched <- enrichr(genes_str[-1], enrichr_dbs)
+      
+      Map(function(id) {
+        dbres = enriched[[enrichr_dbs[id]]]
+        dbres = dbres[ , -which(names(dbres) %in% c("Old.P.value","	Old.Adjusted.P.value"))]
+        output[[paste("mytable_Enrichr",id,sep="_")]] <- DT::renderDataTable({DT::datatable(dbres, selection="none", escape=FALSE,
+                                                                                            options = list(paging = F, searching = F, dom='t',ordering=T),
+                                                                                            rownames = T) %>% formatRound(colnames(dbres)[3:dim(dbres)[2]], digits=5)
+        })
+      }, 1:8)
+      # TopGO
+      removeModal()
+      print('tab5')
+      session$sendCustomMessage("myCallbackHandler", "tab5")
+    }
   })
   
   output$downloadData1 <- downloadHandler(
