@@ -353,7 +353,6 @@ observeEvent(input$dataset_lastClickId,{
       python.load("main.py")
       mergedCluster <- python.call("mainroutine", step1, as.vector(finalExp), nrow(finalExp), ncol(finalExp), gamma, t, lambda, beta, minClusterSize, input$massiveCC)
       geneCharVector <- matrix(0, nrow = 0, ncol = length(mergedCluster))
-      geneCharVector_global <<- geneCharVector
       temp_eigengene <- matrix(0, nrow = length(mergedCluster), ncol = dim(finalExp)[2]) # Clusters * Samples
       
       temptext <- ""
@@ -376,6 +375,7 @@ observeEvent(input$dataset_lastClickId,{
         
         geneChar <- c(toString(i), finalSymChar[vector])
         geneCharVector[i] <- list(geneChar)
+        geneCharVector_global <<- geneCharVector
         temptext <- paste(temptext, capture.output(cat(geneChar, sep=',')), sep="\n")
       }
       temptext <- substring(temptext, 2) # remove first \n separater
@@ -394,9 +394,10 @@ observeEvent(input$dataset_lastClickId,{
         geneCharVector2[["Actions"]] <- paste0('<div><button type="button" class="btn-analysis" id=go_analysis_',1:nrow(geneCharVector2),'>GO</button></div>')
         geneCharVector2 <- geneCharVector2 %>%
           select("Actions", everything())
+        colnames(geneCharVector2)[2:3] <- c("Cluster ID", "Genes")
         # print(head(geneCharVector2))
         DT::datatable(geneCharVector2, selection="none", escape=FALSE,
-                      options = list(paging = F, searching = F, dom='t',ordering=F),
+                      options = list(paging = F, searching = F, dom='t',ordering=T),
                       rownames = F#, colnames = NULL
         )
       })
@@ -600,6 +601,7 @@ observeEvent(input$dataset_lastClickId,{
       })
       
       observeEvent(input$go_lastClickId,{
+        print("lastClickedId received.")
         if (input$go_lastClickId%like%"go_analysis"){
           cluster <- as.numeric(gsub("go_analysis_","",input$go_lastClickId))
           
@@ -624,7 +626,8 @@ observeEvent(input$dataset_lastClickId,{
                            "TargetScan_microRNA_2017")
           # print(geneCharVector_global[[cluster]])
           genes_str <- geneCharVector_global[[cluster]]
-          # genes_str <- c('PHF14','RBM3','Nlrx1','MSL1','PHF21A','ARL10','INSR')
+          genes_str <- unlist(strsplit(genes_str, " /// "))
+          # genes_str <- c('PHF14 /// RBM32','RBM3','Nlrx1','MSL1','PHF21A','ARL10','INSR')
           print("genes_str for enrich analysis: ")
           print(genes_str[-1])
           enriched <- enrichr(genes_str[-1], enrichr_dbs)
