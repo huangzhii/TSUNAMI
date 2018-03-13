@@ -10,7 +10,7 @@ library(GEOquery)
 library(dplyr)
 library(enrichR)
 library(DT)
-library(topGO)
+# library(topGO) # Somehow conflict with WGCNA and GEOquery. Deprecated.
 
 options(shiny.maxRequestSize=300*1024^2) # to the top of server.R would increase the limit to 300MB
 options(shiny.sanitize.errors = FALSE)
@@ -565,7 +565,7 @@ observeEvent(input$dataset_lastClickId,{
         SVD <- svd(XNorm, LINPACK = FALSE)
         temp_eigengene[i,] <- t(SVD$v[,1])
         # ===== Calculate Eigengene Finished
-        geneChar <- c(toString(i), matrixdata[geneID, 1])
+        geneChar <- c(toString(i), labels2colors(i), matrixdata[geneID, 1])
         geneCharVector[i] <- list(geneChar)
         temptext <- paste(temptext, capture.output(cat(geneChar, sep=',')), sep="\n")
       }
@@ -577,8 +577,9 @@ observeEvent(input$dataset_lastClickId,{
       ## Compute maximum length
       max.length <- max(sapply(geneCharVector, length))
       ## Add NA values to list elements
-      geneCharVector2 <- lapply(geneCharVector, function(v) { c(v, labels2colors(v), rep(NA, max.length-length(v)))})
+      geneCharVector2 <- lapply(geneCharVector, function(v) { c(v, rep(NA, max.length-length(v)))})
       ## Rbind
+      # save(geneCharVector2,file = "/Users/zhi/Desktop/geneCharVector2.Rdata")
       geneCharVector2 <- data.frame(do.call(rbind, geneCharVector2))
       
       # output$clusterResult <- renderTable({
@@ -590,6 +591,7 @@ observeEvent(input$dataset_lastClickId,{
         geneCharVector2[["Actions"]] <- paste0('<div><button type="button" class="btn-analysis" id=go_analysis_',1:nrow(geneCharVector2),'>GO</button></div>')
         geneCharVector2 <- geneCharVector2 %>%
           select("Actions", everything())
+        colnames(geneCharVector2)[2:4] <- c("Cluster ID", "Color Name", "Genes")
         # print(head(geneCharVector2))
         DT::datatable(geneCharVector2, selection="none", escape=FALSE,
                       options = list(paging = F, searching = F, dom='t',ordering=F),

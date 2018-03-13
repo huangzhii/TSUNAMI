@@ -1,6 +1,6 @@
 # Credit to wnchang@iu.edu 2017-10-11
 # Edited by Zhi Huang 01/26/2018
-
+library(WGCNA)
 
 #==========================first, log data===========================================
 setwd("/Users/zhi/Desktop/GeneCoexpression/WGCNA"); #mac
