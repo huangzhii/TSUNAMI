@@ -26,6 +26,16 @@ text <- NULL
 geneCharVector_global <- NULL
 eigengene_matrix <- NULL
 fname <- NULL # e.g. 12345_at
+enrichr_dbs <- c("GO_Biological_Process_2017b",
+                 "GO_Molecular_Function_2017b",
+                 "GO_Cellular_Component_2017b",
+                 "Jensen_DISEASES",
+                 "Reactome_2016",
+                 "KEGG_2016",
+                 "Transcription_Factor_PPIs",
+                 "TargetScan_microRNA_2017")
+enriched <- NULL # all enrichr results
+final_genes_str <- NULL
 
 function(input, output, session) {
   
@@ -605,6 +615,7 @@ observeEvent(input$dataset_lastClickId,{
       
       removeModal()
       geneCharVector <- matrix(0, nrow = 0, ncol = length(unique(netcolors))-1)
+      geneCharVector_withoutColor <- matrix(0, nrow = 0, ncol = length(unique(netcolors))-1)
       print("unique netcolors: ")
       print(unique(netcolors))
       # print(matrixdata)
@@ -625,10 +636,11 @@ observeEvent(input$dataset_lastClickId,{
         # ===== Calculate Eigengene Finished
         geneChar <- c(toString(i), labels2colors(i), matrixdata[geneID, 1])
         geneCharVector[i] <- list(geneChar)
+        geneCharVector_withoutColor[i] <- list(c(toString(i), matrixdata[geneID, 1]))
         temptext <- paste(temptext, capture.output(cat(geneChar, sep=',')), sep="\n")
       }
       temptext <- substring(temptext, 2) # remove first \n separater
-      geneCharVector_global <<- geneCharVector
+      geneCharVector_global <<- geneCharVector_withoutColor # remove the color label
       text <<- temptext
       eigengene_matrix <<- temp_eigengene
       
@@ -681,14 +693,14 @@ observeEvent(input$dataset_lastClickId,{
       print("row_of_final_cluster:")
       print(cluster)
       # listEnrichrDbs()
-      enrichr_dbs <- c("GO_Biological_Process_2017b",
-                       "GO_Molecular_Function_2017b",
-                       "GO_Cellular_Component_2017b",
-                       "Jensen_DISEASES",
-                       "Reactome_2016",
-                       "KEGG_2016",
-                       "Transcription_Factor_PPIs",
-                       "TargetScan_microRNA_2017")
+      # enrichr_dbs <- c("GO_Biological_Process_2017b",
+      #                  "GO_Molecular_Function_2017b",
+      #                  "GO_Cellular_Component_2017b",
+      #                  "Jensen_DISEASES",
+      #                  "Reactome_2016",
+      #                  "KEGG_2016",
+      #                  "Transcription_Factor_PPIs",
+      #                  "TargetScan_microRNA_2017")
       # print(geneCharVector_global[[cluster]])
       genes_str <- geneCharVector_global[[cluster]]
       
@@ -700,17 +712,19 @@ observeEvent(input$dataset_lastClickId,{
       # genes_str <- c('PHF|14','RBM|3','Nlrx1','MSL1','PHF21A','ARL10','INSR')
       print("genes_str for enrich analysis: ")
       print(genes_str[-1])
-      output$textareainput_GOEA <- renderText({ 
-        paste(genes_str, collapse = '\n')
-      })
-      enriched <- enrichr(genes_str[-1], enrichr_dbs)
+      final_genes_str <<- genes_str[-1]
+      updateTextAreaInput(session, "textareainput_GOEA",
+                          label = paste(sprintf("Number of Genes: %d", length(final_genes_str)), input$controller),
+                          value = paste(paste(final_genes_str, collapse = '\n'), input$controller))
+      
+      enriched <<- enrichr(final_genes_str, enrichr_dbs)
       
       Map(function(id) {
         dbres = enriched[[enrichr_dbs[id]]]
         dbres = dbres[ , -which(names(dbres) %in% c("Old.P.value","	Old.Adjusted.P.value"))]
         output[[paste("mytable_Enrichr",id,sep="_")]] <- DT::renderDataTable({DT::datatable(dbres, selection="none", escape=FALSE,
-                                                                                            options = list(paging = F, searching = F, dom='t',ordering=T),
-                                                                                            rownames = T) %>% formatRound(colnames(dbres)[3:dim(dbres)[2]], digits=5)
+                                                                                            options = list(paging = F, searching = F, dom='t',ordering=T), extensions = 'Responsive',
+                                                                                            rownames = T) #%>% formatRound(colnames(dbres)[3:dim(dbres)[2]], digits=8)
         })
       }, 1:8)
       removeModal()
@@ -766,6 +780,44 @@ observeEvent(input$dataset_lastClickId,{
     }
   )
   
-
+  output$downloadData3 <- downloadHandler(
+    
+    # This function returns a string which tells the client
+    # browser what name to use when saving the file.
+    filename = 'GO_results.zip',
+    content = function(fname) {
+      separator <- switch(input$filetype3, "csv" = ',', "txt" = '\t')
+      # write.table(eigengene_matrix, file = file, append = FALSE, quote = TRUE, sep = separator,
+      #             eol = "\r\n", na = "NA", dec = ".", row.names = F,
+      #             col.names = F, qmethod = c("escape", "double"),
+      #             fileEncoding = "")
+      
+      if(separator == ','){
+        fs <- paste0(enrichr_dbs, '.csv')
+      }
+      else{
+        fs <- paste0(enrichr_dbs, '.txt')
+      }
+      fs <- c(fs, 'genes_list.txt')
+      for(i in 1:length(enrichr_dbs)){
+        write.table(enriched[[enrichr_dbs[i]]], file = fs[i], sep = separator)
+        print(fs[i])
+      }
+      if(length(final_genes_str) > 0){
+        write(final_genes_str, file = 'genes_list.txt', sep = "\n")
+      }
+      else{
+        write("Why you still download a group of files that you know they all should be empty?", file = 'genes_list.txt')
+      }
+      zip(zipfile=fname, files=fs)
+      if(file.exists(paste0(fname, ".zip"))) {file.rename(paste0(fname, ".zip"), fname)}
+      
+    },
+    contentType = "application/zip"
+  )
   
+  output$url_toppgene <- renderUI({tagList("ToppGene Suite:", a("ToppGene", href="https://toppgene.cchmc.org/enrichment.jsp"))})
+  output$url_david <- renderUI({tagList("DAVID Bioinformatics Resources 6.8:", a("DAVID", href="https://david.ncifcrf.gov/tools.jsp"))})
+  output$url_enrichr <- renderUI({tagList("Enrichr:", a("Enrichr", href="http://amp.pharm.mssm.edu/Enrichr/"))})
+  output$url_gorilla <- renderUI({tagList("GOrilla:", a("GOrilla", href="http://cbl-gorilla.cs.technion.ac.il/"))})
 }

@@ -177,7 +177,7 @@ navbarPage( theme = "style.css",
                                                h5("Data Summary"),
                                                verbatimTextOutput("summary"),
                                                helpText("Convert Probe ID to Gene Symbol with Platform:"),
-                                               helpText("Be sure to verify (modify) Gene Symbol starting row!"),
+                                               tags$span(style="color:red", "Be sure to verify (modify) Gene Symbol starting row!"),
                                                fluidRow(
                                                  column(6, textInput("platform_text", NULL, value = "Unknown", width = NULL, placeholder = NULL)),
                                                  column(6, actionButton("action_platform", "Convert"))
@@ -310,6 +310,8 @@ navbarPage( theme = "style.css",
                                                         helpText("The combined score is a combination of the p-value and z-score calculated by multiplying the two scores as follows:
                                                                  c = ln(p) * z
                                                                  Where c is the combined score, p is the p-value computed using Fisher's exact test, and z is the z-score computed to assess the deviation from the expected rank. The combined score provides a compromise between both methods and in several benchmarks we show that it reports the best rankings when compared with the other scoring schemes."),
+                                                        
+                                                        
                                                         tabsetPanel(
                                                           id = 'tabset',
                                                           tabPanel("GO_Biological_Process_2017b", 
@@ -329,14 +331,26 @@ navbarPage( theme = "style.css",
                                                           tabPanel("TargetScan_microRNA_2017", 
                                                                    DT::dataTableOutput("mytable_Enrichr_8"))
                                                         )
-                                                ),
-                                               
-                                               tabPanel("Target Gene Symbols", 
-                                                        h5("The target gene symbols allow users to copy and use in other GO analysis website."),
-                                                        textAreaInput("textareainput_GOEA", "Gene Symbols", value = "", width = '300px', height = '400px', placeholder = NULL)
-                                               )
+                                                )#,
+                                               # 
+                                               # tabPanel("Target Gene Symbols", 
+                                               #          h5("The target gene symbols allow users to copy and use in other GO analysis website."),
+                                               #          textAreaInput("textareainput_GOEA", "Gene Symbols", value = "", width = '300px', height = '400px', placeholder = NULL)
+                                               # )
                                              )
                                              
+                                           ),
+                                           sidebarPanel(
+                                             h4("Download all results"),
+                                             radioButtons("filetype3", "Gene Sets and 8 Enrichment Analysis Results:",
+                                                          choices = c("csv", "txt")),
+                                             downloadButton('downloadData3', 'Download'),
+                                             textAreaInput("textareainput_GOEA", "Gene Symbols", value = "", width = 'auto', height = '300px', placeholder = NULL),
+                                             helpText("The target gene symbols allow users to copy and use in other GO analysis website."),
+                                             uiOutput("url_toppgene"),
+                                             uiOutput("url_david"),
+                                             uiOutput("url_enrichr"),
+                                             uiOutput("url_gorilla")
                                            )
                                   )
                                                  )  #, style='width: 80%'
