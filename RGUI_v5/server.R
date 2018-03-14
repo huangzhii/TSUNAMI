@@ -219,6 +219,15 @@ observeEvent(input$dataset_lastClickId,{
       }
   })
   
+  
+  #   +------------------------------------------------------------+
+  #   | 
+  #   | 
+  #   |                       Platform Convert
+  #   | 
+  #   |
+  #   +--------------------------------
+  
   observeEvent(input$action_platform,{
     
     showModal(modalDialog(
@@ -299,6 +308,13 @@ observeEvent(input$dataset_lastClickId,{
     removeModal()
   })
   
+  #   +------------------------------------------------------------+
+  #   | 
+  #   | 
+  #   |                      Cleaning the Data
+  #   | 
+  #   |
+  #   +--------------------------------
   
   observeEvent(input$action3,{
       # source("/Users/zhi/Desktop/GeneCoexpression/RGUI/utils.R")
@@ -398,6 +414,13 @@ observeEvent(input$dataset_lastClickId,{
       session$sendCustomMessage("myCallbackHandler", "tab3")
   })
   
+  #   +------------------------------------------------------------+
+  #   | 
+  #   | 
+  #   |                         l m Q C M
+  #   | 
+  #   |
+  #   +--------------------------------
   
   observeEvent(input$action4_lmQCM,{
       #lmQCM
@@ -677,6 +700,14 @@ observeEvent(input$dataset_lastClickId,{
       session$sendCustomMessage("myCallbackHandler", "tab4")
   })
   
+  #   +------------------------------------------------------------+
+  #   | 
+  #   | 
+  #   |                  GO Enrichment Analysis
+  #   | 
+  #   |
+  #   +--------------------------------
+  
   observeEvent(input$go_lastClickId,{
     print("lastClickedId received.")
     if (input$go_lastClickId%like%"go_analysis"){
@@ -733,6 +764,13 @@ observeEvent(input$dataset_lastClickId,{
     }
   })
   
+  #   +------------------------------------------------------------+
+  #   | 
+  #   | 
+  #   |                     Download Handler
+  #   | 
+  #   |
+  #   +--------------------------------
   output$downloadData1 <- downloadHandler(
     
     # This function returns a string which tells the client
@@ -815,7 +853,13 @@ observeEvent(input$dataset_lastClickId,{
     },
     contentType = "application/zip"
   )
-  
+  #   +------------------------------------------------------------+
+  #   | 
+  #   | 
+  #   |                       External URLs
+  #   | 
+  #   |
+  #   +--------------------------------
   output$url_toppgene <- renderUI({tagList("ToppGene Suite:", a("ToppGene", href="https://toppgene.cchmc.org/enrichment.jsp"))})
   output$url_david <- renderUI({tagList("DAVID Bioinformatics Resources 6.8:", a("DAVID", href="https://david.ncifcrf.gov/tools.jsp"))})
   output$url_enrichr <- renderUI({tagList("Enrichr:", a("Enrichr", href="http://amp.pharm.mssm.edu/Enrichr/"))})
