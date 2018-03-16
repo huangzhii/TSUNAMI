@@ -121,4 +121,4 @@ def mainroutine(step1, inputdata, nRow, nCol, gamma, t, lambda_val, beta, minClu
 #    inputdata = pickle.load(f)
 # nRow, nCol = 2000, 415
 # gamma,t,lambda_val,beta,minClusterSize = 0.55,1,1,0.4,10
-mergedCluster = mainroutine(1,inputdata, nRow, nCol, gamma, t, lambda_val, beta, minClusterSize, method = "Pearson")
+# mergedCluster = mainroutine(1,inputdata, nRow, nCol, gamma, t, lambda_val, beta, minClusterSize, method = "Pearson")

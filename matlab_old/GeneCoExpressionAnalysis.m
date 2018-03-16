@@ -123,7 +123,14 @@ for gamma = 0.55:0.05:0.55
             if (currentInd < length(mergedCluster))
                 keepInd = 1 : currentInd;
                 for j = currentInd+1 : length(mergedCluster)
+                    
                     interCluster = intersect(mergedCluster{currentInd}, mergedCluster{j});
+                    
+                    j
+                    beta*min(length(mergedCluster{j}), length(mergedCluster{currentInd}))
+                    length(interCluster)
+                    length(mergedCluster{currentInd})
+                    
                     if length(interCluster) >= beta*min(length(mergedCluster{j}), length(mergedCluster{currentInd}))
                         mergedCluster{currentInd} = union(mergedCluster{currentInd}, mergedCluster{j});
                         mergeOccur = 1;
@@ -132,7 +139,7 @@ for gamma = 0.55:0.05:0.55
                     end;
                 end;
                 mergedCluster = mergedCluster(keepInd);
-                length(mergedCluster);
+                length(mergedCluster)
             end;
         end;
         sizeMergedCluster = zeros(1, length(mergedCluster));

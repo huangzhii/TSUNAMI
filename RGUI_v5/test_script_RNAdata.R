@@ -106,6 +106,9 @@ finalSymChar <- as.character(finalSym)
 #   |
 #   +--------------------------------
 
+# cor_mat = cor(t(finalExp))
+
+
 step1 = 1
 gamma = 0.55
 t = 1
