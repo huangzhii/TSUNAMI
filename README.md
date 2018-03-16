@@ -1,4 +1,4 @@
-# GeneCoexpression
+# TBI-TSUNAMI: Translational Bioinformatics Tool SUite for Network Analysis and MIning
 An R software for Gene Co-Expression Analysis
 
 
