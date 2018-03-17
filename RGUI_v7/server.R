@@ -65,6 +65,7 @@ function(input, output, session) {
     colnames(GEO)[which(names(GEO) == "Sample.Count")] <- "Samples"
     GEO <- GEO %>% select("Samples", everything())
     GEO <- GEO %>% select("Actions", everything())
+    GEO <<- GEO
     # Basic process
     output$mytable1 <- DT::renderDataTable({
       DT::datatable(GEO, extensions = 'Responsive', escape=F, selection = 'none', rownames = F)
@@ -112,7 +113,7 @@ function(input, output, session) {
 observeEvent(input$dataset_lastClickId,{
   if (input$dataset_lastClickId%like%"dataset_analysis"){
   row_of_GEO <- as.numeric(gsub("dataset_analysis_","",input$dataset_lastClickId))
-  myGSE <- as.character(GEO[row_of_GEO,1])
+  myGSE <- GEO$Accession[row_of_GEO]
   print(myGSE)
 
   showModal(modalDialog(
