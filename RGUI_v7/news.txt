@@ -1,3 +1,0 @@
-03/16/2018
-1. Change name to TSUNAMI
-2. Deprecate lmQCM rPython

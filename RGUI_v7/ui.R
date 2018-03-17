@@ -1,4 +1,5 @@
 # Zhi Huang 03/16/2018
+library(plotly)
 navbarPage( theme = "style.css",
 
             # title="bioinfo tool",
@@ -11,10 +12,30 @@ navbarPage( theme = "style.css",
                           style = "margin:0px 0px; padding-bottom: 5px")),
             tabPanel("Analysis",
                                      navlistPanel(widths = c(2, 10),
-                                                #theme = "style.css",
-                                                 #"GeneCoExpression!",
+                                              #theme = "style.css",
+                                              #"GeneCoExpression!",
 
-                                                 tabPanel("INFO",
+                                              tabPanel("INFO",
+                                                 sidebarLayout(
+                                                   position = "right",
+                                                   sidebarPanel(
+                                                     h4("Welcome Panel", style="color: STEELBLUE"),
+                                                     tabsetPanel(
+                                                       id = 'overview_tabset',
+                                                       tabPanel("NCBI GEO Data Statistics",
+                                                                br(),
+                                                                # Output: Histogram ----
+                                                                plotlyOutput(outputId = "NCBI_GEO_Sample_Histogram", height = "200px"),
+                                                                br(),
+                                                                br(),
+                                                                plotlyOutput(outputId = "NCBI_GEO_Release_Date", height = "200px")
+                                                       ),
+                                                       tabPanel("Help",
+                                                                "User analytics and statistics"
+                                                       )
+                                                     )
+                                                   ),
+                                                   mainPanel(
                                                           h4("Gene Co-Expression Analysis Site"),
                                                           h5("Gene co-expression network (GCN)"),
                                                           "A gene co-expression network (GCN) is an undirected graph, where each node corresponds to a gene, and a pair of nodes is connected with an edge if there is a significant co-expression relationship between them.[1] Having gene expression profiles of a number of genes for several samples or experimental conditions, a gene co-expression network can be constructed by looking for pairs of genes which show a similar expression pattern across samples, since the transcript levels of two co-expressed genes rise and fall together across samples. Gene co-expression networks are of biological interest since co-expressed genes are controlled by the same transcriptional regulatory program, functionally related, or members of the same pathway or protein complex.",
@@ -68,7 +89,9 @@ navbarPage( theme = "style.css",
                                                           # Horizontal line ----
                                                           tags$hr(),
                                                           actionButton("action1", "Proceed")
-                                                          ),
+                                                        ) # end of mainPanel
+                                                 ) # end of sidebarLayout
+                                              ), # end of tabPanel
                                                  tabPanel("1. DataSet",
                                                           # App title ----
                                                           # titlePanel("Choose GSE Data or Upload Your Own Data"),
@@ -393,7 +416,7 @@ navbarPage( theme = "style.css",
                        HTML('<iframe width="720" height="480" src="https://www.youtube.com/embed/rRIRMW_RRS4" frameborder="0" allowfullscreen></iframe>'),
                        style="text-align: center; padding: 20px"
                      ),
-                     h4("Text Tutorial", style="color: STEELBLUE; padding-bottom: 20px"),
+                     h4("Google Slides", style="color: STEELBLUE; padding-bottom: 20px"),
                      h4("Github", style="color: STEELBLUE; padding-bottom: 20px"),
                      h4("Report Bugs", style="color: STEELBLUE; padding-bottom: 20px")
             ),

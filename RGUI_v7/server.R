@@ -10,6 +10,7 @@ library(GEOquery)
 library(dplyr)
 library(enrichR)
 library(DT)
+library(plotly)
 # library(topGO) # Somehow conflict with WGCNA and GEOquery. Deprecated.
 
 options(shiny.maxRequestSize=300*1024^2) # to the top of server.R would increase the limit to 300MB
@@ -50,36 +51,62 @@ function(input, output, session) {
       print('tab1')
       session$sendCustomMessage("myCallbackHandler", "tab1")
   })
-  output$mytable1 <- DT::renderDataTable({
-    showModal(modalDialog(
-      title = "Loading NCBI GEO database", footer = modalButton("OK"), easyClose = TRUE,
-      div(class = "busy",
-          p("Loading NCBI GEO database. Last fetched version: 01/31/2018"),
-          img(src="images/loading.gif"),
-          style = "margin: auto"
-      )
-    ))
+  
+  output$NCBI_GEO_Release_Date <- renderPlotly({
+    
+    # Create a Progress object
+    progress <- shiny::Progress$new(session)
+    progress$set(message = "Loading NCBI GEO database. Last fetched version: 01/31/2018", value = 0)
+    # Close the progress when this reactive exits (even if there's an error)
+    on.exit(progress$close())
     # NCBI GEO
-
-    load_data <- function(path) {
-      files <- dir(path, pattern = '\\.csv', full.names = TRUE)
-      tables <- lapply(files, read.csv)
-      do.call(rbind, tables)
-    }
-
-    GEO_DB_csvpath = "./NCBI_GEO_SERIES_20180131_DOWNLOADED"
-    GEO <<- load_data(GEO_DB_csvpath)
-    GEO[["Actions"]] <- paste0('
-    <div>
-    <button type="button" class="btn-analysis" id=dataset_analysis_',1:nrow(GEO),'>Analyze</button></div>
-    ')
+    load("./GEO_20180131.Rdata")
+    GEO[["Actions"]] <- paste0('<div><button type="button" class="btn-analysis" id=dataset_analysis_',1:nrow(GEO),'>Analyze</button></div>')
     colnames(GEO)[which(names(GEO) == "Sample.Count")] <- "Samples"
     GEO <- GEO %>% select("Samples", everything())
     GEO <- GEO %>% select("Actions", everything())
-
-    print("GEO data loaded from ./NCBI_GEO_SERIES_20180131_DOWNLOADED")
-    removeModal()
-    DT::datatable(GEO, extensions = 'Responsive', escape=F, selection = 'none', rownames = F)
+    # Basic process
+    output$mytable1 <- DT::renderDataTable({
+      DT::datatable(GEO, extensions = 'Responsive', escape=F, selection = 'none', rownames = F)
+    })
+    
+    # Other fancy processes
+    # number of samples
+    output$NCBI_GEO_Sample_Histogram <- renderPlotly({
+      GEO_sample_number <- GEO$Samples
+      plot_ly(x = GEO_sample_number, type = "histogram") %>% 
+        layout(title = "Samples Histogram (log scale)",font=list(size = 10), 
+               xaxis = list(title = "Number of Samples"),
+               yaxis = list(title = "Occurence", type = "log")) %>% 
+        layout(plot_bgcolor='transparent') %>% 
+        layout(paper_bgcolor='transparent') %>% config(displayModeBar = F)
+    })
+    
+    #release date
+    GEO_release_date <- as.Date(GEO$Release.Date,format = "%B %d, %Y")
+    GEO_release_date_unique = cumsum(table(GEO_release_date)) #cummulative sum
+    
+    
+    font <- list(
+      family = "Courier New, monospace",
+      size = 12,
+      color = "black"
+    )
+    x_axis <- list(
+      title = "",
+      titlefont = font,
+      tickangle = 45,
+      zeroline = TRUE
+    )
+    y_axis <- list(
+      title = "Number of GSE data",
+      titlefont = font
+    )
+    plot_ly(x = names(GEO_release_date_unique), y = as.numeric(GEO_release_date_unique),
+            type = 'scatter', mode = 'lines') %>%
+      layout(title = "Number of GSE Data Growing",font=list(size = 10), xaxis = x_axis, yaxis = y_axis) %>% 
+      layout(plot_bgcolor='transparent') %>% 
+      layout(paper_bgcolor='transparent') %>% config(displayModeBar = F)
   })
 
 observeEvent(input$dataset_lastClickId,{
