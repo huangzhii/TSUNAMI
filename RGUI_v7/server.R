@@ -542,6 +542,7 @@ observeEvent(input$dataset_lastClickId,{
 
       removeModal()
       print('tab4')
+      session$sendCustomMessage("download_cluster_ready","-")
       session$sendCustomMessage("myCallbackHandler", "tab4")
   })
 
@@ -761,6 +762,7 @@ observeEvent(input$dataset_lastClickId,{
       },rownames = FALSE, colnames = FALSE, na = "", bordered = TRUE)
 
       print('tab4')
+      session$sendCustomMessage("download_cluster_ready","-")
       session$sendCustomMessage("myCallbackHandler", "tab4")
   })
 
@@ -810,6 +812,7 @@ observeEvent(input$dataset_lastClickId,{
       }, 1:8)
       removeModal()
       print('tab5')
+      session$sendCustomMessage("download_go_ready","-")
       session$sendCustomMessage("myCallbackHandler", "tab5")
     }
   })
@@ -821,17 +824,7 @@ observeEvent(input$dataset_lastClickId,{
   #   |
   #   |
   #   +--------------------------------
-  observe({
-    if (!is.null(text) && !is.null(eigengene_matrix)) {
-      # notify the browser that the data is ready to download
-      session$sendCustomMessage("download_cluster_ready")
-    }
-    if (!is.null(text) && !is.null(enriched)) {
-      # notify the browser that the data is ready to download
-      session$sendCustomMessage("download_go_ready")
-    }
-  })
-  
+
   output$downloadData1 <- downloadHandler(
     # This function returns a string which tells the client
     # browser what name to use when saving the file.
