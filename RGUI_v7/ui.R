@@ -9,26 +9,12 @@ navbarPage( theme = "style.css",
             title=div(img(src="images/tbi_tsunami_logo.png",
                           height = 28,
                           style = "margin:0px 0px; padding-bottom: 5px")),
-
-            tabPanel("Home",
-                     h4("Introduction to TBI-TSUNAMI"),
-                     h5("TBI-TSUNAMI: Translational Bioinformatics Tool Suite for Network Analysis and Mining"),
-                     "Author information",
-                     "Publication link",
-                     h5("Tutorial"),
-                     "",
-                     h5("Citation"),
-                     ""
-                     ),
-            tabPanel("Co-Expression Analysis",
-                                     h5("Lorem ipsum"),
-                                     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-
+            tabPanel("Analysis",
                                      navlistPanel(widths = c(2, 10),
                                                 #theme = "style.css",
                                                  #"GeneCoExpression!",
 
-                                                 tabPanel("Introduction",
+                                                 tabPanel("INFO",
                                                           h4("Gene Co-Expression Analysis Site"),
                                                           h5("Gene co-expression network (GCN)"),
                                                           "A gene co-expression network (GCN) is an undirected graph, where each node corresponds to a gene, and a pair of nodes is connected with an edge if there is a significant co-expression relationship between them.[1] Having gene expression profiles of a number of genes for several samples or experimental conditions, a gene co-expression network can be constructed by looking for pairs of genes which show a similar expression pattern across samples, since the transcript levels of two co-expressed genes rise and fall together across samples. Gene co-expression networks are of biological interest since co-expressed genes are controlled by the same transcriptional regulatory program, functionally related, or members of the same pathway or protein complex.",
@@ -43,7 +29,7 @@ navbarPage( theme = "style.css",
                                                                              ga('create', 'UA-113406500-2', 'auto');
                                                                              ga('send', 'pageview');"))
                                                                     ),
-                                                          tags$head(tags$script(HTML("document.title = 'Bioinfo Suite';"))), # rename the title by JS
+                                                          tags$head(tags$script(HTML("document.title = 'TSUNAMI';"))), # rename the title by JS
                                                           tags$head(tags$script('Shiny.addCustomMessageHandler("myCallbackHandler",
                                                                                 function(typeMessage) {console.log(typeMessage)
                                                                                 if(typeMessage == "tab1"){
@@ -63,7 +49,22 @@ navbarPage( theme = "style.css",
                                                                                 $("a:contains(5. GO Enrichment Analysis)").click();
                                                                                 }
                                                                                 });
-                                                                                ')),
+                                                                                
+                                                                                  // disable download at startup.
+                                                                                $(document).ready(function() {
+                                                                                  $("#downloadData1").attr("disabled", "true").attr("onclick", "return false;");
+                                                                                  $("#downloadData2").attr("disabled", "true").attr("onclick", "return false;");
+                                                                                  $("#downloadData3").attr("disabled", "true").attr("onclick", "return false;");
+                                                                                  
+                                                                                  Shiny.addCustomMessageHandler("download_cluster_ready", function(message) {
+                                                                                  $("#downloadData1").removeAttr("disabled").removeAttr("onclick");
+                                                                                  $("#downloadData2").removeAttr("disabled").removeAttr("onclick");
+                                                                                  });
+                                                                                  Shiny.addCustomMessageHandler("download_go_ready", function(message) {
+                                                                                  $("#downloadData3").removeAttr("disabled").removeAttr("onclick");
+                                                                                  });
+                                                                                })
+                                                                      ')),
                                                           # Horizontal line ----
                                                           tags$hr(),
                                                           actionButton("action1", "Proceed")
@@ -385,13 +386,73 @@ navbarPage( theme = "style.css",
                                                  )  #, style='width: 80%'
 
                      ),
-            navbarMenu(
-              "More",
-              tabPanel("Developer",
-                       h4("Author Information"),
-                       helpText("Indiana University School of Medicine"),
-                       h4("Publication"),
-                       helpText("Please cite ...")
-                       )
+            tabPanel("Tutorial",
+                     h3("Tutorial", style="color: STEELBLUE; padding-bottom: 20px"),
+                     h4("Video Tutorial", style="color: STEELBLUE; padding-bottom: 20px"),
+                     tags$div(
+                       HTML('<iframe width="720" height="480" src="https://www.youtube.com/embed/rRIRMW_RRS4" frameborder="0" allowfullscreen></iframe>'),
+                       style="text-align: center; padding: 20px"
+                     ),
+                     h4("Text Tutorial", style="color: STEELBLUE; padding-bottom: 20px"),
+                     h4("Github", style="color: STEELBLUE; padding-bottom: 20px"),
+                     h4("Report Bugs", style="color: STEELBLUE; padding-bottom: 20px")
+            ),
+            tabPanel("FAQ",
+                     h3("Frequently Asked Questions", style="color: STEELBLUE; padding-bottom: 20px"),
+                     h4("General Questions", style="color: STEELBLUE; padding-bottom: 20px"),
+                     h5("What is the TBI-TSUNAMI website?", style="color: STEELBLUE"),
+                     p("The TBI-TSUNAMI (Translational Bioinformatics Tool Suite for Network Analysis and Mining) was developed at Indiana University School of Medicine."),
+                     h5("How do I get started?", style="color: STEELBLUE"),
+                     p("Check our tutorial.")
+            ),
+            tabPanel("News",
+                      h3("News", style="color: STEELBLUE; padding-bottom: 20px"),
+                      h4("March 16, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
+                      tags$ul(
+                        tags$li("Renamed our website as TBI-TSUNAMI."),
+                        tags$li("Various of bugs are fixed.")
+                      ),
+                      h4("March 02, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
+                      tags$ul(
+                        tags$li("First prototype platform has been founded.")
+                      )
+            ),
+            tabPanel("About",
+                      h3("About Us", style="color: STEELBLUE; padding-bottom: 20px"),
+                      "The TBI-TSUNAMI (Translational Bioinformatics Tool Suite for Network Analysis and Mining) was developed at Indiana University School of Medicine.",
+                      
+                      tags$div(
+                        tags$img(src='images/tbi_tsunami_logo.png',
+                                 width="150",
+                                 alt="TBI-TSUNAMI", class="center"),
+                        style="text-align: center; padding: 20px"
+                      ),
+                      h4("Development Team", style="color: STEELBLUE; padding-bottom: 20px"),
+                      h5("Prof. Kun Huang's Laboratory", style="color: STEELBLUE"),
+                      tags$ul(
+                        tags$li("Zhi Huang"),
+                        tags$li("Zhi Han"),
+                        tags$li("Jie Zhang"),
+                        tags$li("Kun Huang")
+                      ),
+                      h4("Publications", style="color: STEELBLUE; padding-bottom: 20px"),
+                      "Nice paper",
+                      h4("Funding for the TBI-TSUNAMI is or has been provided by:", style="color: STEELBLUE; padding-bottom: 20px"),
+                      tags$ul(
+                        tags$li("Good funding"),
+                        tags$li("Nice funding")
+                      )
+                   
             )
-            )
+            
+            
+            # navbarMenu(
+            #   "More",
+            #   tabPanel("Developer",
+            #            h4("Author Information"),
+            #            helpText("Indiana University School of Medicine"),
+            #            h4("Publication"),
+            #            helpText("Please cite ...")
+            #            )
+            # )
+  )

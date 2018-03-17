@@ -73,7 +73,8 @@ function(input, output, session) {
     <div>
     <button type="button" class="btn-analysis" id=dataset_analysis_',1:nrow(GEO),'>Analyze</button></div>
     ')
-    GEO <- GEO %>% select("Sample.Count", everything())
+    colnames(GEO)[which(names(GEO) == "Sample.Count")] <- "Samples"
+    GEO <- GEO %>% select("Samples", everything())
     GEO <- GEO %>% select("Actions", everything())
 
     print("GEO data loaded from ./NCBI_GEO_SERIES_20180131_DOWNLOADED")
@@ -237,7 +238,16 @@ observeEvent(input$dataset_lastClickId,{
   #   +--------------------------------
 
   observeEvent(input$action_platform,{
-
+    if(is.null(data)){
+      showModal(modalDialog(
+        title = "Operation Failed", footer = modalButton("OK"), easyClose = TRUE,
+        div(class = "busy",
+            p("You have not selected any data. Please go to previous section."),
+            style = "margin: auto"
+        )
+      ))
+      return()
+    }
     showModal(modalDialog(
       title = "Converting...", footer = NULL,
       div(class = "busy",
@@ -327,6 +337,17 @@ observeEvent(input$dataset_lastClickId,{
   #   +--------------------------------
 
   observeEvent(input$action3,{
+    
+      if(is.null(data)){
+        showModal(modalDialog(
+          title = "Operation Failed", footer = modalButton("OK"), easyClose = TRUE,
+          div(class = "busy",
+              p("You have not selected any data. Please go to previous section."),
+              style = "margin: auto"
+          )
+        ))
+        return()
+      }
       # source("/Users/zhi/Desktop/GeneCoexpression/RGUI/utils.R")
       source("utils.R")
 
@@ -436,6 +457,16 @@ observeEvent(input$dataset_lastClickId,{
   #   +--------------------------------
 
   observeEvent(input$action4_lmQCM,{
+    if(is.null(finalExp)){
+      showModal(modalDialog(
+        title = "Operation Failed", footer = modalButton("OK"), easyClose = TRUE,
+        div(class = "busy",
+            p("You have not selected any data. Please go to previous section."),
+            style = "margin: auto"
+        )
+      ))
+      return()
+    }
       #lmQCM
       showModal(modalDialog(
         title = "Using lmQCM to calculate merged clusters", footer = NULL,
@@ -522,6 +553,16 @@ observeEvent(input$dataset_lastClickId,{
   #=================================================
 
   observeEvent(input$checkPower, {
+    if(is.null(finalExp)){
+      showModal(modalDialog(
+        title = "Operation Failed", footer = modalButton("OK"), easyClose = TRUE,
+        div(class = "busy",
+            p("You have not selected any data. Please go to previous section."),
+            style = "margin: auto"
+        )
+      ))
+      return()
+    }
     if (length(finalSym) > 0){
       #WGCNA
       showModal(modalDialog(
@@ -583,6 +624,16 @@ observeEvent(input$dataset_lastClickId,{
   })
 
   observeEvent(input$action4_WGCNA,{
+      if(is.null(finalExp)){
+        showModal(modalDialog(
+          title = "Operation Failed", footer = modalButton("OK"), easyClose = TRUE,
+          div(class = "busy",
+              p("You have not selected any data. Please go to previous section."),
+              style = "margin: auto"
+          )
+        ))
+        return()
+      }
       #WGCNA
       showModal(modalDialog(
         title = "Using WGCNA to calculate merged clusters", footer = NULL,
@@ -770,8 +821,18 @@ observeEvent(input$dataset_lastClickId,{
   #   |
   #   |
   #   +--------------------------------
+  observe({
+    if (!is.null(text) && !is.null(eigengene_matrix)) {
+      # notify the browser that the data is ready to download
+      session$sendCustomMessage("download_cluster_ready")
+    }
+    if (!is.null(text) && !is.null(enriched)) {
+      # notify the browser that the data is ready to download
+      session$sendCustomMessage("download_go_ready")
+    }
+  })
+  
   output$downloadData1 <- downloadHandler(
-
     # This function returns a string which tells the client
     # browser what name to use when saving the file.
     filename = function() {
@@ -797,7 +858,6 @@ observeEvent(input$dataset_lastClickId,{
     }
   )
   output$downloadData2 <- downloadHandler(
-
     # This function returns a string which tells the client
     # browser what name to use when saving the file.
     filename = function() {
@@ -818,7 +878,6 @@ observeEvent(input$dataset_lastClickId,{
   )
 
   output$downloadData3 <- downloadHandler(
-
     # This function returns a string which tells the client
     # browser what name to use when saving the file.
     filename = 'GO_results.zip',
@@ -862,5 +921,5 @@ observeEvent(input$dataset_lastClickId,{
   output$url_toppgene <- renderUI({tagList("ToppGene Suite:", a("ToppGene", href="https://toppgene.cchmc.org/enrichment.jsp"))})
   output$url_david <- renderUI({tagList("DAVID Bioinformatics Resources 6.8:", a("DAVID", href="https://david.ncifcrf.gov/tools.jsp"))})
   output$url_enrichr <- renderUI({tagList("Enrichr:", a("Enrichr", href="http://amp.pharm.mssm.edu/Enrichr/"))})
-  output$url_gorilla <- renderUI({tagList("GOrilla:", a("GOrilla", href="http://cbl-gorilla.cs.technion.ac.il/"))})
+
 }
