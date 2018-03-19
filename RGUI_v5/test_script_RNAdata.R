@@ -13,7 +13,7 @@ library(enrichR)
 library(DT)
 library(reticulate)
 use_python("/Users/zhi/anaconda2/bin/python")
-setwd('/Users/zhi/Desktop/GeneCoexpression/RGUI_v5/')
+setwd('/Users/zhi/Desktop/TBI-TSUNAMI/RGUI_v5/')
 
 data <- NULL
 GEO <- NULL
