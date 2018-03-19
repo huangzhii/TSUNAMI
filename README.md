@@ -6,6 +6,6 @@ An R software for Gene Co-Expression Analysis
 * RSconnect<br/>
 * [genefilter](https://bioconductor.org/packages/release/bioc/html/genefilter.html)<br/>
 * [WGCNA](https://labs.genetics.ucla.edu/horvath/CoexpressionNetwork/Rpackages/WGCNA/)<br/>
-* Rpython:<br/>
+* (Deprecated since V8) Rpython:<br/>
 `install.packages("rPython")`
 * [GEOquery](https://bioconductor.org/packages/release/bioc/html/GEOquery.html)
