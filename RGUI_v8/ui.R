@@ -76,13 +76,17 @@ navbarPage( theme = "style.css",
                                                                      $("#downloadData1").attr("disabled", "true").attr("onclick", "return false;");
                                                                      $("#downloadData2").attr("disabled", "true").attr("onclick", "return false;");
                                                                      $("#downloadData3").attr("disabled", "true").attr("onclick", "return false;");
+                                                                     $("#download_finaldata").attr("disabled", "true").attr("onclick", "return false;");
                                                                      
                                                                      Shiny.addCustomMessageHandler("download_cluster_ready", function(message) {
-                                                                     $("#downloadData1").removeAttr("disabled").removeAttr("onclick");
-                                                                     $("#downloadData2").removeAttr("disabled").removeAttr("onclick");
+                                                                       $("#downloadData1").removeAttr("disabled").removeAttr("onclick");
+                                                                       $("#downloadData2").removeAttr("disabled").removeAttr("onclick");
                                                                      });
                                                                      Shiny.addCustomMessageHandler("download_go_ready", function(message) {
                                                                      $("#downloadData3").removeAttr("disabled").removeAttr("onclick");
+                                                                     });
+                                                                     Shiny.addCustomMessageHandler("download_finaldata_ready", function(message) {
+                                                                     $("#download_finaldata").removeAttr("disabled").removeAttr("onclick");
                                                                      });
                                                                      })
                                                                      ')),
@@ -155,57 +159,74 @@ navbarPage( theme = "style.css",
                                              ),
                                   tabPanel("2. Data Preprocessing",
                                            # titlePanel("Verifying & Cleaning Data"),
-                                     tabsetPanel(
-                                       tabPanel("Main",
                                            # Sidebar layout with input and output definitions ----
                                            sidebarLayout(
                                              position = "right",
                                              # Sidebar panel for inputs ----
                                              sidebarPanel(
-                                               # Input: Select a file ----
-                                               h5("Choose Preview dimensions"),
-                                               helpText("Preview starting from the beginning to specific rows and columns.", style="margin: 0px"),
-                                               helpText("Default value when leave it blank: # of rows = 100, # of columns = 10.", style="color: STEELBLUE; font-size: 12px"),
-                                               
-                                               fluidRow(
-                                                 column(6, numericInput("quicklook_row", "# of rows:", 100, step = 1, min = 1)),
-                                                 column(6, numericInput("quicklook_col", "# of columns:", 10, step = 1, min = 1))
-                                               ),
-                                               # Horizontal line ----
-                                               # tags$hr(),
-                                               h5("Verify starting column and row of expression data"),
-                                               helpText("Choose starting column and row for expression data.", style="margin: 0px"),
-                                               helpText("Default value when leave them blank: starting row = 1, starting column = 2.", style="color: STEELBLUE; font-size: 12px"),
-                                               
-                                               fluidRow(
-                                                 column(6, numericInput("starting_row", "starting row:", 1, step = 1, min = 1)),
-                                                 column(6, numericInput("starting_col", "starting column:", 2, step = 1, min = 1))
-                                               ),
-                                               # Horizontal line ----
-                                               # tags$hr(),
-                                               h5("Verify Gene Symbol"),
-                                               helpText("We suppose Gene Symbol is in column 1.", style="margin: 0px"),
-                                               helpText("Default value when leave it blank: 1.", style="color: STEELBLUE; font-size: 12px"),
-                                               numericInput("starting_gene_row", "starting row:", 1, step = 1, min = 1),
-                                               # Horizontal line ----
-                                               tags$hr(),
-                                               h5("Remove Genes"),
-                                               helpText("Remove data with lowest percentile absolute expression value shared by all samples. Then remove data with lowest percentile variance across samples.", style="margin: 0px"),
-                                               helpText("Default value when leave them blank: 0.", style="color: STEELBLUE; font-size: 12px"),
-                                               fluidRow(
-                                                 column(6, numericInput("absolute_expval", "Lowest Absolute Percentile (%) To Remove:", 20, step = 1, min = 0)),
-                                                 column(6, numericInput("variance_expval", "Lowest Variance Percentile (%) To Remove:", 10, step = 1, min = 0))
-                                               ),
-                                               checkboxInput("checkbox_NA", "Convert NA value to 0 in Expression Data", TRUE),
-                                               checkboxInput("checkbox_logarithm", "Take the log (e) of Expression Data (Default: Unchecked)", FALSE),
-                                               checkboxInput("checkbox_empty", "Remove rows with empty Gene Symbol", TRUE),
-                                               checkboxInput("checkbox_duplicated", "Keep only one row with largest mean expression value when Gene Symbol is duplicated", TRUE),
-                                               numericInput("max_gene_retain", "Maximum Number of Genes to Retain (i.e. Top N genes sorted by mean expression values among all samples. Leave blank for keeping all data):", 10000, step = 1000, min = 0),
-                                               actionButton("action4", "Perform Advanced Data Analysis"),
-                                               br(),
-                                               br(),
+                                               tabsetPanel(
+                                                 tabPanel("Main",
+                                                   # Input: Select a file ----
+                                                   h5("Choose Preview dimensions"),
+                                                   helpText("Preview starting from the beginning to specific rows and columns.", style="margin: 0px"),
+                                                   helpText("Default value when leave it blank: # of rows = 100, # of columns = 10.", style="color: STEELBLUE; font-size: 12px"),
+                                                   
+                                                   fluidRow(
+                                                     column(6, numericInput("quicklook_row", "# of rows:", 100, step = 1, min = 1)),
+                                                     column(6, numericInput("quicklook_col", "# of columns:", 10, step = 1, min = 1))
+                                                   ),
+                                                   # Horizontal line ----
+                                                   # tags$hr(),
+                                                   h5("Verify starting column and row of expression data"),
+                                                   helpText("Choose starting column and row for expression data.", style="margin: 0px"),
+                                                   helpText("Default value when leave them blank: starting row = 1, starting column = 2.", style="color: STEELBLUE; font-size: 12px"),
+                                                   
+                                                   fluidRow(
+                                                     column(6, numericInput("starting_row", "starting row:", 1, step = 1, min = 1)),
+                                                     column(6, numericInput("starting_col", "starting column:", 2, step = 1, min = 1))
+                                                   ),
+                                                   # Horizontal line ----
+                                                   # tags$hr(),
+                                                   h5("Verify Gene Symbol"),
+                                                   helpText("We suppose Gene Symbol is in column 1.", style="margin: 0px"),
+                                                   helpText("Default value when leave it blank: 1.", style="color: STEELBLUE; font-size: 12px"),
+                                                   numericInput("starting_gene_row", "starting row:", 1, step = 1, min = 1),
+                                                   
+                                                   # Horizontal line ----
+                                                   tags$hr(),
+                                                   h5("Remove Genes"),
+                                                   helpText("Remove data with lowest percentile absolute expression value shared by all samples. Then remove data with lowest percentile variance across samples.", style="margin: 0px"),
+                                                   helpText("Default value when leave them blank: 0.", style="color: STEELBLUE; font-size: 12px"),
+                                                   fluidRow(
+                                                     column(6, numericInput("absolute_expval", "Lowest Absolute Percentile (%) To Remove:", 20, step = 1, min = 0)),
+                                                     column(6, numericInput("variance_expval", "Lowest Variance Percentile (%) To Remove:", 10, step = 1, min = 0))
+                                                   ),
+                                                   checkboxInput("checkbox_NA", "Convert NA value to 0 in Expression Data", TRUE),
+                                                   checkboxInput("checkbox_logarithm", "Take the log (e) of Expression Data (Default: Unchecked)", FALSE),
+                                                   checkboxInput("checkbox_empty", "Remove rows with empty Gene Symbol", TRUE),
+                                                   checkboxInput("checkbox_duplicated", "Keep only one row with largest mean expression value when Gene Symbol is duplicated", TRUE),
+                                                   numericInput("max_gene_retain", "Maximum Number of Genes to Retain (i.e. Top N genes sorted by mean expression values among all samples. Leave blank for keeping all data):", 10000, step = 1000, min = 0)
+                                                   
+                                                 ), # EOF tabpanel main
+                                                 tabPanel("Advanced",
+                                                    h5("Choose Advanced Processes"),
+                                                    verbatimTextOutput("summary_advanced"),
+                                                    h5("Sorting"),
+                                                    checkboxInput("sorting_adv_checkbox", "Sort expression data ascending to learn OS / EFS", F),
+                                                    selectizeInput(
+                                                      'choose_OS_EFS', 'Specify OS or EFS:',
+                                                      choices = c("OS", "EFS")),
+                                                    helpText("If yes, please select objective row: row index and range of columns."),
+                                                    numericInput("row_osefs_ind", "Row of OS_IND/EFS_IND:", 9, step = 1, width = NULL, min = 1),
+                                                    numericInput("row_osefs", "Row of OS/EFS:", 10, step = 1, width = NULL, min = 1),
+                                                    numericInput("sort_col_start", "Starting Col:", 2, step = 1, width = NULL, min = 1),
+                                                    checkboxInput("select_pval_adv_checkbox", "Pick Expression Data only with satisfied P-value.", F),
+                                                    helpText("Calculated by median and the (non-central) Chi-Squared Distribution."),
+                                                    numericInput("advance_selection_pvalue", "P-value smaller than:", 0.05, step = 0.001, width = NULL, min = 0)
+                                                 )
+                                               ), # EOF tabsetPanel
                                                actionButton("action3", "Continue to Co-Expression Analysis",style="color: WHITE; background-color: DODGERBLUE")
-                                             ),
+                                             ), # EOF siderbarPanel
                                              
                                              # Main panel for displaying outputs ----
                                              mainPanel(
@@ -225,13 +246,8 @@ navbarPage( theme = "style.css",
                                                  tabPanel("Gene Symbol", tableOutput("mytable6"))
                                                )
                                              )
-                                           )
-                                       ),
-                                       tabPanel("Advanced",
-                                                "s"
-                                       )
-                                     )
-                                  ),
+                                           ) # EOF siderbarLayout
+                                       ), # EOF tabPanel 2. Data Preprocessing
                                   tabPanel("3. Choose Method",
                                            # titlePanel("Select Method for Gene Co-Expression Analysis"),
                                            
@@ -311,7 +327,26 @@ navbarPage( theme = "style.css",
                                                       br(),
                                                       br(),
                                                       br()
-                                             )
+                                             ), # EOF WGCNA TAB
+                                             tabPanel("Verify Final Data",
+                                                      h5("Final Incoming Data"),
+                                                      
+                                                      fluidRow(
+                                                        column(6,
+                                                               helpText("You can verify the final incoming data and also download it."),
+                                                               downloadButton('download_finaldata', 'Download Final Data (CSV)')),
+                                                        column(6,
+                                                               helpText("GO Enrichment Analysis for following all Genes."),
+                                                               actionButton("action_finaldata4enrichr", "GO Enrichment Analysis",
+                                                                               style="color: WHITE; background-color: DODGERBLUE"),
+                                                               helpText("Warning: Directly process large # of genes may cause very slow GO process. We suggest user perform Co-expression clustering and do GO analysis with small amount of genes.", style="color: STEELBLUE; font-size: 12px"))
+                                                      ),
+                                                      
+                                                      
+                                                      h5("Data Preview"),
+                                                      DT::dataTableOutput("mytable_finaldata")
+                                                      
+                                             ) # EOF TAB Verify Final Data
                                              )
                                            ),
                                   tabPanel("4. Result",

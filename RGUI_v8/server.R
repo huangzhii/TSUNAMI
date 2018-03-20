@@ -12,6 +12,7 @@ library(enrichR)
 library(DT)
 library(plotly)
 library(openxlsx)
+library(survival)
 # library(topGO) # Somehow conflict with WGCNA and GEOquery. Deprecated.
 
 options(shiny.maxRequestSize=300*1024^2) # to the top of server.R would increase the limit to 300MB
@@ -21,6 +22,7 @@ source("utils.R")
 # source("./lmQCM/GeneCoExpressionAnalysis.R")
 # ----------------------------------------------------
 data <- NULL
+data_final <- NULL
 GEO <- NULL
 finalExp <- NULL
 finalSym <- NULL
@@ -486,13 +488,66 @@ observeEvent(input$dataset_lastClickId,{
       #Remove gene symbol after vertical line: from ABC|123 to ABC:
       uniGene <- gsub("\\|.*$","", uniGene)
 
-      finalExp <<- tmpExp[sortInd[1:topN], ]
-      finalSym <<- uniGene[sortInd[1:topN]]
-      finalSymChar <<- as.character(finalSym)
+      finalExp <- tmpExp[sortInd[1:topN], ]
+      finalSym <- uniGene[sortInd[1:topN]]
+      finalSymChar <- as.character(finalSym)
+      
+      output$summary_advanced <- renderPrint({
+        print(sprintf("Number of Genes: %d",dim(finalExp)[1]))
+        print(sprintf("Number of Samples: %d",dim(finalExp)[2]))
+      })
+      
+      # advanced
+      if (input$sorting_adv_checkbox){
+        finalPValue <- matrix(0, ncol = 0, nrow = length(finalSym))
+        OS_IND <- as.numeric(data[input$row_osefs_ind, input$sort_col_start:dim(data)[2]])
+        OS <- as.numeric(data[input$row_osefs, input$sort_col_start:dim(data)[2]])
+        # print(OS_IND)
+        # print(OS)
+        # pvalue
+        for(i in 1:dim(finalExp)[1]){
+          rr = finalExp[i,]
+          rr_sorted_list = sort(rr, decreasing = FALSE, index.return=T)
+          rr_sorted = rr_sorted_list$x
+          rr_sorted_idx = rr_sorted_list$ix
+          medianB <- rep(0, length(rr))
+          medianB[ rr_sorted_idx > length(rr)/2 ] = 1
+          ss <- survdiff(Surv(OS, OS_IND) ~ medianB)
+          finalPValue[i] <- 1-pchisq(ss$chisq, 1)
+        }
+        # print("final P value:")
+        # print(finalPValue)
+        finalPValue <- as.numeric(finalPValue)
+        save(finalPValue,file="~/Desktop/finalPValue.Rdata")
+        if (input$select_pval_adv_checkbox){
+          finalExp <- finalExp[finalPValue<=input$advance_selection_pvalue,]
+          finalSym <- finalSym[finalPValue<=input$advance_selection_pvalue]
+          finalSymChar <- finalSymChar[finalPValue<=input$advance_selection_pvalue]
+          finalPValue <- finalPValue[finalPValue<=input$advance_selection_pvalue]
+        }
+        
+        data_final <<- data.frame(cbind(finalSym,finalPValue,finalExp))
+        colnames(data_final)[1:2] = c("Gene_Symbol", sprintf("P-value of %s",input$choose_OS_EFS))
+      }
+      else{
+        data_final <<- data.frame(cbind(finalSym,finalExp))
+        colnames(data_final)[1] = "Gene_Symbol"
+      }
+      #finally no matter if just basic or advanced:
+      finalExp <<- finalExp
+      finalSym <<- finalSym
+      finalSymChar <<- finalSymChar
+      output$mytable_finaldata <- DT::renderDataTable({
+        DT::datatable(data_final,
+                      extensions = 'Responsive', escape=F, selection = 'none')
+      })
+      
       removeModal()
       print('tab3')
+      session$sendCustomMessage("download_finaldata_ready","-")
       session$sendCustomMessage("myCallbackHandler", "tab3")
   })
+  
 
   #   +------------------------------------------------------------+
   #   |
@@ -809,7 +864,43 @@ observeEvent(input$dataset_lastClickId,{
   #   |
   #   |
   #   +--------------------------------
-
+  observeEvent(input$action_finaldata4enrichr,{
+    if(is.null(finalSym)){
+      showModal(modalDialog(
+        title = "Operation Failed", footer = modalButton("OK"), easyClose = TRUE,
+        div(class = "busy",
+            p("You have not selected any data. Please go to previous section."),
+            style = "margin: auto"
+        )
+      ))
+      return()
+    }
+    genes_str = finalSym
+    genes_str <- unlist(strsplit(genes_str, " /// "))
+    # genes_str <- c('PHF|14','RBM|3','Nlrx1','MSL1','PHF21A','ARL10','INSR')
+    print("genes_str for enrich analysis: ")
+    print(genes_str)
+    final_genes_str <<- genes_str
+    updateTextAreaInput(session, "textareainput_GOEA",
+                        label = paste(sprintf("Number of Genes: %d", length(final_genes_str)), input$controller),
+                        value = paste(paste(final_genes_str, collapse = '\n'), input$controller))
+    
+    enriched <<- enrichr(final_genes_str, enrichr_dbs)
+    
+    Map(function(id) {
+      dbres = enriched[[enrichr_dbs[id]]]
+      dbres = dbres[ , -which(names(dbres) %in% c("Old.P.value","	Old.Adjusted.P.value"))]
+      output[[paste("mytable_Enrichr",id,sep="_")]] <- DT::renderDataTable({DT::datatable(dbres, selection="none", escape=FALSE, pageLength = 100,
+                                                                                          options = list(paging = F, searching = T, dom='t',ordering=T), extensions = 'Responsive',
+                                                                                          rownames = T) #%>% formatRound(colnames(dbres)[3:dim(dbres)[2]], digits=8)
+      })
+    }, 1:8)
+    removeModal()
+    print('tab5')
+    session$sendCustomMessage("download_go_ready","-")
+    session$sendCustomMessage("myCallbackHandler", "tab5")
+  })
+    
   observeEvent(input$go_lastClickId,{
     print("lastClickedId received.")
     if (input$go_lastClickId%like%"go_analysis"){
@@ -841,7 +932,7 @@ observeEvent(input$dataset_lastClickId,{
       Map(function(id) {
         dbres = enriched[[enrichr_dbs[id]]]
         dbres = dbres[ , -which(names(dbres) %in% c("Old.P.value","	Old.Adjusted.P.value"))]
-        output[[paste("mytable_Enrichr",id,sep="_")]] <- DT::renderDataTable({DT::datatable(dbres, selection="none", escape=FALSE,
+        output[[paste("mytable_Enrichr",id,sep="_")]] <- DT::renderDataTable({DT::datatable(dbres, selection="none", escape=FALSE, pageLength = 100,
                                                                                             options = list(paging = F, searching = T, dom='t',ordering=T), extensions = 'Responsive',
                                                                                             rownames = T) #%>% formatRound(colnames(dbres)[3:dim(dbres)[2]], digits=8)
         })
@@ -906,6 +997,21 @@ observeEvent(input$dataset_lastClickId,{
     }
   )
 
+  output$download_finaldata <- downloadHandler(
+    # This function returns a string which tells the client
+    # browser what name to use when saving the file.
+    filename = function() {
+      name = "finaldata.csv"
+    },
+    
+    content = function(file) {
+      write.table(data_final, file = file, append = FALSE, quote = TRUE, sep = ',',
+                  eol = "\r\n", na = "NA", dec = ".", row.names = F,
+                  col.names = T, qmethod = c("escape", "double"),
+                  fileEncoding = "")
+    }
+  )
+  
   output$downloadData3 <- downloadHandler(
     # This function returns a string which tells the client
     # browser what name to use when saving the file.

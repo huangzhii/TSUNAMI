@@ -66,8 +66,9 @@ server <- function(input, output) {
   },1:3)
 
   # customize the length drop-down menu; display 5 rows per page by default
-  output$mytable3 <- DT::renderDataTable({
-    DT::datatable(iris, options = list(lengthMenu = c(5, 30, 50), pageLength = 5))
+  output$mytable3<- DT::renderDataTable({
+    DT::datatable(data_final[, 1:10],
+                  extensions = 'Responsive', escape=F, selection = 'none')
   })
 
 }
