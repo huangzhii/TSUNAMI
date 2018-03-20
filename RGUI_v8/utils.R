@@ -44,36 +44,15 @@ highExpressionProbes <- function (genes, probes, eset){
   return(list(first=ind, second=uniGene))
 }
 
-
-massivePCC_withoutNaN <- function (eset){
-  nRow <- nrow(eset)
-  nCol <- ncol(eset)
-  if (nRow > 1) {
-    sumX <- rowSums(eset)
-    # meanX <- colMeans(eset)
-    # A * B	Element-wise multiplication
-    sumV <- sqrt( rowSums(eset * eset) - (sumX * sumX)/nCol )
-    PCC_mat <- matrix(0, nrow = nRow, ncol = nRow)
-    
-    #starting parallel
-    # no_cores <- detectCores() - 1
-    # cl <- makeCluster(no_cores)
-    
-    for (i in 1:(nRow-1)){
-      if (i %% round(nRow/100) == 0) {
-        print(sprintf("Processing Massive PCC ... %.2f%%",(i/nRow*100)))
-      }
-      # %*% Matrix multiplication
-      PCC_mat[i,(i+1):nRow] <- ( eset[(i+1):nRow,] %*% eset[i,] - sumX[i] * sumX[(i+1):nRow]/nCol ) / (sumV[i] * sumV[(i+1):nRow])
-      # PCC_mat[i,(i+1):nRow] <- ( tcrossprod(eset[(i+1):nRow,],t(eset[i,])) - sumX[i] * sumX[(i+1):nRow]/nCol ) / (sumV[i] * sumV[(i+1):nRow])
-      # array <- tcrossprod(eset[(i+1):nRow,],t(eset[i,]))
-      # array <- array - sumX[i] * sumX[(i+1):nRow]/nCol
-      # denom <- (sumV[i] * sumV[(i+1):nRow])
-      # array <- array/denom
-      # PCC_mat[i,(i+1):nRow] <- array
-    }
-    PCC_mat2 <- PCC_mat + t(PCC_mat)
-    
-  }
-  return(PCC_mat2)
+getFileNameExtension <- function (fn) {
+  # remove a path
+  splitted    <- strsplit(x=fn, split='/')[[1]]   
+  # or use .Platform$file.sep in stead of '/'
+  fn          <- splitted [length(splitted)]
+  ext         <- ''
+  splitted    <- strsplit(x=fn, split='\\.')[[1]]
+  l           <-length (splitted)
+  if (l > 1 && sum(splitted[1:(l-1)] != ''))  ext <-splitted [l] 
+  # the extention must be the suffix of a non-empty name    
+  ext
 }

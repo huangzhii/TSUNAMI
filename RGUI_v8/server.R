@@ -11,10 +11,12 @@ library(dplyr)
 library(enrichR)
 library(DT)
 library(plotly)
+library(openxlsx)
 # library(topGO) # Somehow conflict with WGCNA and GEOquery. Deprecated.
 
 options(shiny.maxRequestSize=300*1024^2) # to the top of server.R would increase the limit to 300MB
 options(shiny.sanitize.errors = FALSE)
+source("utils.R")
 # setwd("/Users/zhi/Desktop/GeneCoexpression/RGUI"); #mac #remove when deploy to shinyapps.io
 # source("./lmQCM/GeneCoExpressionAnalysis.R")
 # ----------------------------------------------------
@@ -164,17 +166,17 @@ observeEvent(input$dataset_lastClickId,{
   removeModal()
   output$mytable4 <- DT::renderDataTable({
     # Expression Value
-    DT::datatable(data[1:ifelse(is.nan(input$quicklook_row),100,input$quicklook_row), 1:ifelse(is.nan(input$quicklook_col),10,input$quicklook_col)],
+    DT::datatable(data[1:ifelse(is.na(input$quicklook_row),100,input$quicklook_row), 1:ifelse(is.na(input$quicklook_col),10,input$quicklook_col)],
                   extensions = 'Responsive', escape=F, selection = 'none')
   })
   output$mytable5 <- DT::renderDataTable({
     # Expression Value
-    DT::datatable(data[ifelse(is.nan(input$starting_row),1,input$starting_row):ifelse(is.nan(input$quicklook_row),100,input$quicklook_row), ifelse(is.nan(input$starting_col),2,input$starting_col):ifelse(is.nan(input$quicklook_col),10,input$quicklook_col)],
+    DT::datatable(data[ifelse(is.na(input$starting_row),1,input$starting_row):ifelse(is.na(input$quicklook_row),100,input$quicklook_row), ifelse(is.na(input$starting_col),2,input$starting_col):ifelse(is.na(input$quicklook_col),10,input$quicklook_col)],
                   , extensions = 'Responsive', escape=F, selection = 'none')
   })
   output$mytable6 <- renderTable({
     # Gene ID
-    data[ifelse(is.nan(input$starting_gene_row),1,input$starting_gene_row):ifelse(is.nan(input$quicklook_row),100,input$quicklook_row), 1]
+    data[ifelse(is.na(input$starting_gene_row),1,input$starting_gene_row):ifelse(is.na(input$quicklook_row),100,input$quicklook_row), 1]
   })
   print('tab2')
   session$sendCustomMessage("myCallbackHandler", "tab2")
@@ -207,21 +209,35 @@ observeEvent(input$dataset_lastClickId,{
               style = "margin: auto"
           )
         ))
-        # data <<- read.csv(input$csvfile$datapath,
-        #                   header = input$header,
-        #                   sep = input$sep,
-        #                   quote = input$quote)
-        data_temp = as.matrix(readLines(input$csvfile$datapath), sep = '\n')
-        data_temp = strsplit(data_temp, split=input$sep)
-        max.length <- max(sapply(data_temp, length))
-        data_temp <- lapply(data_temp, function(v) { c(v, rep(NA, max.length-length(v)))})
-        data_temp <- data.frame(do.call(rbind, data_temp))
-        if(data_temp[dim(data_temp)[1],1] == "!series_matrix_table_end"){
-          print("remove last row with \"!series_matrix_table_end\" ")
-          data_temp = data_temp[-dim(data_temp)[1],]
+        fileExtension <- getFileNameExtension(input$csvfile$datapath)
+        if(fileExtension == "csv"){
+          data <<- read.csv(input$csvfile$datapath,
+                            header = input$header,
+                            sep = input$sep,
+                            quote = input$quote)
+          print("csv file Processed.")
         }
-        data <<- data_temp
-        print("CSV / txt file Processed.")
+        else if(fileExtension == "txt"){
+          data_temp = as.matrix(readLines(input$csvfile$datapath), sep = '\n')
+          data_temp = strsplit(data_temp, split=input$sep)
+          max.length <- max(sapply(data_temp, length))
+          data_temp <- lapply(data_temp, function(v) { c(v, rep(NA, max.length-length(v)))})
+          data_temp <- data.frame(do.call(rbind, data_temp))
+          if(data_temp[dim(data_temp)[1],1] == "!series_matrix_table_end"){
+            print("remove last row with \"!series_matrix_table_end\" ")
+            data_temp = data_temp[-dim(data_temp)[1],]
+          }
+          data <<- data_temp
+          print("txt file Processed.")
+        } else if(fileExtension == "xlsx" || fileExtension == "xls"){
+          data_temp <- read.xlsx(input$csvfile$datapath, sheet = 1, startRow = 1, colNames = TRUE)
+          if(data_temp[dim(data_temp)[1],1] == "!series_matrix_table_end"){
+            print("remove last row with \"!series_matrix_table_end\" ")
+            data_temp = data_temp[-dim(data_temp)[1],]
+          }
+          data <<- data_temp
+          print("xlsx / xls file Processed.")
+        }
         removeModal()
 
         output$summary <- renderPrint({
@@ -239,17 +255,17 @@ observeEvent(input$dataset_lastClickId,{
         }
         output$mytable4 <- DT::renderDataTable({
           # Expression Value
-          DT::datatable(data[1:ifelse(is.nan(input$quicklook_row),100,input$quicklook_row), 1:ifelse(is.nan(input$quicklook_col),10,input$quicklook_col)],
+          DT::datatable(data[1:ifelse(is.na(input$quicklook_row),100,input$quicklook_row), 1:ifelse(is.na(input$quicklook_col),10,input$quicklook_col)],
                         , extensions = 'Responsive', escape=F, selection = 'none')
         })
         output$mytable5 <- DT::renderDataTable({
           # Expression Value
-          DT::datatable(data[ifelse(is.nan(input$starting_row),1,input$starting_row):ifelse(is.nan(input$quicklook_row),100,input$quicklook_row), ifelse(is.nan(input$starting_col),2,input$starting_col):ifelse(is.nan(input$quicklook_col),10,input$quicklook_col)],
+          DT::datatable(data[ifelse(is.na(input$starting_row),1,input$starting_row):ifelse(is.na(input$quicklook_row),100,input$quicklook_row), ifelse(is.na(input$starting_col),2,input$starting_col):ifelse(is.na(input$quicklook_col),10,input$quicklook_col)],
                         , extensions = 'Responsive', escape=F, selection = 'none')
         })
         output$mytable6 <- renderTable({
           # Gene ID
-          data[ifelse(is.nan(input$starting_gene_row),1,input$starting_gene_row):ifelse(is.nan(input$quicklook_row),100,input$quicklook_row), 1]
+          data[ifelse(is.na(input$starting_gene_row),1,input$starting_gene_row):ifelse(is.na(input$quicklook_row),100,input$quicklook_row), 1]
         })
         print('tab2')
         session$sendCustomMessage("myCallbackHandler", "tab2")
@@ -304,22 +320,19 @@ observeEvent(input$dataset_lastClickId,{
     if (is.null(fname)){
       # data is not from GEO
       print("data is self-uploaded, so no fname defined.")
-      fname <- data[ifelse(is.nan(input$starting_gene_row),1,input$starting_gene_row):dim(data)[1], 1]# Gene ID
+      fname <- data[ifelse(is.na(input$starting_gene_row),1,input$starting_gene_row):dim(data)[1], 1]# Gene ID
       fname <- gsub("\"","",fname) # convert "\"1553418_a_at\"" to "1553418_a_at"
       # save(fname,file="/Users/zhi/Desktop/fname.Rdata")
     }
     fname2 <- fname
     if (!is.null(gpltable$`Gene Symbol`)){
       print("load GPL table with name \"Gene Symbol\"")
-      for (i in 1:length(fname)){
-        fname2[i] <- gpltable$`Gene Symbol`[which(gpltable$ID == fname[i])]
-      }
+      fname2 <- gpltable$`Gene Symbol`[match(fname,gpltable$ID)]
     }
+    
     else if (!is.null(gpltable$`GENE_SYMBOL`)){
       print("load GPL table with name \"GENE_SYMBOL\"")
-      for (i in 1:length(fname)){
-        fname2[i] <- gpltable$`GENE_SYMBOL`[which(gpltable$ID == fname[i])]
-      }
+      fname2 <- gpltable$`GENE_SYMBOL`[match(fname,gpltable$ID)]
     }
     else {
         removeModal()
@@ -333,23 +346,21 @@ observeEvent(input$dataset_lastClickId,{
 
     print(dim(data))
     print(length(fname2))
-    data[ifelse(is.nan(input$starting_gene_row),1,input$starting_gene_row):dim(data)[1],1] <<- fname2
+    data[ifelse(is.na(input$starting_gene_row),1,input$starting_gene_row):dim(data)[1],1] <<- fname2
     # row.names(data) <- seq(1, length(fname2))
     output$mytable4 <- DT::renderDataTable({
       # Expression Value
-      DT::datatable(data[1:ifelse(is.nan(input$quicklook_row),100,input$quicklook_row), 1:ifelse(is.nan(input$quicklook_col),10,input$quicklook_col)],
+      DT::datatable(data[1:ifelse(is.na(input$quicklook_row),100,input$quicklook_row), 1:ifelse(is.na(input$quicklook_col),10,input$quicklook_col)],
                     extensions = 'Responsive', escape=F, selection = 'none')
     })
     output$mytable5 <- DT::renderDataTable({
       # Expression Value
-      DT::datatable(data[ifelse(is.nan(input$starting_row),1,input$starting_row):ifelse(is.nan(input$quicklook_row),100,input$quicklook_row), ifelse(is.nan(input$starting_col),2,input$starting_col):ifelse(is.nan(input$quicklook_col),10,input$quicklook_col)],
+      DT::datatable(data[ifelse(is.na(input$starting_row),1,input$starting_row):ifelse(is.na(input$quicklook_row),100,input$quicklook_row), ifelse(is.na(input$starting_col),2,input$starting_col):ifelse(is.na(input$quicklook_col),10,input$quicklook_col)],
                     extensions = 'Responsive', escape=F, selection = 'none')
     })
     output$mytable6 <- renderTable({
       # Gene ID
-
-
-      data[ifelse(is.nan(input$starting_gene_row),1,input$starting_gene_row):ifelse(is.nan(input$quicklook_row),100,input$quicklook_row), 1]
+      data[ifelse(is.na(input$starting_gene_row),1,input$starting_gene_row):ifelse(is.na(input$quicklook_row),100,input$quicklook_row), 1]
     })
     print("Platform Conversion finished")
 
@@ -376,8 +387,7 @@ observeEvent(input$dataset_lastClickId,{
         ))
         return()
       }
-      # source("/Users/zhi/Desktop/GeneCoexpression/RGUI/utils.R")
-      source("utils.R")
+      # source("/Users/zhi/Desktop/TBI-TSUNAMI/RGUI_v8/utils.R")
 
       showModal(modalDialog(
         title = "Cleaning input data", footer = NULL,
@@ -389,9 +399,9 @@ observeEvent(input$dataset_lastClickId,{
       ))
       print(dim(data))
       # Step 0
-      RNA <- as.matrix(data[ifelse(is.nan(input$starting_row),1,input$starting_row):dim(data)[1], ifelse(is.nan(input$starting_col),2,input$starting_col):dim(data)[2]])
+      RNA <- as.matrix(data[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data)[1], ifelse(is.na(input$starting_col),2,input$starting_col):dim(data)[2]])
       class(RNA) <- "numeric"
-      geneID <- data.frame(data[ifelse(is.nan(input$starting_gene_row),1,input$starting_gene_row):dim(data)[1], 1])
+      geneID <- data.frame(data[ifelse(is.na(input$starting_gene_row),1,input$starting_gene_row):dim(data)[1], 1])
       print(dim(RNA))
       print(dim(geneID))
 
@@ -401,7 +411,8 @@ observeEvent(input$dataset_lastClickId,{
       }
 
       # Remove data with lowest 20% absolute exp value shared by all samples
-      percentile <- ifelse(is.nan(input$absolute_expval),0,input$absolute_expval)/100.
+      percentile <- ifelse(is.na(input$absolute_expval),0,input$absolute_expval)/100.
+      print(sprintf("percentile 1: %f",percentile))
       # save(RNA, file="/Users/zhi/Desktop/RNA.Rdata")
       if (percentile > 0){
         RNA_filtered1 = RNA[apply(RNA,1,max) > quantile(RNA, percentile)[[1]], ]
@@ -411,8 +422,12 @@ observeEvent(input$dataset_lastClickId,{
         RNA_filtered1 = RNA
         geneID_filtered1 = geneID
       }
+      
+      print("after remove lowest k% abs exp value:")
+      print(dim(RNA_filtered1))
       # Remove data with lowest 10% variance across samples
-      percentile <- ifelse(is.nan(input$variance_expval),0,input$variance_expval)/100.
+      percentile <- ifelse(is.na(input$variance_expval),0,input$variance_expval)/100.
+      print(sprintf("percentile 2: %f",percentile))
       if (percentile > 0){
         index <- varFilter2(eset = RNA_filtered1, var.cutoff = percentile)
         RNA_filtered2 = RNA_filtered1[index, ]
@@ -422,6 +437,9 @@ observeEvent(input$dataset_lastClickId,{
         RNA_filtered2 = RNA_filtered1
         geneID_filtered2 = geneID_filtered1
       }
+      
+      print("after remove lowest l% var exp value:")
+      print(dim(RNA_filtered2))
 
       # expData <- RNA_filtered2
       # res <- highExpressionProbes(geneID_filtered2, geneID_filtered2, expData)
@@ -464,7 +482,7 @@ observeEvent(input$dataset_lastClickId,{
       res <- sort.int(rowMeans(tmpExp), decreasing = TRUE, index.return=TRUE)
       sortMean <- res$x
       sortInd <- res$ix
-      topN <- min(ifelse(is.nan(input$max_gene_retain),Inf,input$max_gene_retain), nrow(tmpExp))
+      topN <- min(ifelse(is.na(input$max_gene_retain),Inf,input$max_gene_retain), nrow(tmpExp))
       #Remove gene symbol after vertical line: from ABC|123 to ABC:
       uniGene <- gsub("\\|.*$","", uniGene)
 

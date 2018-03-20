@@ -11,151 +11,152 @@ navbarPage( theme = "style.css",
                           height = 28,
                           style = "margin:0px 0px; padding-bottom: 5px")),
             tabPanel("Analysis",
-                                     navlistPanel(widths = c(2, 10),
-                                              #theme = "style.css",
-                                              #"GeneCoExpression!",
-
-                                              tabPanel("INFO",
-                                                 sidebarLayout(
-                                                   position = "right",
-                                                   sidebarPanel(
-                                                     h4("Welcome Panel", style="color: STEELBLUE"),
-                                                     tabsetPanel(
-                                                       id = 'overview_tabset',
-                                                       tabPanel("NCBI GEO Data Statistics",
-                                                                br(),
-                                                                # Output: Histogram ----
-                                                                plotlyOutput(outputId = "NCBI_GEO_Sample_Histogram", height = "200px"),
-                                                                br(),
-                                                                br(),
-                                                                plotlyOutput(outputId = "NCBI_GEO_Release_Date", height = "200px")
-                                                       ),
-                                                       tabPanel("Help",
-                                                                "User analytics and statistics"
-                                                       )
-                                                     )
-                                                   ),
-                                                   mainPanel(
-                                                          h4("Gene Co-Expression Analysis Site"),
-                                                          h5("Gene co-expression network (GCN)"),
-                                                          "A gene co-expression network (GCN) is an undirected graph, where each node corresponds to a gene, and a pair of nodes is connected with an edge if there is a significant co-expression relationship between them.[1] Having gene expression profiles of a number of genes for several samples or experimental conditions, a gene co-expression network can be constructed by looking for pairs of genes which show a similar expression pattern across samples, since the transcript levels of two co-expressed genes rise and fall together across samples. Gene co-expression networks are of biological interest since co-expressed genes are controlled by the same transcriptional regulatory program, functionally related, or members of the same pathway or protein complex.",
-                                                          h5("Section 1.10.32"),
-                                                          "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?"
-                                                          ,
-                                                          tags$head(
-                                                            tags$script(HTML("(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-                                                                             m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-                                                                             })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-                                                                             ga('create', 'UA-113406500-2', 'auto');
-                                                                             ga('send', 'pageview');"))
-                                                                    ),
-                                                          tags$head(tags$script(HTML("document.title = 'TSUNAMI';"))), # rename the title by JS
-                                                          tags$head(tags$script('Shiny.addCustomMessageHandler("myCallbackHandler",
-                                                                                function(typeMessage) {console.log(typeMessage)
-                                                                                if(typeMessage == "tab1"){
-                                                                                console.log("got here");
-                                                                                $("a:contains(1. DataSet)").click();
-                                                                                }
-                                                                                if(typeMessage == "tab2"){
-                                                                                $("a:contains(2. Data Preprocessing)").click();
-                                                                                }
-                                                                                if(typeMessage == "tab3"){
-                                                                                $("a:contains(3. Choose Method)").click();
-                                                                                }
-                                                                                if(typeMessage == "tab4"){
-                                                                                $("a:contains(4. Result)").click();
-                                                                                }
-                                                                                if(typeMessage == "tab5"){
-                                                                                $("a:contains(5. GO Enrichment Analysis)").click();
-                                                                                }
-                                                                                });
-                                                                                
-                                                                                  // disable download at startup.
-                                                                                $(document).ready(function() {
-                                                                                  $("#downloadData1").attr("disabled", "true").attr("onclick", "return false;");
-                                                                                  $("#downloadData2").attr("disabled", "true").attr("onclick", "return false;");
-                                                                                  $("#downloadData3").attr("disabled", "true").attr("onclick", "return false;");
-                                                                                  
-                                                                                  Shiny.addCustomMessageHandler("download_cluster_ready", function(message) {
-                                                                                  $("#downloadData1").removeAttr("disabled").removeAttr("onclick");
-                                                                                  $("#downloadData2").removeAttr("disabled").removeAttr("onclick");
-                                                                                  });
-                                                                                  Shiny.addCustomMessageHandler("download_go_ready", function(message) {
-                                                                                  $("#downloadData3").removeAttr("disabled").removeAttr("onclick");
-                                                                                  });
-                                                                                })
-                                                                      ')),
-                                                          # Horizontal line ----
-                                                          tags$hr(),
-                                                          actionButton("action1", "Proceed")
-                                                        ) # end of mainPanel
+                     navlistPanel(widths = c(2, 10),
+                                  #theme = "style.css",
+                                  #"GeneCoExpression!",
+                                  
+                                  tabPanel("INFO",
+                                           sidebarLayout(
+                                             position = "right",
+                                             sidebarPanel(
+                                               h4("Welcome Panel", style="color: STEELBLUE"),
+                                               tabsetPanel(
+                                                 id = 'overview_tabset',
+                                                 tabPanel("NCBI GEO Data Statistics",
+                                                          br(),
+                                                          # Output: Histogram ----
+                                                          plotlyOutput(outputId = "NCBI_GEO_Sample_Histogram", height = "200px"),
+                                                          br(),
+                                                          br(),
+                                                          plotlyOutput(outputId = "NCBI_GEO_Release_Date", height = "200px")
+                                                 ),
+                                                 tabPanel("Help",
+                                                          "User analytics and statistics"
+                                                 )
+                                               )
+                                             ),
+                                             mainPanel(
+                                               h4("Gene Co-Expression Analysis Site"),
+                                               h5("Gene co-expression network (GCN)"),
+                                               "A gene co-expression network (GCN) is an undirected graph, where each node corresponds to a gene, and a pair of nodes is connected with an edge if there is a significant co-expression relationship between them.[1] Having gene expression profiles of a number of genes for several samples or experimental conditions, a gene co-expression network can be constructed by looking for pairs of genes which show a similar expression pattern across samples, since the transcript levels of two co-expressed genes rise and fall together across samples. Gene co-expression networks are of biological interest since co-expressed genes are controlled by the same transcriptional regulatory program, functionally related, or members of the same pathway or protein complex.",
+                                               h5("Section 1.10.32"),
+                                               "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?"
+                                               ,
+                                               tags$head(
+                                                 tags$script(HTML("(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                                                                  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                                                                  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+                                                                  
+                                                                  ga('create', 'UA-113406500-2', 'auto');
+                                                                  ga('send', 'pageview');"))
+                                                 ),
+                                               tags$head(tags$script(HTML("document.title = 'TSUNAMI';"))), # rename the title by JS
+                                               tags$head(tags$script('Shiny.addCustomMessageHandler("myCallbackHandler",
+                                                                     function(typeMessage) {console.log(typeMessage)
+                                                                     if(typeMessage == "tab1"){
+                                                                     console.log("got here");
+                                                                     $("a:contains(1. DataSet)").click();
+                                                                     }
+                                                                     if(typeMessage == "tab2"){
+                                                                     $("a:contains(2. Data Preprocessing)").click();
+                                                                     }
+                                                                     if(typeMessage == "tab3"){
+                                                                     $("a:contains(3. Choose Method)").click();
+                                                                     }
+                                                                     if(typeMessage == "tab4"){
+                                                                     $("a:contains(4. Result)").click();
+                                                                     }
+                                                                     if(typeMessage == "tab5"){
+                                                                     $("a:contains(5. GO Enrichment Analysis)").click();
+                                                                     }
+                                                                     });
+                                                                     
+                                                                     // disable download at startup.
+                                                                     $(document).ready(function() {
+                                                                     $("#downloadData1").attr("disabled", "true").attr("onclick", "return false;");
+                                                                     $("#downloadData2").attr("disabled", "true").attr("onclick", "return false;");
+                                                                     $("#downloadData3").attr("disabled", "true").attr("onclick", "return false;");
+                                                                     
+                                                                     Shiny.addCustomMessageHandler("download_cluster_ready", function(message) {
+                                                                     $("#downloadData1").removeAttr("disabled").removeAttr("onclick");
+                                                                     $("#downloadData2").removeAttr("disabled").removeAttr("onclick");
+                                                                     });
+                                                                     Shiny.addCustomMessageHandler("download_go_ready", function(message) {
+                                                                     $("#downloadData3").removeAttr("disabled").removeAttr("onclick");
+                                                                     });
+                                                                     })
+                                                                     ')),
+                                               # Horizontal line ----
+                                               tags$hr(),
+                                               actionButton("action1", "Proceed")
+                                               ) # end of mainPanel
                                                  ) # end of sidebarLayout
-                                              ), # end of tabPanel
-                                                 tabPanel("1. DataSet",
-                                                          # App title ----
-                                                          # titlePanel("Choose GSE Data or Upload Your Own Data"),
-                                                          singleton(
-                                                            tags$head(tags$script(src = "message-handler.js"))
-                                                          ),
-                                                          # Sidebar layout with input and output definitions ----
-                                                          sidebarLayout(
-                                                            position = "right",
-
-                                                            # Sidebar panel for inputs ----
-                                                            sidebarPanel(
-                                                              # Input: Select a file ----
-                                                              h5("File uploader"),
-                                                              fileInput("csvfile", "Choose File",
-                                                                        multiple = FALSE,
-                                                                        accept = c("text/csv",
-                                                                                   "text/comma-separated-values,text/plain",
-                                                                                   ".csv")),
-
-                                                              # Include clarifying text ----
-                                                              helpText("Note: Maximum file size allowed for uploading is 300MB."),
-
-                                                              # Input: Checkbox if file has header ----
-                                                              checkboxInput("header", "Header", TRUE),
-
-                                                              fluidRow(
-                                                                # Input: Select separator ----
-                                                                column(6, radioButtons("sep", "Separator",
-                                                                                       choices = c(Comma = ",",
-                                                                                                   Semicolon = ";",
-                                                                                                   Tab = "\t",
-                                                                                                   Space = " "),
-                                                                                       selected = ",")),
-                                                                # Input: Select quotes ----
-                                                                column(6, radioButtons("quote", "Quote",
-                                                                                       choices = c(None = "",
-                                                                                                   "Double Quote" = '"',
-                                                                                                   "Single Quote" = "'"),
-                                                                                       selected = '"'))
-                                                              ),
-                                                              # Horizontal line ----
-                                                              tags$hr(),
-                                                              actionButton("action2", "Confirm when Complete")
-                                                            ),
-
-                                                            # Main panel for displaying outputs ----
-                                                            mainPanel(
-                                                              h5("NCBI GEO Data"),
-                                                              tabsetPanel(
-                                                                id = 'dataset',
-                                                                tabPanel("Series", DT::dataTableOutput("mytable1"))
-                                                              ),
-
-                                                              tags$script("$(document).on('click', '#mytable1 button', function () {
-                                                                          Shiny.onInputChange('dataset_lastClickId',this.id)
-                                                                          });")
+                                                 ), # end of tabPanel
+                                  tabPanel("1. DataSet",
+                                           # App title ----
+                                           # titlePanel("Choose GSE Data or Upload Your Own Data"),
+                                           singleton(
+                                             tags$head(tags$script(src = "message-handler.js"))
+                                           ),
+                                           # Sidebar layout with input and output definitions ----
+                                           sidebarLayout(
+                                             position = "right",
+                                             
+                                             # Sidebar panel for inputs ----
+                                             sidebarPanel(
+                                               # Input: Select a file ----
+                                               h5("File uploader"),
+                                               fileInput("csvfile", "Choose File",
+                                                         multiple = FALSE,
+                                                         accept = c("text/csv",
+                                                                    "text/comma-separated-values,text/plain",
+                                                                    ".csv", ".xlsx", ".xls")),
+                                               
+                                               # Include clarifying text ----
+                                               helpText("Note: Maximum file size allowed for uploading is 300MB. If uploaded data is with .xlsx or .xls, separater can be any value, but please make sure data are located in Sheet1."),
+                                               
+                                               # Input: Checkbox if file has header ----
+                                               checkboxInput("header", "Header", TRUE),
+                                               
+                                               fluidRow(
+                                                 # Input: Select separator ----
+                                                 column(6, radioButtons("sep", "Separator",
+                                                                        choices = c(Comma = ",",
+                                                                                    Semicolon = ";",
+                                                                                    Tab = "\t",
+                                                                                    Space = " "),
+                                                                        selected = ",")),
+                                                 # Input: Select quotes ----
+                                                 column(6, radioButtons("quote", "Quote",
+                                                                        choices = c(None = "",
+                                                                                    "Double Quote" = '"',
+                                                                                    "Single Quote" = "'"),
+                                                                        selected = '"'))
+                                               ),
+                                               # Horizontal line ----
+                                               tags$hr(),
+                                               actionButton("action2", "Confirm when Complete")
+                                             ),
+                                             
+                                             # Main panel for displaying outputs ----
+                                             mainPanel(
+                                               h5("NCBI GEO Data"),
+                                               tabsetPanel(
+                                                 id = 'dataset',
+                                                 tabPanel("Series", DT::dataTableOutput("mytable1"))
+                                               ),
+                                               
+                                               tags$script("$(document).on('click', '#mytable1 button', function () {
+                                                           Shiny.onInputChange('dataset_lastClickId',this.id)
+                                                           });")
                                   )
-                                                            )
-
-                                                            ),
+                                             )
+                                  
+                                             ),
                                   tabPanel("2. Data Preprocessing",
                                            # titlePanel("Verifying & Cleaning Data"),
-
+                                     tabsetPanel(
+                                       tabPanel("Main",
                                            # Sidebar layout with input and output definitions ----
                                            sidebarLayout(
                                              position = "right",
@@ -165,7 +166,7 @@ navbarPage( theme = "style.css",
                                                h5("Choose Preview dimensions"),
                                                helpText("Preview starting from the beginning to specific rows and columns.", style="margin: 0px"),
                                                helpText("Default value when leave it blank: # of rows = 100, # of columns = 10.", style="color: STEELBLUE; font-size: 12px"),
-
+                                               
                                                fluidRow(
                                                  column(6, numericInput("quicklook_row", "# of rows:", 100, step = 1, min = 1)),
                                                  column(6, numericInput("quicklook_col", "# of columns:", 10, step = 1, min = 1))
@@ -175,7 +176,7 @@ navbarPage( theme = "style.css",
                                                h5("Verify starting column and row of expression data"),
                                                helpText("Choose starting column and row for expression data.", style="margin: 0px"),
                                                helpText("Default value when leave them blank: starting row = 1, starting column = 2.", style="color: STEELBLUE; font-size: 12px"),
-
+                                               
                                                fluidRow(
                                                  column(6, numericInput("starting_row", "starting row:", 1, step = 1, min = 1)),
                                                  column(6, numericInput("starting_col", "starting column:", 2, step = 1, min = 1))
@@ -200,10 +201,12 @@ navbarPage( theme = "style.css",
                                                checkboxInput("checkbox_empty", "Remove rows with empty Gene Symbol", TRUE),
                                                checkboxInput("checkbox_duplicated", "Keep only one row with largest mean expression value when Gene Symbol is duplicated", TRUE),
                                                numericInput("max_gene_retain", "Maximum Number of Genes to Retain (i.e. Top N genes sorted by mean expression values among all samples. Leave blank for keeping all data):", 10000, step = 1000, min = 0),
-                                               actionButton("action3", "Continue",
-                                               style="color: WHITE; background-color: DODGERBLUE")
+                                               actionButton("action4", "Perform Advanced Data Analysis"),
+                                               br(),
+                                               br(),
+                                               actionButton("action3", "Continue to Co-Expression Analysis",style="color: WHITE; background-color: DODGERBLUE")
                                              ),
-
+                                             
                                              # Main panel for displaying outputs ----
                                              mainPanel(
                                                h5("Data Summary"),
@@ -223,10 +226,15 @@ navbarPage( theme = "style.css",
                                                )
                                              )
                                            )
+                                       ),
+                                       tabPanel("Advanced",
+                                                "s"
+                                       )
+                                     )
                                   ),
                                   tabPanel("3. Choose Method",
                                            # titlePanel("Select Method for Gene Co-Expression Analysis"),
-
+                                           
                                            tabsetPanel(
                                              id = "MethodList",
                                              tabPanel("lmQCM",
@@ -249,11 +257,11 @@ navbarPage( theme = "style.css",
                                                       fluidRow(
                                                         column(6, numericInput("minClusterSize", "Minimum Cluster Size:", 10, step = 1, width = NULL)),
                                                         column(6, selectizeInput(
-                                                                 'massiveCC', 'Calculation of Correlation Coefficient',
-                                                                 choices = c("pearson", "spearman")))
+                                                          'massiveCC', 'Calculation of Correlation Coefficient',
+                                                          choices = c("pearson", "spearman")))
                                                       ),
-
-
+                                                      
+                                                      
                                                       # Horizontal line ----
                                                       tags$hr(),
                                                       actionButton("action4_lmQCM", "Confirm and Run",
@@ -262,22 +270,22 @@ navbarPage( theme = "style.css",
                                                       br(),
                                                       br(),
                                                       br()
-                                             ),
+                                                               ),
                                              tabPanel("WGCNA",
                                                       h5("WGCNA: An R package for weighted correlation network analysis"),
                                                       helpText("The WGCNA as an analysis method is described in: Zhang B and Horvath S (2005) A General Framework for Weighted Gene Co-Expression Network Analysis, Statistical Applications in Genetics and Molecular Biology: Vol. 4: No. 1, Article 17 PMID: 16646834"),
                                                       helpText("The package implementation is described in the article: Langfelder P, Horvath S (2008) WGCNA: an R package for weighted correlation network analysis. BMC Bioinformatics 2008, 9:559"),
                                                       tags$hr(),
-
+                                                      
                                                       h5("Step 1: Pick Soft Thresholding"),
                                                       helpText("The soft thresholding, is a value used to power the correlation of the genes to that threshold. The assumption on that by raising the correlation to a power will reduce the noise of the correlations in the adjacency matrix. To pick up one threshold use the pickSoftThreshold function, which calculates for each power if the network resembles to a scale-free graph. The power which produce a higher similarity with a scale-free network is the one you should use."),
-
+                                                      
                                                       actionButton("checkPower", "Check Power (β)"),
                                                       uiOutput("WGCNAPowerPlot1and2"),
-
+                                                      
                                                       # Horizontal line ----
                                                       tags$hr(),
-
+                                                      
                                                       h5("Step 2: Choose Parameters"),
                                                       helpText("Choose the power and remaining parameters. Default are as showned."),
                                                       helpText("power (β, Default = 6): The soft thresholding. 6 is large enough so that the resulting network exhibited approximate scale free topology."),
@@ -294,7 +302,7 @@ navbarPage( theme = "style.css",
                                                         column(6, numericInput("verbose", "verbose:", 3, step = 1))
                                                       ),
                                                       numericInput("minModuleSize", "Minimum Module Size:", 10, step = 1, width = NULL),
-
+                                                      
                                                       # Horizontal line ----
                                                       tags$hr(),
                                                       actionButton("action4_WGCNA", "Confirm and Run",
@@ -304,8 +312,8 @@ navbarPage( theme = "style.css",
                                                       br(),
                                                       br()
                                              )
-                                           )
-                                  ),
+                                             )
+                                           ),
                                   tabPanel("4. Result",
                                            mainPanel(
                                              h4("Download Results"),
@@ -321,22 +329,22 @@ navbarPage( theme = "style.css",
                                                       downloadButton('downloadData2', 'Download')
                                                )
                                              ),
-
+                                             
                                              h4("Preview"),
                                              tabsetPanel(
                                                id = 'tabset',
                                                tabPanel("Merged Clusters", DT::dataTableOutput("clusterResult")),
                                                tabPanel("Eigengene Matrix", tableOutput("mytable7"))
                                              ),
-
+                                             
                                              tags$script("$(document).on('click', '#clusterResult button', function () {
                                                          Shiny.onInputChange('go_lastClickId',this.id)
                                                          });")
                                            )
-                                  ),
+                                           ),
                                   tabPanel("5. GO Enrichment Analysis",
                                            mainPanel(
-
+                                             
                                              tabsetPanel(
                                                id = 'tabset_GOEA',
                                                tabPanel("Enrichr",
@@ -349,8 +357,8 @@ navbarPage( theme = "style.css",
                                                         helpText("The combined score is a combination of the p-value and z-score calculated by multiplying the two scores as follows:
                                                                  c = ln(p) * z
                                                                  Where c is the combined score, p is the p-value computed using Fisher's exact test, and z is the z-score computed to assess the deviation from the expected rank. The combined score provides a compromise between both methods and in several benchmarks we show that it reports the best rankings when compared with the other scoring schemes."),
-
-
+                                                        
+                                                        
                                                         tabsetPanel(
                                                           id = 'tabset',
                                                           tabPanel("GO_Biological_Process_2017b",
@@ -382,14 +390,14 @@ navbarPage( theme = "style.css",
                                                           tabPanel("ChEA_2016",
                                                                    DT::dataTableOutput("mytable_Enrichr_14"))
                                                         )
-                                                )#,
+                                                        )#,
                                                #
                                                # tabPanel("Target Gene Symbols",
                                                #          h5("The target gene symbols allow users to copy and use in other GO analysis website."),
                                                #          textAreaInput("textareainput_GOEA", "Gene Symbols", value = "", width = '300px', height = '400px', placeholder = NULL)
                                                # )
-                                             )
-
+                                                        )
+                                             
                                            ),
                                            sidebarPanel(
                                              h5("Download Results & Further Analysis"),
@@ -406,9 +414,9 @@ navbarPage( theme = "style.css",
                                              uiOutput("url_gorilla")
                                            )
                                   )
-                                                 )  #, style='width: 80%'
-
-                     ),
+                                  )  #, style='width: 80%'
+                     
+            ),
             tabPanel("Tutorial",
                      h3("Tutorial", style="color: STEELBLUE; padding-bottom: 20px"),
                      h4("Video Tutorial", style="color: STEELBLUE; padding-bottom: 20px"),
