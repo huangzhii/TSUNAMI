@@ -1,16 +1,3 @@
-# TBI-TSUNAMI: Translational Bioinformatics Tool SUite for Network Analysis and MIning
-An R software for Gene Co-Expression Analysis
-
-
-### Dependencies:<br/>
-* RSconnect<br/>
-* [genefilter](https://bioconductor.org/packages/release/bioc/html/genefilter.html)<br/>
-* [WGCNA](https://labs.genetics.ucla.edu/horvath/CoexpressionNetwork/Rpackages/WGCNA/)<br/>
-* (Deprecated since V8) Rpython:<br/>
-`install.packages("rPython")`
-* [GEOquery](https://bioconductor.org/packages/release/bioc/html/GEOquery.html)
-
-
 # TSUNAMI: Translational Bioinformatics Tool SUite for Network Analysis and MIning
 Gene co-expression network (GCN) mining aims to mine gene modules with highly correlated expression profiles across sample cohorts. It may help to reveal latent molecular interactions, identify novel gene functions, pathways and drug targets, as well as providing disease mechanistic insights on for biological researchers. TSUNAMI is developed to allow biological researchers with no programing background to perform GCN mining themselves. Users can get access to our online service from https://apps.medgen.iupui.edu/rsc/content/22/
 
