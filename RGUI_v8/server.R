@@ -50,7 +50,6 @@ enriched <- NULL # all enrichr results
 final_genes_str <- NULL
 
 function(input, output, session) {
-
   observeEvent(input$action1,{
       print('tab1')
       session$sendCustomMessage("myCallbackHandler", "tab1")
@@ -1053,8 +1052,10 @@ observeEvent(input$dataset_lastClickId,{
   #   |
   #   |
   #   +--------------------------------
-  output$url_toppgene <- renderUI({tagList("ToppGene Suite:", a("ToppGene", href="https://toppgene.cchmc.org/enrichment.jsp"))})
-  output$url_david <- renderUI({tagList("DAVID Bioinformatics Resources 6.8:", a("DAVID", href="https://david.ncifcrf.gov/tools.jsp"))})
-  output$url_enrichr <- renderUI({tagList("Enrichr:", a("Enrichr", href="http://amp.pharm.mssm.edu/Enrichr/"))})
+  
+  output$url_toppgene <- renderUI({tagList("", a("ToppGene", href="https://toppgene.cchmc.org/enrichment.jsp"))})
+  output$url_david <- renderUI({tagList("", a("DAVID", href="https://david.ncifcrf.gov/tools.jsp"))})
+  output$url_enrichr <- renderUI({tagList("", a("Enrichr", href="http://amp.pharm.mssm.edu/Enrichr/"))})
+  output$url_GEO <- renderUI({tagList("", a("Gene Expression Omnibus", href="https://www.ncbi.nlm.nih.gov/geo/"))})
 
 }

@@ -19,29 +19,49 @@ navbarPage( theme = "style.css",
                                            sidebarLayout(
                                              position = "right",
                                              sidebarPanel(
-                                               h4("Welcome Panel", style="color: STEELBLUE"),
+                                               h4("Overview", style="color: STEELBLUE"),
                                                tabsetPanel(
                                                  id = 'overview_tabset',
-                                                 tabPanel("NCBI GEO Data Statistics",
+                                                 tabPanel("NCBI GEO Database",
+                                                          uiOutput("url_GEO"),
+                                                          helpText("GEO is a public functional genomics data repository supporting MIAME-compliant data submissions. Numerous array- and sequence-based data are available for downstream analysis."),
+                                                          
+                                                          h5("Statistics", style="color: STEELBLUE"),
                                                           br(),
                                                           # Output: Histogram ----
                                                           plotlyOutput(outputId = "NCBI_GEO_Sample_Histogram", height = "200px"),
                                                           br(),
                                                           br(),
                                                           plotlyOutput(outputId = "NCBI_GEO_Release_Date", height = "200px")
-                                                 ),
-                                                 tabPanel("Help",
-                                                          "User analytics and statistics"
                                                  )
                                                )
                                              ),
                                              mainPanel(
-                                               h4("Gene Co-Expression Analysis Site"),
-                                               h5("Gene co-expression network (GCN)"),
+                                               h2("TBI-TSUNAMI:", style="color: STEELBLUE; font-size: 22px"),
+                                               h2("Translational BIoinformatics Tool SUite for Network Analysis and MIning", style="color: STEELBLUE; font-size: 20px; margin: 0px"),
+                                               
+                                               h5("Introduction", style="color: STEELBLUE; padding-top: 10px"),
+                                               "Recent technological advances in gene co-expression module discovery have allowed researcher to explorer highly correlated genes among groups. Thus TBI-TSUNAMI is developed to cater such needs. It has several highlight features and advantages:",
+                                               
+                                               tags$ul(
+                                                 tags$li("Easy-access and real-time performance based on web server;"),
+                                                 tags$li("Supporting multiple data formats and data preprocessing interface is bundled together;"),
+                                                 tags$li("Multiple co-expression analysis interfaces available with a high flexibility of variable selection;"),
+                                                 tags$li("Integrated downstream Enrichr enrichment analysis;"),
+                                                 tags$li("All results are downloadable with multiple formats (CSV, txt, etc.) are supported.")
+                                               ),
+                                               "All of which bring convenience to researchers for multiple purposes.",
+                                               h5("Pipeline Flowchart", style="color: STEELBLUE; padding-top: 10px"),
+                                               tags$div(
+                                                 tags$img(src='images/flowchart.png',
+                                                          height="500",
+                                                          alt="TBI-TSUNAMI Flowchart", class="center"),
+                                                 style="text-align: center; padding: 20px"
+                                               ),
+                                               "Figure above: TBI-TSUNAMI in flowchart. Blue rectangles represent operations; Transparent rounded rectangles represent optional processes; Pink rounded rectangles represent Download processes; Black arrows represent regular procedure; Dashed orange arrows represent optional processes.",
+                                               h5("Definition of Co-expression", style="color: STEELBLUE; padding-top: 10px"),
                                                "A gene co-expression network (GCN) is an undirected graph, where each node corresponds to a gene, and a pair of nodes is connected with an edge if there is a significant co-expression relationship between them.[1] Having gene expression profiles of a number of genes for several samples or experimental conditions, a gene co-expression network can be constructed by looking for pairs of genes which show a similar expression pattern across samples, since the transcript levels of two co-expressed genes rise and fall together across samples. Gene co-expression networks are of biological interest since co-expressed genes are controlled by the same transcriptional regulatory program, functionally related, or members of the same pathway or protein complex.",
-                                               h5("Section 1.10.32"),
-                                               "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?"
-                                               ,
+                                               
                                                tags$head(
                                                  tags$script(HTML("(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
                                                                   m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
@@ -109,7 +129,7 @@ navbarPage( theme = "style.css",
                                              # Sidebar panel for inputs ----
                                              sidebarPanel(
                                                # Input: Select a file ----
-                                               h5("File uploader"),
+                                               h4("File Uploader", style="color: STEELBLUE"),
                                                fileInput("csvfile", "Choose File",
                                                          multiple = FALSE,
                                                          accept = c("text/csv",
@@ -144,7 +164,7 @@ navbarPage( theme = "style.css",
                                              
                                              # Main panel for displaying outputs ----
                                              mainPanel(
-                                               h5("NCBI GEO Data"),
+                                               h5("NCBI GEO Database"),
                                                tabsetPanel(
                                                  id = 'dataset',
                                                  tabPanel("Series", DT::dataTableOutput("mytable1"))
@@ -351,7 +371,7 @@ navbarPage( theme = "style.css",
                                            ),
                                   tabPanel("4. Result",
                                            mainPanel(
-                                             h4("Download Results"),
+                                             h4("Download Results", style="color: STEELBLUE; padding-top: 10px"),
                                              fluidRow(
                                                column(6,
                                                       radioButtons("filetype1", "Merged Clusters with Gene Symbol:",
@@ -365,7 +385,7 @@ navbarPage( theme = "style.css",
                                                )
                                              ),
                                              
-                                             h4("Preview"),
+                                             h4("Preview", style="color: STEELBLUE; padding-top: 10px"),
                                              tabsetPanel(
                                                id = 'tabset',
                                                tabPanel("Merged Clusters", DT::dataTableOutput("clusterResult")),
@@ -383,7 +403,7 @@ navbarPage( theme = "style.css",
                                              tabsetPanel(
                                                id = 'tabset_GOEA',
                                                tabPanel("Enrichr",
-                                                        h4("Enrichment Analysis - by Enrichr"),
+                                                        h4("Enrichment Analysis - by Enrichr", style="color: STEELBLUE"),
                                                         h5("Adjusted P-value (q-value):"),
                                                         helpText("The q-value is an adjusted p-value using the Benjamini-Hochberg method for correction for multiple hypotheses testing. Users can read more about this method, and why it is needed here:"),
                                                         helpText("Yoav Benjamini and Yosef Hochberg. Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing. Journal of the Royal Statistical Society. Series B (Methodological)
@@ -435,7 +455,7 @@ navbarPage( theme = "style.css",
                                              
                                            ),
                                            sidebarPanel(
-                                             h5("Download Results & Further Analysis"),
+                                             h4("Download Results & Further Analysis", style="color: STEELBLUE"),
                                              radioButtons("filetype3", "Choose file type:",
                                                           choices = c("csv", "txt")),
                                              downloadButton('downloadData3', 'Download'),
@@ -473,11 +493,16 @@ navbarPage( theme = "style.css",
             ),
             tabPanel("News",
                       h3("News", style="color: STEELBLUE; padding-bottom: 20px"),
-                      h4("March 16, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
-                      tags$ul(
-                        tags$li("Renamed our website as TBI-TSUNAMI."),
-                        tags$li("Various of bugs are fixed.")
-                      ),
+                       h4("March 20, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
+                       tags$ul(
+                         tags$li("R package 'lmQCM' was released to CRAN."),
+                         tags$li("Create flowchart.")
+                       ),
+                       h4("March 16, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
+                       tags$ul(
+                         tags$li("Renamed our website as TBI-TSUNAMI."),
+                         tags$li("Various of bugs are fixed.")
+                       ),
                       h4("March 02, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
                       tags$ul(
                         tags$li("First prototype platform has been founded.")
@@ -486,13 +511,17 @@ navbarPage( theme = "style.css",
             tabPanel("About",
                       h3("About Us", style="color: STEELBLUE; padding-bottom: 20px"),
                       "The TBI-TSUNAMI (Translational Bioinformatics Tool Suite for Network Analysis and Mining) was developed at Indiana University School of Medicine.",
-                      
-                      tags$div(
-                        tags$img(src='images/tbi_tsunami_logo.png',
-                                 width="150",
-                                 alt="TBI-TSUNAMI", class="center"),
-                        style="text-align: center; padding: 20px"
-                      ),
+                     
+                     tags$div(
+                       tags$img(src='images/IUSM2.png',
+                                height="100",
+                                alt="TBI-TSUNAMI", class="center", style="padding: 30px"),
+                       tags$img(src='images/regenstrief.png',
+                                height="100",
+                                alt="TBI-TSUNAMI", class="center", style="padding: 30px"),
+                       style="text-align: center; padding: 20px"
+                     ),
+                     
                       h4("Development Team", style="color: STEELBLUE; padding-bottom: 20px"),
                       h5("Prof. Kun Huang's Laboratory", style="color: STEELBLUE"),
                       tags$ul(
