@@ -37,18 +37,19 @@ navbarPage( theme = "style.css",
                                                )
                                              ),
                                              mainPanel(
-                                               h2("TBI-TSUNAMI:", style="color: STEELBLUE; font-size: 22px"),
-                                               h2("Translational BIoinformatics Tool SUite for Network Analysis and MIning", style="color: STEELBLUE; font-size: 20px; margin: 0px"),
+                                               h2("TSUNAMI:", style="color: STEELBLUE; font-size: 22px"),
+                                               h2("Translational Bioinformatics Tool SUite for Network Analysis and MIning", style="color: STEELBLUE; font-size: 20px; margin: 0px"),
                                                
                                                h5("Introduction", style="color: STEELBLUE; padding-top: 10px"),
-                                               "Recent technological advances in gene co-expression module discovery have allowed researcher to explorer highly correlated genes among groups. Thus TBI-TSUNAMI is developed to cater such needs. It has several highlight features and advantages:",
+                                               "Gene co-expression network (GCN) mining aims to mine gene modules with highly correlated expression profiles across sample cohorts. It may help to reveal latent molecular interactions, identify novel gene functions, pathways and drug targets, as well as providing disease mechanistic insights on for biological researchers. TSUNAMI is developed to allow biological researchers with no programing background to perform GCN mining themselves. It has several highlight features and advantages:",
                                                
                                                tags$ul(
-                                                 tags$li("Easy-access and real-time performance based on web server;"),
-                                                 tags$li("Supporting multiple data formats and data preprocessing interface is bundled together;"),
-                                                 tags$li("Multiple co-expression analysis interfaces available with a high flexibility of variable selection;"),
-                                                 tags$li("Integrated downstream Enrichr enrichment analysis;"),
-                                                 tags$li("All results are downloadable with multiple formats (CSV, txt, etc.) are supported.")
+                                                 tags$li("User friendly interface, easy-access and real-time co-expression network mining based on web server;"),
+                                                 tags$li("Direct access and search of GEO database as well as user-input expression matrix for network mining;"),
+                                                 tags$li("Support multiple data formats and data preprocessing interface is bundled together;"),
+                                                 tags$li("Multiple co-expression analysis tools available with a high flexibility of variable selection;"),
+                                                 tags$li("Integrated downstream Enrichr GO enrichment analysis and link to other GO tools as well;"),
+                                                 tags$li("All results can be downloaded with multiple formats (CSV, txt, etc.).")
                                                ),
                                                "All of which bring convenience to researchers for multiple purposes.",
                                                h5("Pipeline Flowchart", style="color: STEELBLUE; padding-top: 10px"),
