@@ -1,4 +1,4 @@
-# Zhi Huang 03/16/2018
+# Zhi Huang 03/21/2018
 library(plotly)
 navbarPage( theme = "style.css",
 
@@ -7,7 +7,7 @@ navbarPage( theme = "style.css",
             #               width = 20,
             #               style = "margin:0px 0px;"), "BioInfo Suite"),
 
-            title=div(img(src="images/tbi_tsunami_logo.png",
+            title=div(img(src="images/tsunami_logo.png",
                           height = 28,
                           style = "margin:0px 0px; padding-bottom: 5px")),
             tabPanel("Analysis",
@@ -54,12 +54,12 @@ navbarPage( theme = "style.css",
                                                "All of which bring convenience to researchers for multiple purposes.",
                                                h5("Pipeline Flowchart", style="color: STEELBLUE; padding-top: 10px"),
                                                tags$div(
-                                                 tags$img(src='images/flowchart.png',
-                                                          height="500",
-                                                          alt="TBI-TSUNAMI Flowchart", class="center"),
+                                                 tags$img(src='images/flowchart_concise.png',
+                                                          height="360",
+                                                          alt="TSUNAMI Flowchart", class="center"),
                                                  style="text-align: center; padding: 20px"
                                                ),
-                                               "Figure above: TBI-TSUNAMI in flowchart. Blue rectangles represent operations; Transparent rounded rectangles represent optional processes; Pink rounded rectangles represent Download processes; Black arrows represent regular procedure; Dashed orange arrows represent optional processes.",
+                                               "Figure above: TSUNAMI in flowchart. Blue rectangles represent operations; Transparent rounded rectangles represent optional processes; Pink rounded rectangles represent Download processes; Black arrows represent regular procedure; Dashed orange arrows represent optional processes.",
                                                h5("Definition of Co-expression", style="color: STEELBLUE; padding-top: 10px"),
                                                "A gene co-expression network (GCN) is an undirected graph, where each node corresponds to a gene, and a pair of nodes is connected with an edge if there is a significant co-expression relationship between them.[1] Having gene expression profiles of a number of genes for several samples or experimental conditions, a gene co-expression network can be constructed by looking for pairs of genes which show a similar expression pattern across samples, since the transcript levels of two co-expressed genes rise and fall together across samples. Gene co-expression networks are of biological interest since co-expressed genes are controlled by the same transcriptional regulatory program, functionally related, or members of the same pathway or protein complex.",
                                                
@@ -487,8 +487,8 @@ navbarPage( theme = "style.css",
             tabPanel("FAQ",
                      h3("Frequently Asked Questions", style="color: STEELBLUE; padding-bottom: 20px"),
                      h4("General Questions", style="color: STEELBLUE; padding-bottom: 20px"),
-                     h5("What is the TBI-TSUNAMI website?", style="color: STEELBLUE"),
-                     p("The TBI-TSUNAMI (Translational Bioinformatics Tool Suite for Network Analysis and Mining) was developed at Indiana University School of Medicine."),
+                     h5("What is the TSUNAMI website?", style="color: STEELBLUE"),
+                     p("The TSUNAMI (Translational Bioinformatics Tool Suite for Network Analysis and Mining) was developed at Indiana University School of Medicine."),
                      h5("How do I get started?", style="color: STEELBLUE"),
                      p("Check our tutorial.")
             ),
@@ -501,7 +501,7 @@ navbarPage( theme = "style.css",
                        ),
                        h4("March 16, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
                        tags$ul(
-                         tags$li("Renamed our website as TBI-TSUNAMI."),
+                         tags$li("Renamed our website as TSUNAMI."),
                          tags$li("Various of bugs are fixed.")
                        ),
                       h4("March 02, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
@@ -511,15 +511,15 @@ navbarPage( theme = "style.css",
             ),
             tabPanel("About",
                       h3("About Us", style="color: STEELBLUE; padding-bottom: 20px"),
-                      "The TBI-TSUNAMI (Translational Bioinformatics Tool Suite for Network Analysis and Mining) was developed at Indiana University School of Medicine.",
+                      "The TSUNAMI (Translational Bioinformatics Tool Suite for Network Analysis and Mining) was developed at Indiana University School of Medicine.",
                      
                      tags$div(
                        tags$img(src='images/IUSM2.png',
                                 height="100",
-                                alt="TBI-TSUNAMI", class="center", style="padding: 30px"),
+                                alt="TSUNAMI", class="center", style="padding: 30px"),
                        tags$img(src='images/regenstrief.png',
                                 height="100",
-                                alt="TBI-TSUNAMI", class="center", style="padding: 30px"),
+                                alt="TSUNAMI", class="center", style="padding: 30px"),
                        style="text-align: center; padding: 20px"
                      ),
                      
@@ -533,7 +533,7 @@ navbarPage( theme = "style.css",
                       ),
                       h4("Publications", style="color: STEELBLUE; padding-bottom: 20px"),
                       "Nice paper",
-                      h4("Funding for the TBI-TSUNAMI is or has been provided by:", style="color: STEELBLUE; padding-bottom: 20px"),
+                      h4("Funding for the TSUNAMI is or has been provided by:", style="color: STEELBLUE; padding-bottom: 20px"),
                       tags$ul(
                         tags$li("Good funding"),
                         tags$li("Nice funding")
