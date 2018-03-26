@@ -1,5 +1,5 @@
 # TSUNAMI: Translational Bioinformatics Tool SUite for Network Analysis and MIning
-Gene co-expression network (GCN) mining aims to mine gene modules with highly correlated expression profiles across sample cohorts. It may help to reveal latent molecular interactions, identify novel gene functions, pathways and drug targets, as well as providing disease mechanistic insights on for biological researchers. TSUNAMI is developed to allow biological researchers with no programing background to perform GCN mining themselves. Users can get access to our online service from https://apps.medgen.iupui.edu/rsc/content/22/
+Gene co-expression network (GCN) mining aims to mine gene modules with highly correlated expression profiles across sample cohorts. It may help to reveal latent molecular interactions, identify novel gene functions, pathways and drug targets, as well as providing disease mechanistic insights on for biological researchers. TSUNAMI is developed to allow biological researchers with no programing background to perform GCN mining themselves. Users can get access to our online service from https://apps.medgen.iupui.edu/rsc/tsunami/
 
 ## Features
 It has several highlight features and advantages:
@@ -38,6 +38,6 @@ install.packages(c("shiny", "rsconnect", "plyr", "data.table", "lmQCM", "WGCNA",
 source("https://bioconductor.org/biocLite.R")
 biocLite(c("genefilter", "Biobase", "AnnotationDbi", "impute", "GO.db", "preprocessCore", "GEOquery"))
 ```
-* Download the source code for annoPeak from GitHub https://github.com/huangzhii/TSUNAMI/.
+* Download the source code for TSUNAMI from GitHub https://github.com/huangzhii/TSUNAMI/.
 
-Open ui.R from the download TSUNAMI folder. Click the button named "Run App" on the upper right corner of code editing window, an web page will be automatically invoked and the annoPeak application is ready to use. It may take a few minutes to load the required packages. 
+Open ui.R from the download TSUNAMI folder. Click the button named "Run App" on the upper right corner of code editing window, an web page will be automatically invoked and the TSUNAMI application is ready to use. It may take a few minutes to load the required packages. 
