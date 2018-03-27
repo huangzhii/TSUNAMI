@@ -124,7 +124,7 @@ observeEvent(input$dataset_lastClickId,{
     div(class = "busy",
         p("We are currently loading your selected file from NCBI GEO Database ..."),
         img(src="images/loading.gif"),
-        style = "margin: auto"
+        style = "margin: auto; text-align: center"
     )
   ))
   t <- try(gset <- getGEO(myGSE, GSEMatrix=TRUE, AnnotGPL=FALSE)) #AnnotGPL default is FALSE
@@ -207,7 +207,7 @@ observeEvent(input$dataset_lastClickId,{
           div(class = "busy",
               p("Intepreting ..."),
               img(src="images/loading.gif"),
-              style = "margin: auto"
+              style = "margin: auto; text-align: center"
           )
         ))
         fileExtension <- getFileNameExtension(input$csvfile$datapath)
@@ -288,7 +288,7 @@ observeEvent(input$dataset_lastClickId,{
         title = "Operation Failed", footer = modalButton("OK"), easyClose = TRUE,
         div(class = "busy",
             p("You have not selected any data. Please go to previous section."),
-            style = "margin: auto"
+            style = "margin: auto; text-align: center"
         )
       ))
       return()
@@ -298,7 +298,7 @@ observeEvent(input$dataset_lastClickId,{
       div(class = "busy",
           p("We are currently converting probe ID to Gene Symbol..."),
           img(src="images/loading.gif"),
-          style = "margin: auto"
+          style = "margin: auto; text-align: center"
       )
     ))
     platform_name <- gsub(" ", "", input$platform_text, fixed = TRUE)
@@ -383,7 +383,7 @@ observeEvent(input$dataset_lastClickId,{
           title = "Operation Failed", footer = modalButton("OK"), easyClose = TRUE,
           div(class = "busy",
               p("You have not selected any data. Please go to previous section."),
-              style = "margin: auto"
+              style = "margin: auto; text-align: center"
           )
         ))
         return()
@@ -395,7 +395,7 @@ observeEvent(input$dataset_lastClickId,{
         div(class = "busy",
             p("Cleaning ..."),
             img(src="images/loading.gif"),
-            style = "margin: auto"
+            style = "margin: auto; text-align: center"
         )
       ))
       print(dim(data))
@@ -562,7 +562,7 @@ observeEvent(input$dataset_lastClickId,{
         title = "Operation Failed", footer = modalButton("OK"), easyClose = TRUE,
         div(class = "busy",
             p("You have not selected any data. Please go to previous section."),
-            style = "margin: auto"
+            style = "margin: auto; text-align: center"
         )
       ))
       return()
@@ -573,7 +573,7 @@ observeEvent(input$dataset_lastClickId,{
         div(class = "busy",
             p("Calculating ..."),
             img(src="images/loading.gif"),
-            style = "margin: auto"
+            style = "margin: auto; text-align: center"
         )
       ))
       
@@ -649,7 +649,7 @@ observeEvent(input$dataset_lastClickId,{
         title = "Operation Failed", footer = modalButton("OK"), easyClose = TRUE,
         div(class = "busy",
             p("You have not selected any data. Please go to previous section."),
-            style = "margin: auto"
+            style = "margin: auto; text-align: center"
         )
       ))
       return()
@@ -661,7 +661,7 @@ observeEvent(input$dataset_lastClickId,{
         div(class = "busy",
             p("Calculating ..."),
             img(src="images/loading.gif"),
-            style = "margin: auto"
+            style = "margin: auto; text-align: center"
         )
       ))
 
@@ -720,7 +720,7 @@ observeEvent(input$dataset_lastClickId,{
           title = "Operation Failed", footer = modalButton("OK"), easyClose = TRUE,
           div(class = "busy",
               p("You have not selected any data. Please go to previous section."),
-              style = "margin: auto"
+              style = "margin: auto; text-align: center"
           )
         ))
         return()
@@ -731,7 +731,7 @@ observeEvent(input$dataset_lastClickId,{
         div(class = "busy",
             p("Calculating ..."),
             img(src="images/loading.gif"),
-            style = "margin: auto"
+            style = "margin: auto; text-align: center"
         )
       ))
 
@@ -869,7 +869,7 @@ observeEvent(input$dataset_lastClickId,{
         title = "Operation Failed", footer = modalButton("OK"), easyClose = TRUE,
         div(class = "busy",
             p("You have not selected any data. Please go to previous section."),
-            style = "margin: auto"
+            style = "margin: auto; text-align: center"
         )
       ))
       return()
@@ -893,7 +893,7 @@ observeEvent(input$dataset_lastClickId,{
                                                                                           options = list(paging = F, searching = T, dom='t',ordering=T), extensions = 'Responsive',
                                                                                           rownames = T) #%>% formatRound(colnames(dbres)[3:dim(dbres)[2]], digits=8)
       })
-    }, 1:8)
+    }, 1:length(enrichr_dbs))
     removeModal()
     print('tab5')
     session$sendCustomMessage("download_go_ready","-")
@@ -910,7 +910,7 @@ observeEvent(input$dataset_lastClickId,{
         div(class = "busy",
             p("Loading ..."),
             img(src="images/loading.gif"),
-            style = "margin: auto"
+            style = "margin: auto; text-align: center"
         )
       ))
       print("row_of_final_cluster:")
@@ -931,11 +931,11 @@ observeEvent(input$dataset_lastClickId,{
       Map(function(id) {
         dbres = enriched[[enrichr_dbs[id]]]
         dbres = dbres[ , -which(names(dbres) %in% c("Old.P.value","	Old.Adjusted.P.value"))]
-        output[[paste("mytable_Enrichr",id,sep="_")]] <- DT::renderDataTable({DT::datatable(dbres, selection="none", escape=FALSE, pageLength = 100,
-                                                                                            options = list(paging = F, searching = T, dom='t',ordering=T), extensions = 'Responsive',
+        output[[paste("mytable_Enrichr",id,sep="_")]] <- DT::renderDataTable({DT::datatable(dbres, selection="none", escape=FALSE,
+                                                                                            options = list(paging = T, pageLength = 100, searching = T, dom='t',ordering=T), extensions = 'Responsive',
                                                                                             rownames = T) #%>% formatRound(colnames(dbres)[3:dim(dbres)[2]], digits=8)
         })
-      }, 1:8)
+      }, 1:length(enrichr_dbs))
       removeModal()
       print('tab5')
       session$sendCustomMessage("download_go_ready","-")
