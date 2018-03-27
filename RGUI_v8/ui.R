@@ -23,7 +23,7 @@ navbarPage( theme = "style.css",
                                                tabsetPanel(
                                                  id = 'overview_tabset',
                                                  tabPanel("NCBI GEO Database",
-                                                          uiOutput("url_GEO"),
+                                                          h5(a("Gene Expression Omnibus", href="https://www.ncbi.nlm.nih.gov/geo/", target="_blank")),
                                                           helpText("GEO is a public functional genomics data repository supporting MIAME-compliant data submissions. Numerous array- and sequence-based data are available for downstream analysis."),
                                                           
                                                           h5("Statistics", style="color: STEELBLUE"),
@@ -54,14 +54,12 @@ navbarPage( theme = "style.css",
                                                "All of which bring convenience to researchers for multiple purposes.",
                                                h5("Pipeline Flowchart", style="color: STEELBLUE; padding-top: 10px"),
                                                tags$div(
-                                                 tags$img(src='images/flowchart_concise.png',
-                                                          height="360",
+                                                 tags$img(src='images/flowchart_concise_flat3.png',
+                                                          width="600",
                                                           alt="TSUNAMI Flowchart", class="center"),
                                                  style="text-align: center; padding: 20px"
                                                ),
-                                               "Figure above: TSUNAMI in flowchart. Blue rectangles represent operations; Transparent rounded rectangles represent optional processes; Pink rounded rectangles represent Download processes; Black arrows represent regular procedure; Dashed orange arrows represent optional processes.",
-                                               h5("Definition of Co-expression", style="color: STEELBLUE; padding-top: 10px"),
-                                               "A gene co-expression network (GCN) is an undirected graph, where each node corresponds to a gene, and a pair of nodes is connected with an edge if there is a significant co-expression relationship between them.[1] Having gene expression profiles of a number of genes for several samples or experimental conditions, a gene co-expression network can be constructed by looking for pairs of genes which show a similar expression pattern across samples, since the transcript levels of two co-expressed genes rise and fall together across samples. Gene co-expression networks are of biological interest since co-expressed genes are controlled by the same transcriptional regulatory program, functionally related, or members of the same pathway or protein complex.",
+                                               "Figure above: TSUNAMI in flowchart. Blue blocks represent operations; Pink rounded rectangles represent Download processes; Dashed arrow means optional process.",
                                                
                                                tags$head(
                                                  tags$script(HTML("(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -113,7 +111,10 @@ navbarPage( theme = "style.css",
                                                                      ')),
                                                # Horizontal line ----
                                                tags$hr(),
-                                               actionButton("action1", "Proceed")
+                                               actionButton("action1", "Proceed"),
+                                               br(),
+                                               br(),
+                                               br()
                                                ) # end of mainPanel
                                                  ) # end of sidebarLayout
                                                  ), # end of tabPanel
@@ -275,8 +276,9 @@ navbarPage( theme = "style.css",
                                            tabsetPanel(
                                              id = "MethodList",
                                              tabPanel("lmQCM",
-                                                      h5("lmQCM: An Algorithm for Detecting Weak Quasi-Cliques in Weighted Graph with Applications in Gene Co-Expression Module Discovery in Cancers"),
-                                                      helpText("Zhang, Jie, and Kun Huang. \"Normalized ImQCM: An Algorithm for Detecting Weak Quasi-Cliques in Weighted Graph with Applications in Gene Co-Expression Module Discovery in Cancers.\" Cancer informatics 13 (2014): CIN-S14021."),
+                                                      h4("lmQCM: An Algorithm for Detecting Weak Quasi-Cliques in Weighted Graph", style="color: STEELBLUE; padding-top: 10px"),
+                                                      helpText("If you benefit from the results, please cite:"),
+                                                      a("Zhang, Jie, and Kun Huang. \"Normalized ImQCM: An Algorithm for Detecting Weak Quasi-Cliques in Weighted Graph with Applications in Gene Co-Expression Module Discovery in Cancers.\" Cancer informatics 13 (2014): CIN-S14021.",href="http://journals.sagepub.com/doi/abs/10.4137/CIN.S14021",target="_blank"),
                                                       tags$hr(),
                                                       h5("Parameter Choosing"),
                                                       helpText("Gamma (γ) (Default = 0.55) controls the threshold for the initiation of each new module, lambda (λ) (Default = 1) and t (Default = 1) define the adaptive
@@ -309,9 +311,10 @@ navbarPage( theme = "style.css",
                                                       br()
                                                                ),
                                              tabPanel("WGCNA",
-                                                      h5("WGCNA: An R package for weighted correlation network analysis"),
-                                                      helpText("The WGCNA as an analysis method is described in: Zhang B and Horvath S (2005) A General Framework for Weighted Gene Co-Expression Network Analysis, Statistical Applications in Genetics and Molecular Biology: Vol. 4: No. 1, Article 17 PMID: 16646834"),
-                                                      helpText("The package implementation is described in the article: Langfelder P, Horvath S (2008) WGCNA: an R package for weighted correlation network analysis. BMC Bioinformatics 2008, 9:559"),
+                                                      h4("WGCNA: An R package for weighted correlation network analysis", style="color: STEELBLUE; padding-top: 10px"),
+                                                      helpText("If you benefit from the results, please cite:"),
+                                                      helpText("The WGCNA as an analysis method is described in:",a("Zhang B and Horvath S (2005) A General Framework for Weighted Gene Co-Expression Network Analysis, Statistical Applications in Genetics and Molecular Biology: Vol. 4: No. 1, Article 17 PMID: 16646834",href="https://econpapers.repec.org/article/bpjsagmbi/v_3a4_3ay_3a2005_3ai_3a1_3an_3a17.htm", target="_blank")),
+                                                      helpText("The package implementation is described in the article:", a("Langfelder P, Horvath S (2008) WGCNA: an R package for weighted correlation network analysis. BMC Bioinformatics 2008, 9:559",href="https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-9-559", target="_blank")),
                                                       tags$hr(),
                                                       
                                                       h5("Step 1: Pick Soft Thresholding"),
@@ -407,8 +410,8 @@ navbarPage( theme = "style.css",
                                                         h4("Enrichment Analysis - by Enrichr", style="color: STEELBLUE"),
                                                         h5("Adjusted P-value (q-value):"),
                                                         helpText("The q-value is an adjusted p-value using the Benjamini-Hochberg method for correction for multiple hypotheses testing. Users can read more about this method, and why it is needed here:"),
-                                                        helpText("Yoav Benjamini and Yosef Hochberg. Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing. Journal of the Royal Statistical Society. Series B (Methodological)
-                                                                 Vol. 57, No. 1 (1995), pp. 289-300"),
+                                                        a("Yoav Benjamini and Yosef Hochberg. Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing. Journal of the Royal Statistical Society. Series B (Methodological)
+                                                                 Vol. 57, No. 1 (1995), pp. 289-300", href="http://www.jstor.org/stable/2346101", target="_blank"),
                                                         h5("Relationship between P-value, Z-score, and combined score:"),
                                                         helpText("The combined score is a combination of the p-value and z-score calculated by multiplying the two scores as follows:
                                                                  c = ln(p) * z
@@ -464,10 +467,11 @@ navbarPage( theme = "style.css",
                                              br(),
                                              textAreaInput("textareainput_GOEA", "Gene Symbols", value = "", width = 'auto', height = '300px', placeholder = NULL),
                                              helpText("The target gene symbols allow users to copy and use in other GO analysis website."),
-                                             uiOutput("url_toppgene"),
-                                             uiOutput("url_david"),
-                                             uiOutput("url_enrichr"),
-                                             uiOutput("url_gorilla")
+                                             
+                                             h5(a("ToppGene", href="https://toppgene.cchmc.org/enrichment.jsp", target="_blank")),
+                                             h5(a("DAVID", href="https://david.ncifcrf.gov/tools.jsp", target="_blank")),
+                                             h5(a("Enrichr", href="http://amp.pharm.mssm.edu/Enrichr/", target="_blank"))
+                                             
                                            )
                                   )
                                   )  #, style='width: 80%'
@@ -475,14 +479,33 @@ navbarPage( theme = "style.css",
             ),
             tabPanel("Tutorial",
                      h3("Tutorial", style="color: STEELBLUE; padding-bottom: 20px"),
-                     h4("Video Tutorial", style="color: STEELBLUE; padding-bottom: 20px"),
-                     tags$div(
-                       HTML('<iframe width="720" height="480" src="https://www.youtube.com/embed/rRIRMW_RRS4" frameborder="0" allowfullscreen></iframe>'),
-                       style="text-align: center; padding: 20px"
+                     fluidRow(
+                       column(6,
+                         h4("Google Slides", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
+                         tags$div(
+                            HTML("<iframe src=\"https://docs.google.com/presentation/d/e/2PACX-1vSv-c_P5P2dFCo9oP67JeBWRIrjZkxLgEkytC6edxUps7l4udMdWHqZx9kiltOwlIoWyWgJH-yDPqJY/embed?start=false&loop=false&delayms=3000\" frameborder=\"0\" width=\"480\" height=\"389\" allowfullscreen=\"true\" mozallowfullscreen=\"true\" webkitallowfullscreen=\"true\"></iframe>"),
+                            style="text-align: center; padding: 20px"
+                         )
+                       ),
+                       column(6,
+                          h4("Video Tutorial", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
+                          tags$div(
+                            HTML('<iframe width="480" height="360" src="https://www.youtube.com/embed/d3eDKqm5yA0" frameborder="0" allowfullscreen></iframe>'),
+                            style="text-align: center; padding: 20px"
+                          )
+                       )
                      ),
-                     h4("Google Slides", style="color: STEELBLUE; padding-bottom: 20px"),
-                     h4("Github", style="color: STEELBLUE; padding-bottom: 20px"),
-                     h4("Report Bugs", style="color: STEELBLUE; padding-bottom: 20px")
+                    h4("Github", style="color: STEELBLUE; padding-bottom: 20px"),
+                    tags$div(
+                      a("https://github.com/huangzhii/TSUNAMI", href="https://github.com/huangzhii/TSUNAMI"),
+                      style="padding: 0px"
+                    ),
+                     h4("Report Bugs", style="color: STEELBLUE; padding-bottom: 20px"),
+                    
+                    tags$div(
+                      a("https://github.com/huangzhii/TSUNAMI/issues/", href="https://github.com/huangzhii/TSUNAMI/issues/"),
+                      style="padding: 0px"
+                    )
             ),
             tabPanel("FAQ",
                      h3("Frequently Asked Questions", style="color: STEELBLUE; padding-bottom: 20px"),
@@ -490,10 +513,18 @@ navbarPage( theme = "style.css",
                      h5("What is the TSUNAMI website?", style="color: STEELBLUE"),
                      p("The TSUNAMI (Translational Bioinformatics Tool Suite for Network Analysis and Mining) was developed at Indiana University School of Medicine."),
                      h5("How do I get started?", style="color: STEELBLUE"),
-                     p("Check our tutorial.")
+                     p("Please refer to our tutorial.")
             ),
             tabPanel("News",
                       h3("News", style="color: STEELBLUE; padding-bottom: 20px"),
+                       h4("March 27, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
+                       tags$ul(
+                         tags$li("Texts are modified."),
+                         tags$li("Footer added."),
+                         tags$li("Update pipeline flowchart."),
+                         tags$li("Update funding information."),
+                         tags$li("Added a Google Slides tutorial talk.")
+                       ),
                        h4("March 20, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
                        tags$ul(
                          tags$li("R package 'lmQCM' was released to CRAN."),
@@ -506,13 +537,13 @@ navbarPage( theme = "style.css",
                        ),
                       h4("March 02, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
                       tags$ul(
-                        tags$li("First prototype platform has been founded.")
+                        tags$li("First prototype platform has been deployed.")
                       )
             ),
             tabPanel("About",
                       h3("About Us", style="color: STEELBLUE; padding-bottom: 20px"),
                       "The TSUNAMI (Translational Bioinformatics Tool Suite for Network Analysis and Mining) was developed at Indiana University School of Medicine.",
-                     
+                      "The design of such user-friendly implementations of our TSUNAMI pipeline provides a comprehensive analysis tool suite for users to study gene interaction from raw transcriptomic data level all the way to the gene ontology level with just simple button clicks.",
                      tags$div(
                        tags$img(src='images/IUSM2.png',
                                 height="100",
@@ -522,7 +553,19 @@ navbarPage( theme = "style.css",
                                 alt="TSUNAMI", class="center", style="padding: 30px"),
                        style="text-align: center; padding: 20px"
                      ),
-                     
+                     h4("Our Other Softwares", style="color: STEELBLUE; padding-bottom: 20px"),
+                     tags$div(
+                       a(tags$img(src='images/lmQCM_logo.png',
+                                height="60",
+                                alt="lmQCM", class="center", style="padding: 5px"), href="https://CRAN.R-project.org/package=lmQCM", target="_blank"),
+                       br(),a("lmQCM: An Algorithm for Gene Co-Expression Analysis", href="https://CRAN.R-project.org/package=lmQCM", target="_blank"),
+                       br(),br(),br(),br(),
+                       a(tags$img(src='images/annoPeak_logo.png',
+                                  height="40",
+                                  alt="annoPeak", class="center", style="padding: 5px"), href="https://apps.medgen.iupui.edu/rsc/content/19/", target="_blank"),
+                       br(),a("annoPeakR: a web-tool to annotate, visualize and compare peak sets from ChIP-seq/ChIP-exo", href="https://apps.medgen.iupui.edu/rsc/content/19/", target="_blank"),
+                       style="text-align: center; padding: 5px"
+                     ),
                       h4("Development Team", style="color: STEELBLUE; padding-bottom: 20px"),
                       h5("Prof. Kun Huang's Laboratory", style="color: STEELBLUE"),
                       tags$ul(
@@ -532,14 +575,16 @@ navbarPage( theme = "style.css",
                         tags$li("Kun Huang")
                       ),
                       h4("Publications", style="color: STEELBLUE; padding-bottom: 20px"),
-                      "Nice paper",
+                      tags$ul(
+                        tags$li("-")
+                      ),
                       h4("Funding for the TSUNAMI is or has been provided by:", style="color: STEELBLUE; padding-bottom: 20px"),
                       tags$ul(
-                        tags$li("Good funding"),
-                        tags$li("Nice funding")
+                        tags$li("Partially supported by IUSM startup fund, the NCI ITCR U01 (CA188547)."),
+                        tags$li("Data Science and Bioinformatics Program for Precision Health Initiative, Indiana University.")
                       )
                    
-            )
+            ),
             
             
             # navbarMenu(
@@ -551,4 +596,9 @@ navbarPage( theme = "style.css",
             #            helpText("Please cite ...")
             #            )
             # )
+            tags$div(
+              p(a("TSUNAMI", href="https://apps.medgen.iupui.edu/rsc/tsunami"), "Version v1.8 | ", a("IUSM",href="https://medicine.iu.edu/", target="_blank"), " | ", a("RI",href="http://www.regenstrief.org/", target="_blank"), style="color: grey; font-size: 12px"), 
+              p("Questions and feedback: zhihuan(at)umail(dot)iu(dot)edu | ", a("Report Issue", href="https://github.com/huangzhii/TSUNAMI/issues", target="_blank"), " | ", a("Github", href="https://github.com/huangzhii/TSUNAMI/", target="_blank"), style="color: grey; font-size: 12px"),
+              style="text-align: center; padding-top: 40px"
+            )
   )
