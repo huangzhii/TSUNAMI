@@ -1,1 +1,0 @@
-This app demonstrates modal dialogs.

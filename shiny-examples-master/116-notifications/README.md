@@ -1,1 +1,0 @@
-This app demonstrates Shiny's notification system.

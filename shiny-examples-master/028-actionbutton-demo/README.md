@@ -1,1 +1,0 @@
-Action buttons should always be used with one of `eventReactive()` or `observeEvent()`. See the article [Using Action Buttons](http://shiny.rstudio.com/articles/action-buttons.html) for details.

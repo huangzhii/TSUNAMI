@@ -1,1 +1,0 @@
-A `navlistPanel` is like a `tabPanel`, except that the navigation links are on the left instead of the top.
