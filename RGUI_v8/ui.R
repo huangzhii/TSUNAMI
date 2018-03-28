@@ -277,6 +277,12 @@ navbarPage( theme = "style.css",
                                              id = "MethodList",
                                              tabPanel("lmQCM",
                                                       h4("lmQCM: An Algorithm for Detecting Weak Quasi-Cliques in Weighted Graph", style="color: STEELBLUE; padding-top: 10px"),
+                                                      tags$div(
+                                                        a(tags$img(src='images/lmQCM_logo.png',
+                                                                   height="60",
+                                                                   alt="lmQCM", class="center", style="padding: 5px"), href="https://CRAN.R-project.org/package=lmQCM", target="_blank"),
+                                                        style="text-align: center; padding: 5px"
+                                                      ),
                                                       helpText("If you benefit from the results, please cite:"),
                                                       a("Zhang, Jie, and Kun Huang. \"Normalized ImQCM: An Algorithm for Detecting Weak Quasi-Cliques in Weighted Graph with Applications in Gene Co-Expression Module Discovery in Cancers.\" Cancer informatics 13 (2014): CIN-S14021.",href="http://journals.sagepub.com/doi/abs/10.4137/CIN.S14021",target="_blank"),
                                                       tags$hr(),
@@ -479,32 +485,26 @@ navbarPage( theme = "style.css",
             ),
             tabPanel("Tutorial",
                      h3("Tutorial", style="color: STEELBLUE; padding-bottom: 20px"),
-                     fluidRow(
-                       column(6,
-                         h4("Google Slides", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
-                         tags$div(
-                            HTML("<iframe src=\"https://docs.google.com/presentation/d/e/2PACX-1vSv-c_P5P2dFCo9oP67JeBWRIrjZkxLgEkytC6edxUps7l4udMdWHqZx9kiltOwlIoWyWgJH-yDPqJY/embed?start=false&loop=false&delayms=3000\" frameborder=\"0\" width=\"480\" height=\"389\" allowfullscreen=\"true\" mozallowfullscreen=\"true\" webkitallowfullscreen=\"true\"></iframe>"),
-                            style="text-align: center; padding: 20px"
-                         )
-                       ),
-                       column(6,
-                          h4("Video Tutorial", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
-                          tags$div(
-                            HTML('<iframe width="480" height="360" src="https://www.youtube.com/embed/d3eDKqm5yA0" frameborder="0" allowfullscreen></iframe>'),
-                            style="text-align: center; padding: 20px"
-                          )
-                       )
+                     h4("Google Slides", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
+                     tags$div(
+                        HTML("<iframe src=\"https://docs.google.com/presentation/d/e/2PACX-1vSv-c_P5P2dFCo9oP67JeBWRIrjZkxLgEkytC6edxUps7l4udMdWHqZx9kiltOwlIoWyWgJH-yDPqJY/embed?start=false&loop=false&delayms=3000\" frameborder=\"0\" width=\"960\" height=\"749\" allowfullscreen=\"true\" mozallowfullscreen=\"true\" webkitallowfullscreen=\"true\"></iframe>"),
+                        style="text-align: center; padding: 20px"
                      ),
-                    h4("Github", style="color: STEELBLUE; padding-bottom: 20px"),
+                      h4("Video Tutorial", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
+                      tags$div(
+                        HTML('<iframe width="720" height="480" src="https://www.youtube.com/embed/d3eDKqm5yA0" frameborder="0" allowfullscreen></iframe>'),
+                        style="text-align: center; padding: 20px"
+                      ),
+                    h4("Github", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
                     tags$div(
                       a("https://github.com/huangzhii/TSUNAMI", href="https://github.com/huangzhii/TSUNAMI"),
-                      style="padding: 0px"
+                      style="text-align: center; padding: 0px"
                     ),
-                     h4("Report Bugs", style="color: STEELBLUE; padding-bottom: 20px"),
+                     h4("Report Bugs", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
                     
                     tags$div(
                       a("https://github.com/huangzhii/TSUNAMI/issues/", href="https://github.com/huangzhii/TSUNAMI/issues/"),
-                      style="padding: 0px"
+                      style="text-align: center; padding: 0px"
                     )
             ),
             tabPanel("FAQ",
@@ -513,7 +513,16 @@ navbarPage( theme = "style.css",
                      h5("What is the TSUNAMI website?", style="color: STEELBLUE"),
                      p("The TSUNAMI (Translational Bioinformatics Tool Suite for Network Analysis and Mining) was developed at Indiana University School of Medicine."),
                      h5("How do I get started?", style="color: STEELBLUE"),
-                     p("Please refer to our tutorial.")
+                     p("Please refer to our tutorial."),
+                     h5("Can I use TSUNAMI to analysis my data from my mobile devices?", style="color: STEELBLUE"),
+                     p("Yes you can!"),
+                     tags$div(
+                       tags$img(src='images/iphonex.png',
+                                width="200",
+                                alt="TSUNAMI_iPhoneX", style="padding: 0px"),
+                       style="padding: 10px"
+                     ),
+                     p("TSUNAMI website adopted responsive web design and is compatible with any mobile terminal. Every process, analysis, and computation is performed on the server behind your mobile browser. File uploading system would still work even on the phone when you are waiting a bus.")
             ),
             tabPanel("News",
                       h3("News", style="color: STEELBLUE; padding-bottom: 20px"),
