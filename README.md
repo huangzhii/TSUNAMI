@@ -38,6 +38,10 @@ install.packages(c("shiny", "rsconnect", "plyr", "data.table", "lmQCM", "WGCNA",
 source("https://bioconductor.org/biocLite.R")
 biocLite(c("genefilter", "Biobase", "AnnotationDbi", "impute", "GO.db", "preprocessCore", "GEOquery"))
 ```
+* If openssl in R configured fail, run following in bash:
+```bash
+apt-get install libssl-dev/unstable
+```
 * Download the source code for TSUNAMI from GitHub https://github.com/huangzhii/TSUNAMI/.
 
 Open ui.R from the download TSUNAMI folder. Click the button named "Run App" on the upper right corner of code editing window, an web page will be automatically invoked and the TSUNAMI application is ready to use. It may take a few minutes to load the required packages. 
