@@ -47,6 +47,14 @@ Warning: Do not perform "sudo apt-get remove libssl". If you did, tears I see dr
 ```bash
 sudo apt-get install libxml2-dev
 ```
+* If you meet error when install "openxlsx", that could be cause you are running a lower version of R (say 3.2.3) and openxlsx doesn't support this version of R. Try to upgrade R in ubuntu by running following in bash:
+```bash
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+sudo add-apt-repository 'deb [arch=amd64,i386] https://cran.rstudio.com/bin/linux/ubuntu xenial/'
+sudo apt-get update
+sudo apt-get install r-base
+```
+
 * Download the source code for TSUNAMI from GitHub https://github.com/huangzhii/TSUNAMI/.
 
 Open ui.R from the download TSUNAMI folder. Click the button named "Run App" on the upper right corner of code editing window, an web page will be automatically invoked and the TSUNAMI application is ready to use. It may take a few minutes to load the required packages. 
