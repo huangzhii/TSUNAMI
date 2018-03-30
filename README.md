@@ -40,7 +40,7 @@ biocLite(c("genefilter", "Biobase", "AnnotationDbi", "impute", "GO.db", "preproc
 ```
 * If openssl in R configured fail, run following in bash:
 ```bash
-apt-get install libssl-dev/unstable
+sudo apt-get install libssl-dev
 ```
 * Download the source code for TSUNAMI from GitHub https://github.com/huangzhii/TSUNAMI/.
 
