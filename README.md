@@ -42,6 +42,10 @@ biocLite(c("genefilter", "Biobase", "AnnotationDbi", "impute", "GO.db", "preproc
 ```bash
 sudo apt-get install libssl-dev
 ```
+* If error occured when showing "ERROR: dependency ‘annotate’ is not available for package ‘genefilter’", run following in bash:
+```bash
+sudo apt-get install libxml2-dev
+```
 * Download the source code for TSUNAMI from GitHub https://github.com/huangzhii/TSUNAMI/.
 
 Open ui.R from the download TSUNAMI folder. Click the button named "Run App" on the upper right corner of code editing window, an web page will be automatically invoked and the TSUNAMI application is ready to use. It may take a few minutes to load the required packages. 
