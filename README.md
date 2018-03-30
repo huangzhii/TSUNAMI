@@ -56,6 +56,12 @@ sudo add-apt-repository 'deb [arch=amd64,i386] https://cran.rstudio.com/bin/linu
 sudo apt-get update
 sudo apt-get install r-base
 ```
+* More issue: C stack usage is too close to the limit when loading a Module?
+Change ulimit larger in bash then restart rstudio.
+```bash
+ulimit -s 16384
+```
+(https://github.com/RcppCore/Rcpp/issues/458)
 
 * Download the source code for TSUNAMI from GitHub https://github.com/huangzhii/TSUNAMI/.
 
