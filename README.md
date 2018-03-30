@@ -29,7 +29,7 @@ It has several highlight features and advantages:
 
 ## Installation
 * Install R and RStudio
-
+R version > 3.4.3
 Please download the right version of R for your own system from https://cloud.r-project.org/ and install it. 
 RStudio is an integrated development environment (IDE) for R. Please download RStudio from https://www.rstudio.com/products/rstudio/#Desktop and install it.
 * Install R packages within RStudio as below.
