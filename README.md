@@ -42,6 +42,7 @@ biocLite(c("genefilter", "Biobase", "AnnotationDbi", "impute", "GO.db", "preproc
 ```bash
 sudo apt-get install libssl-dev
 ```
+Warning: Do not perform "sudo apt-get remove libssl". If you did, tears I see drop from your eyes.
 * If error occured when showing "ERROR: dependency ‘annotate’ is not available for package ‘genefilter’", run following in bash:
 ```bash
 sudo apt-get install libxml2-dev
