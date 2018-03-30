@@ -1,4 +1,4 @@
-# Zhi Huang 03/21/2018
+# Zhi Huang 03/28/2018
 library(plotly)
 navbarPage( theme = "style.css",
 
@@ -565,14 +565,27 @@ navbarPage( theme = "style.css",
                      h4("Our Other Softwares", style="color: STEELBLUE; padding-bottom: 20px"),
                      tags$div(
                        a(tags$img(src='images/lmQCM_logo.png',
-                                height="60",
-                                alt="lmQCM", class="center", style="padding: 5px"), href="https://CRAN.R-project.org/package=lmQCM", target="_blank"),
-                       br(),a("lmQCM: An Algorithm for Gene Co-Expression Analysis", href="https://CRAN.R-project.org/package=lmQCM", target="_blank"),
-                       br(),br(),br(),br(),
+                                  height="60",
+                                  alt="lmQCM", class="center", style="padding: 5px"), href="https://CRAN.R-project.org/package=lmQCM", target="_blank"),
+                       br(),a("R package: lmQCM", href="https://CRAN.R-project.org/package=lmQCM", target="_blank"),
+                       br(),br(),
                        a(tags$img(src='images/annoPeak_logo.png',
                                   height="40",
                                   alt="annoPeak", class="center", style="padding: 5px"), href="https://apps.medgen.iupui.edu/rsc/content/19/", target="_blank"),
                        br(),a("annoPeakR: a web-tool to annotate, visualize and compare peak sets from ChIP-seq/ChIP-exo", href="https://apps.medgen.iupui.edu/rsc/content/19/", target="_blank"),
+                       style="text-align: center; padding: 5px"
+                     ),
+                     br(),
+                     tags$div(
+                       tags$img(src='images/iGenomicsR_logo.png',
+                                  height="40",
+                                  alt="iGenomicsR", class="center", style="padding: 5px"),
+                       br(),"Coming Soon",
+                       br(),br(),
+                       tags$img(src='images/iGPSe_logo.png',
+                                  height="50",
+                                  alt="iGPSe", class="center", style="padding: 5px"),
+                       br(),"Coming Soon",
                        style="text-align: center; padding: 5px"
                      ),
                       h4("Development Team", style="color: STEELBLUE; padding-bottom: 20px"),
