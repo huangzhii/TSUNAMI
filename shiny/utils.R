@@ -108,7 +108,7 @@ circlizeGenomics <- function(BED.data, factors, xlim, mySpecies, myTitle){
   # circos.genomicRainfall(data.frame(hg38.ring[,c(4,6:7)]), pch = 16, cex = 0.4, col = "#FF000080")
   title(myTitle)
   circos.trackPlotRegion(factors = factors, ylim = c(0, 1), bg.border = NA,
-                         bg.col = rep("grey", dim(chr_count)[1]), track.height = 0.05,
+                         bg.col = rep("grey", 24), track.height = 0.05,
                          panel.fun = function(x, y) {
                            sector.name = get.cell.meta.data("sector.index")
                            xlim = get.cell.meta.data("xlim")
