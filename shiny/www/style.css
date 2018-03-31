@@ -16,3 +16,20 @@ button.btn-analysis:hover {
   background: #349bdb;
   text-decoration: none;
 }
+
+button.btn-plot {
+  -webkit-border-radius: 10;
+  -moz-border-radius: 10;
+  border-radius: 10px;
+  font-family: Arial;
+  color: #ffffff;
+  font-size: 14px;
+  background: #FFC300;
+  padding: 6px 12px 6px 12px;
+  text-decoration: none;
+}
+
+button.btn-plot:hover {
+  background: #FFD85A;
+  text-decoration: none;
+}

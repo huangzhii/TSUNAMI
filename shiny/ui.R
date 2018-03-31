@@ -7,9 +7,9 @@ navbarPage( theme = "style.css",
             #               width = 20,
             #               style = "margin:0px 0px;"), "BioInfo Suite"),
 
-            title=div(img(src="images/tsunami_logo.png",
+            title=div(a(img(src="images/tsunami_logo.png",
                           height = 28,
-                          style = "margin:0px 0px; padding-bottom: 5px")),
+                          style = "margin:0px 0px; padding-bottom: 5px"), href="https://apps.medgen.iupui.edu/rsc/tsunami")),
             tabPanel("Analysis",
                      navlistPanel(widths = c(2, 10),
                                   #theme = "style.css",
@@ -84,6 +84,9 @@ navbarPage( theme = "style.css",
                                                                      }
                                                                      if(typeMessage == "tab4"){
                                                                      $("a:contains(4. Result)").click();
+                                                                     }
+                                                                     if(typeMessage == "tab4_functional_plots"){
+                                                                     $("a:contains(Functional Plots)").click();
                                                                      }
                                                                      if(typeMessage == "tab5"){
                                                                      $("a:contains(5. GO Enrichment Analysis)").click();
@@ -359,21 +362,28 @@ navbarPage( theme = "style.css",
                                                       br()
                                              ), # EOF WGCNA TAB
                                              tabPanel("Verify Final Data",
-                                                      h5("Final Incoming Data"),
+                                                      h4("Final Incoming Data", style="color: STEELBLUE; padding-top: 10px"),
                                                       
                                                       fluidRow(
-                                                        column(6,
+                                                        column(4,
                                                                helpText("You can verify the final incoming data and also download it."),
                                                                downloadButton('download_finaldata', 'Download Final Data (CSV)')),
-                                                        column(6,
+                                                        column(4,
                                                                helpText("GO Enrichment Analysis for following all Genes."),
                                                                actionButton("action_finaldata4enrichr", "GO Enrichment Analysis",
                                                                                style="color: WHITE; background-color: DODGERBLUE"),
-                                                               helpText("Warning: Directly process large # of genes may cause very slow GO process. We suggest user perform Co-expression clustering and do GO analysis with small amount of genes.", style="color: STEELBLUE; font-size: 12px"))
+                                                               helpText("Warning: Directly process large # of genes may cause very slow GO process. We suggest user perform Co-expression clustering and do GO analysis with small amount of genes.", style="color: STEELBLUE; font-size: 12px")),
+                                                        column(4,
+                                                               helpText("Circos Plot"),
+                                                               actionButton("action_finaldata4circos", "Circos Plot for All Genes",
+                                                                            style="color: WHITE; background-color: #FFC300"),
+                                                               helpText("When finished, go to 4. Result functional plots section.", style="color: #D5A200; font-size: 12px"),
+                                                               helpText("We strongly recomment user clean the genes first through our Data Preprocessing section. If genes are not get cleaned, such as RBM|123 cannot be found which RBM is supposed to be in hg38 database.", style="color: #D5A200; font-size: 12px")
+                                                        )
                                                       ),
                                                       
                                                       
-                                                      h5("Data Preview"),
+                                                      h4("Data Preview", style="color: STEELBLUE; padding-top: 10px"),
                                                       DT::dataTableOutput("mytable_finaldata")
                                                       
                                              ) # EOF TAB Verify Final Data
@@ -399,11 +409,31 @@ navbarPage( theme = "style.css",
                                              tabsetPanel(
                                                id = 'tabset',
                                                tabPanel("Merged Clusters", DT::dataTableOutput("clusterResult")),
-                                               tabPanel("Eigengene Matrix", tableOutput("mytable7"))
+                                               tabPanel("Eigengene Matrix", tableOutput("mytable7")),
+                                               tabPanel("Functional Plots",
+                                                        sidebarLayout(
+                                                          position = "right",
+                                                          sidebarPanel(
+                                                            h4("Parameters of Circos Plot", style="color: STEELBLUE"),
+                                                            textAreaInput("textareainput_circos", "Gene Symbols", value = "EXAMPLEGENE1\nEXAMPLEGENE2", width = 'auto', height = '300px', placeholder = NULL),
+                                                            actionButton("circos_button_update_1", "Update Gene Symbols",style="color: WHITE; background-color: DODGERBLUE"),
+                                                            helpText("You can directly use your own data here without any previous operation."),
+                                                            # Horizontal line ----
+                                                            tags$hr(),
+                                                            actionButton("circos_button_update_2", "Update Parameters and Plot")
+                                                          ),
+                                                          
+                                                          # Show a plot of the generated distribution
+                                                          mainPanel(
+                                                            h4("Circos Plot", style="color: STEELBLUE"),
+                                                            uiOutput("circos_plot_ui")
+                                                          )
+                                                        )
+                                                )
                                              ),
                                              
                                              tags$script("$(document).on('click', '#clusterResult button', function () {
-                                                         Shiny.onInputChange('go_lastClickId',this.id)
+                                                         Shiny.onInputChange('button_lastClickId',this.id)
                                                          });")
                                            )
                                            ),

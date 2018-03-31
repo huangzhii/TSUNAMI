@@ -13,6 +13,9 @@ library(DT)
 library(plotly)
 library(openxlsx)
 library(survival)
+library(naturalsort)
+# circos plot
+library(circlize)
 # library(topGO) # Somehow conflict with WGCNA and GEOquery. Deprecated.
 
 options(shiny.maxRequestSize=300*1024^2) # to the top of server.R would increase the limit to 300MB
@@ -24,6 +27,7 @@ source("utils.R")
 data <- NULL
 data_final <- NULL
 GEO <- NULL
+GSE_name_title <-NULL
 finalExp <- NULL
 finalSym <- NULL
 finalSymChar <- NULL
@@ -63,7 +67,7 @@ function(input, output, session) {
     # Close the progress when this reactive exits (even if there's an error)
     on.exit(progress$close())
     # NCBI GEO
-    load("./GEO_20180131.Rdata")
+    load("./data/GEO_20180131.Rdata")
     GEO[["Actions"]] <- paste0('<div><button type="button" class="btn-analysis" id=dataset_analysis_',1:nrow(GEO),'>Analyze</button></div>')
     colnames(GEO)[which(names(GEO) == "Sample.Count")] <- "Samples"
     GEO <- GEO %>% select("Samples", everything())
@@ -90,22 +94,9 @@ function(input, output, session) {
     GEO_release_date <- as.Date(GEO$Release.Date,format = "%B %d, %Y")
     GEO_release_date_unique = cumsum(table(GEO_release_date)) #cummulative sum
     
-    
-    font <- list(
-      family = "Courier New, monospace",
-      size = 12,
-      color = "black"
-    )
-    x_axis <- list(
-      title = "",
-      titlefont = font,
-      tickangle = 45,
-      zeroline = TRUE
-    )
-    y_axis <- list(
-      title = "Number of GSE data",
-      titlefont = font
-    )
+    font <- list(family = "Courier New, monospace", size = 12, color = "black")
+    x_axis <- list(title = "", titlefont = font, tickangle = 45, zeroline = TRUE)
+    y_axis <- list(title = "Number of GSE data", titlefont = font)
     plot_ly(x = names(GEO_release_date_unique), y = as.numeric(GEO_release_date_unique),
             type = 'scatter', mode = 'lines') %>%
       layout(title = "Number of GSE Data Growing",font=list(size = 10), xaxis = x_axis, yaxis = y_axis) %>% 
@@ -117,24 +108,15 @@ observeEvent(input$dataset_lastClickId,{
   if (input$dataset_lastClickId%like%"dataset_analysis"){
   row_of_GEO <- as.numeric(gsub("dataset_analysis_","",input$dataset_lastClickId))
   myGSE <- GEO$Accession[row_of_GEO]
+  GSE_name_title <<- GEO$Title[row_of_GEO]
   print(myGSE)
-
-  showModal(modalDialog(
-    title = sprintf("Loading %s file from NCBI GEO Database", myGSE), footer = NULL,
-    div(class = "busy",
-        p("We are currently loading your selected file from NCBI GEO Database ..."),
-        img(src="images/loading.gif"),
-        style = "margin: auto; text-align: center"
-    )
-  ))
+  smartModal(error=F, title = sprintf("Loading %s file from NCBI GEO Database", myGSE),
+                         content = "We are currently loading your selected file from NCBI GEO Database ...")
   t <- try(gset <- getGEO(myGSE, GSEMatrix=TRUE, AnnotGPL=FALSE)) #AnnotGPL default is FALSE
   if("try-error" %in% class(t)) {
     removeModal()
     print("HTTP error 404")
-    showModal(modalDialog(
-      title = "Important message", footer = modalButton("OK"),
-      sprintf("%s is not available in NCBI GEO Database, please try another! (Hint: Maybe bad Internet connection)",myGSE), easyClose = TRUE
-    ))
+    smartModal(error=T, title = "HTTP error 404", content = sprintf("%s is not available in NCBI GEO Database, please try another! (Hint: Maybe bad Internet connection)",myGSE))
     return()
   }
 
@@ -144,10 +126,7 @@ observeEvent(input$dataset_lastClickId,{
   if (dim(edata)[1] == 0){
     removeModal()
     print("No expression data")
-    showModal(modalDialog(
-      title = "Important message", footer = modalButton("OK"),
-      sprintf("%s contains no expression data, please try another!", myGSE), easyClose = TRUE
-    ))
+    smartModal(error=T, title = "Important message", content = sprintf("%s contains no expression data, please try another!", myGSE))
     return()
   }
   # pdata <- pData(gset) # data.frame of phenotypic information.
@@ -173,7 +152,7 @@ observeEvent(input$dataset_lastClickId,{
   output$mytable5 <- DT::renderDataTable({
     # Expression Value
     DT::datatable(data[ifelse(is.na(input$starting_row),1,input$starting_row):ifelse(is.na(input$quicklook_row),100,input$quicklook_row), ifelse(is.na(input$starting_col),2,input$starting_col):ifelse(is.na(input$quicklook_col),10,input$quicklook_col)],
-                  , extensions = 'Responsive', escape=F, selection = 'none')
+                  extensions = 'Responsive', escape=F, selection = 'none')
   })
   output$mytable6 <- renderTable({
     # Gene ID
@@ -194,22 +173,12 @@ observeEvent(input$dataset_lastClickId,{
   observeEvent(input$action2,{
       if(is.null(input$csvfile)){
         print("no files!")
-        showModal(modalDialog(
-          title = "Important message", footer = modalButton("OK"),
-          "No file uploaded! Please retry!", easyClose = TRUE
-        ))
+        smartModal(error=T, title = "Important message", content = "No file uploaded! Please retry!")
         return(NULL)
       }
       else {
         print("Reading file.")
-        showModal(modalDialog(
-          title = "Intepreting uploaded file in progress", footer = NULL,
-          div(class = "busy",
-              p("Intepreting ..."),
-              img(src="images/loading.gif"),
-              style = "margin: auto; text-align: center"
-          )
-        ))
+        smartModal(error=F, title = "Intepreting uploaded file in progress", content = "Intepreting ...")
         fileExtension <- getFileNameExtension(input$csvfile$datapath)
         if(fileExtension == "csv"){
           data <<- read.csv(input$csvfile$datapath,
@@ -248,10 +217,7 @@ observeEvent(input$dataset_lastClickId,{
         })
         if ((dim(data)[2]-1) == 0){
           print("Number of samples 0!")
-          showModal(modalDialog(
-            title = "Important message", footer = modalButton("OK"),
-            sprintf("Target file contains no sample. This problem could because user pick a not matched separator (default: Comma), please try another seperator (e.g. Tab or Space)."), easyClose = TRUE
-          ))
+          smartModal(error=T, title = "Important message", content = sprintf("Target file contains no sample. This problem could because user pick a not matched separator (default: Comma), please try another seperator (e.g. Tab or Space)."))
           return()
         }
         output$mytable4 <- DT::renderDataTable({
@@ -284,23 +250,10 @@ observeEvent(input$dataset_lastClickId,{
 
   observeEvent(input$action_platform,{
     if(is.null(data)){
-      showModal(modalDialog(
-        title = "Operation Failed", footer = modalButton("OK"), easyClose = TRUE,
-        div(class = "busy",
-            p("You have not selected any data. Please go to previous section."),
-            style = "margin: auto; text-align: center"
-        )
-      ))
+      smartModal(error=T, title = "Operation Failed", content = "You have not selected any data. Please go to previous section.")
       return()
     }
-    showModal(modalDialog(
-      title = "Converting...", footer = NULL,
-      div(class = "busy",
-          p("We are currently converting probe ID to Gene Symbol..."),
-          img(src="images/loading.gif"),
-          style = "margin: auto; text-align: center"
-      )
-    ))
+    smartModal(error=F, title = "Converting...", content = "We are currently converting probe ID to Gene Symbol...")
     platform_name <- gsub(" ", "", input$platform_text, fixed = TRUE)
 
     print(sprintf("Platform: %s",platform_name))
@@ -308,10 +261,7 @@ observeEvent(input$dataset_lastClickId,{
     if("try-error" %in% class(t)) {
       removeModal()
       print("HTTP error 404")
-      showModal(modalDialog(
-        title = "Important message", footer = modalButton("OK"),
-        sprintf("%s is not available in NCBI GEO Database, please try another!", platform_name), easyClose = TRUE
-      ))
+      smartModal(error=c(T,F), title = "HTTP error 404", content = sprintf("Platform %s is not available in NCBI GEO Database, please try another!", platform_name))
       return()
     }
     print("Platform Loaded.")
@@ -338,10 +288,7 @@ observeEvent(input$dataset_lastClickId,{
     else {
         removeModal()
         print("HTTP error 404")
-        showModal(modalDialog(
-          title = "Important message", footer = modalButton("OK"),
-          sprintf("Error occured while loading %s. This issue could be different name defined on Gene Symbol (GENE_SYMBOL or others) in the platform.", platform_name), easyClose = TRUE
-        ))
+        smartModal(error=T, title = "Important message", content = sprintf("Error occured while loading %s. This issue could be different name defined on Gene Symbol (GENE_SYMBOL or others) in the platform.", platform_name))
         return()
     }
 
@@ -377,27 +324,11 @@ observeEvent(input$dataset_lastClickId,{
   #   +--------------------------------
 
   observeEvent(input$action3,{
-    
       if(is.null(data)){
-        showModal(modalDialog(
-          title = "Operation Failed", footer = modalButton("OK"), easyClose = TRUE,
-          div(class = "busy",
-              p("You have not selected any data. Please go to previous section."),
-              style = "margin: auto; text-align: center"
-          )
-        ))
+        smartModal(error=T, title = "Operation Failed", content = "You have not selected any data. Please go to previous section.")
         return()
       }
-      # source("/Users/zhi/Desktop/TBI-TSUNAMI/RGUI_v8/utils.R")
-
-      showModal(modalDialog(
-        title = "Cleaning input data", footer = NULL,
-        div(class = "busy",
-            p("Cleaning ..."),
-            img(src="images/loading.gif"),
-            style = "margin: auto; text-align: center"
-        )
-      ))
+      smartModal(error=F, title = "Preprocessing input data", content = "Preprocessing ...")
       print(dim(data))
       # Step 0
       RNA <- as.matrix(data[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data)[1], ifelse(is.na(input$starting_col),2,input$starting_col):dim(data)[2]])
@@ -405,11 +336,9 @@ observeEvent(input$dataset_lastClickId,{
       geneID <- data.frame(data[ifelse(is.na(input$starting_gene_row),1,input$starting_gene_row):dim(data)[1], 1])
       print(dim(RNA))
       print(dim(geneID))
-
-      if (input$checkbox_NA){
-        # convert na to 0
-        RNA[is.na(RNA)] <- 0
-      }
+      
+      # convert na to 0
+      if (input$checkbox_NA){RNA[is.na(RNA)] <- 0}
 
       # Remove data with lowest 20% absolute exp value shared by all samples
       percentile <- ifelse(is.na(input$absolute_expval),0,input$absolute_expval)/100.
@@ -558,25 +487,11 @@ observeEvent(input$dataset_lastClickId,{
 
   observeEvent(input$action4_lmQCM,{
     if(is.null(finalExp)){
-      showModal(modalDialog(
-        title = "Operation Failed", footer = modalButton("OK"), easyClose = TRUE,
-        div(class = "busy",
-            p("You have not selected any data. Please go to previous section."),
-            style = "margin: auto; text-align: center"
-        )
-      ))
+      smartModal(error=T, title = "Operation Failed", content = "You have not selected any data. Please go to previous section.")
       return()
     }
       #lmQCM
-      showModal(modalDialog(
-        title = "Using lmQCM to calculate merged clusters", footer = NULL,
-        div(class = "busy",
-            p("Calculating ..."),
-            img(src="images/loading.gif"),
-            style = "margin: auto; text-align: center"
-        )
-      ))
-      
+      smartModal(error=F, title = "Using lmQCM to calculate merged clusters", content = "Calculating. This could be several seconds to several minutes depends on number of genes. Please be patient.")
       mergedCluster <- lmQCM(finalExp, input$gamma, input$t, input$lambda, input$beta, input$minClusterSize, input$massiveCC)
       geneCharVector <- matrix(0, nrow = 0, ncol = length(mergedCluster))
       temp_eigengene <- matrix(0, nrow = length(mergedCluster), ncol = dim(finalExp)[2]) # Clusters * Samples
@@ -614,11 +529,11 @@ observeEvent(input$dataset_lastClickId,{
       geneCharVector2 <- data.frame(do.call(rbind, geneCharVector2))
 
       output$clusterResult <- DT::renderDataTable({
-
-        geneCharVector2[["Actions"]] <- paste0('<div><button type="button" class="btn-analysis" id=go_analysis_',1:nrow(geneCharVector2),'>GO</button></div>')
+        geneCharVector2[["Actions"]] <- paste0('<div style="text-align: center"><button type="button" class="btn-analysis" id=go_analysis_',1:nrow(geneCharVector2),'>GO</button></div>')
+        geneCharVector2[["Plots"]] <- paste0('<div style="text-align: center"><button type="button" class="btn-plot" id=circos_',1:nrow(geneCharVector2),'>Circos</button></div>')
         geneCharVector2 <- geneCharVector2 %>%
-          select("Actions", everything())
-        colnames(geneCharVector2)[2:3] <- c("Cluster ID", "Genes")
+          select(c("Actions","Plots"), everything())
+        colnames(geneCharVector2)[3:4] <- c("Cluster ID", "Genes")
         # print(head(geneCharVector2))
         DT::datatable(geneCharVector2, selection="none", escape=FALSE,
                       options = list(paging = F, searching = F, dom='t',ordering=T),
@@ -645,25 +560,12 @@ observeEvent(input$dataset_lastClickId,{
 
   observeEvent(input$checkPower, {
     if(is.null(finalExp)){
-      showModal(modalDialog(
-        title = "Operation Failed", footer = modalButton("OK"), easyClose = TRUE,
-        div(class = "busy",
-            p("You have not selected any data. Please go to previous section."),
-            style = "margin: auto; text-align: center"
-        )
-      ))
+      smartModal(error=T, title = "Operation Failed", content = "You have not selected any data. Please go to previous section.")
       return()
     }
     if (length(finalSym) > 0){
       #WGCNA
-      showModal(modalDialog(
-        title = "WGCNA step 1: Preview the power", footer = NULL,
-        div(class = "busy",
-            p("Calculating ..."),
-            img(src="images/loading.gif"),
-            style = "margin: auto; text-align: center"
-        )
-      ))
+      smartModal(error=F, title = "Preview the power", content = "Running ...")
 
       row.names(finalExp) <- finalSym
       datExpr <- t(finalExp) # gene should be colnames, sample should be rownames
@@ -708,32 +610,17 @@ observeEvent(input$dataset_lastClickId,{
              main = paste("Mean connectivity"))
         text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
       })
-
-
       removeModal()
     }
   })
 
   observeEvent(input$action4_WGCNA,{
       if(is.null(finalExp)){
-        showModal(modalDialog(
-          title = "Operation Failed", footer = modalButton("OK"), easyClose = TRUE,
-          div(class = "busy",
-              p("You have not selected any data. Please go to previous section."),
-              style = "margin: auto; text-align: center"
-          )
-        ))
+        smartModal(error=T, title = "Operation Failed", content = "You have not selected any data. Please go to previous section.")
         return()
       }
       #WGCNA
-      showModal(modalDialog(
-        title = "Using WGCNA to calculate merged clusters", footer = NULL,
-        div(class = "busy",
-            p("Calculating ..."),
-            img(src="images/loading.gif"),
-            style = "margin: auto; text-align: center"
-        )
-      ))
+      smartModal <- function(error=F, title = "Using WGCNA to calculate merged clusters", content = "Calculating. This could take a while depend on number of genes. Please be patient.")
 
       row.names(finalExp) <- finalSym
       datExpr <- t(finalExp) # gene should be colnames, sample should be rownames
@@ -835,11 +722,11 @@ observeEvent(input$dataset_lastClickId,{
       # },rownames = FALSE, colnames = FALSE, na = "", bordered = TRUE)
 
       output$clusterResult <- DT::renderDataTable({
-
-        geneCharVector2[["Actions"]] <- paste0('<div><button type="button" class="btn-analysis" id=go_analysis_',1:nrow(geneCharVector2),'>GO</button></div>')
+        geneCharVector2[["Actions"]] <- paste0('<div style="text-align: center"><button type="button" class="btn-analysis" id=go_analysis_',1:nrow(geneCharVector2),'>GO</button></div>')
+        geneCharVector2[["Plots"]] <- paste0('<div style="text-align: center"><button type="button" class="btn-plot" id=circos_',1:nrow(geneCharVector2),'>Circos</button></div>')
         geneCharVector2 <- geneCharVector2 %>%
-          select("Actions", everything())
-        colnames(geneCharVector2)[2:4] <- c("Cluster ID", "Color Name", "Genes")
+          select(c("Actions","Plots"), everything())
+        colnames(geneCharVector2)[3:5] <- c("Cluster ID", "Color Name", "Genes")
         # print(head(geneCharVector2))
         DT::datatable(geneCharVector2, selection="none", escape=FALSE,
                       options = list(paging = F, searching = F, dom='t',ordering=F),
@@ -865,13 +752,7 @@ observeEvent(input$dataset_lastClickId,{
   #   +--------------------------------
   observeEvent(input$action_finaldata4enrichr,{
     if(is.null(finalSym)){
-      showModal(modalDialog(
-        title = "Operation Failed", footer = modalButton("OK"), easyClose = TRUE,
-        div(class = "busy",
-            p("You have not selected any data. Please go to previous section."),
-            style = "margin: auto; text-align: center"
-        )
-      ))
+      smartModal(error=T, title = "Operation Failed", content = "You have not selected any data. Please go to previous section.")
       return()
     }
     genes_str = finalSym
@@ -900,19 +781,12 @@ observeEvent(input$dataset_lastClickId,{
     session$sendCustomMessage("myCallbackHandler", "tab5")
   })
     
-  observeEvent(input$go_lastClickId,{
+  observeEvent(input$button_lastClickId,{
     print("lastClickedId received.")
-    if (input$go_lastClickId%like%"go_analysis"){
-      cluster <- as.numeric(gsub("go_analysis_","",input$go_lastClickId))
+    if (input$button_lastClickId%like%"go_analysis"){
+      cluster <- as.numeric(gsub("go_analysis_","",input$button_lastClickId))
 
-      showModal(modalDialog(
-        title = "Performing GO Enrichment Analysis...", footer = NULL,
-        div(class = "busy",
-            p("Loading ..."),
-            img(src="images/loading.gif"),
-            style = "margin: auto; text-align: center"
-        )
-      ))
+      smartModal(error=F, title = "Performing GO Enrichment Analysis...", content = "Loading GO analysis results. This could take a while depends on number of genes. Please be patient.")
       print("row_of_final_cluster:")
       print(cluster)
       # print(geneCharVector_global[[cluster]])
@@ -941,6 +815,88 @@ observeEvent(input$dataset_lastClickId,{
       session$sendCustomMessage("download_go_ready","-")
       session$sendCustomMessage("myCallbackHandler", "tab5")
     }
+    #   +------------------------------------------------------------+
+    #   |
+    #   |
+    #   |                        Circos Plot
+    #   |
+    #   |
+    #   +--------------------------------
+    
+    if (input$button_lastClickId%like%"circos"){
+      cluster <- as.numeric(gsub("circos_","",input$button_lastClickId))
+      genes_str <- geneCharVector_global[[cluster]]
+      genes_str <- unlist(strsplit(genes_str, " /// "))
+      # genes_str <- c('PHF|14','RBM|3','Nlrx1','MSL1','PHF21A','ARL10','INSR')
+      print("genes_str for circos plot: ")
+      print(genes_str[-1])
+      final_genes_str <<- genes_str[-1]
+      
+      output$circos_plot_ui <- renderUI({
+        plotOutput('circos_plot_component', height = "500px")
+      })
+      
+      # import hg19 and hg38
+      load("./data/UCSC_hg19_refGene_20180330.Rdata") # varname: hg19
+      load("./data/UCSC_hg38_refGene_20180330.Rdata") # varname: hg38
+      genes_str <- c("LOC102725121", "FAM138A", "RIMS2", "LINC01128", "MMP23A", "ULK4P1")
+      
+      hg19 <- data.frame(cbind(rownames(hg19), hg19, hg19[6]-hg19[5]))
+      hg38 <- data.frame(cbind(rownames(hg38), hg38, hg38[6]-hg38[5]))
+      colnames(hg38) = c("id","","name","chrom","strand","txStart","txEnd","cdsStart","cdsEnd","exonCount","exonStarts","exonEnds","proteinID","alignID","","","","length")
+      colnames(hg19) = c("id","","name","chrom","strand","txStart","txEnd","cdsStart","cdsEnd","exonCount","exonStarts","exonEnds","proteinID","alignID","","","","length")
+      hg19.ring <- hg19[!grepl("_", hg19$chrom),] # remove undefined chromosome
+      hg38.ring <- hg38[!grepl("_", hg38$chrom),]
+      
+      hg19.matched <- hg19.ring[match(genes_str, hg19.ring$alignID, nomatch = 0), ]
+      hg38.matched <- hg38.ring[match(genes_str, hg38.ring$alignID, nomatch = 0), ]
+      
+      
+      hg38.ring.lengthsum <- aggregate(hg38.ring["length"],hg38.ring["chrom"],sum)
+      hg19.ring.lengthsum <- aggregate(hg19.ring["length"],hg19.ring["chrom"],sum)
+      
+      
+      
+      factors_count = as.data.frame(hg38.ring.lengthsum)
+      factors = factor(factors_count[,1], levels = factors_count[,1])
+      xlim = cbind(rep(0, dim(factors_count)[1]), factors_count[,2])
+      rownames(xlim) = factors_count[,1]
+      
+      # # based on # of chromosome lines:
+      # factors_count = as.data.frame(table(hg38$chrom))
+      # chr_count = factors_count[!grepl("_", factors_count[,1]),]
+      # chr_count = chr_count[naturalorder(chr_count[,1]),]
+      # rownames(chr_count) <- 1:dim(chr_count)[1]
+      # factors = factor(chr_count[,1], levels = chr_count[,1])
+      # xlim = cbind(rep(0, length(chr_count[,2])), chr_count[,2])
+      # rownames(xlim) = chr_count[,1]
+      
+      par(mar = c(1, 1, 1, 1))
+      circos.par(cell.padding = c(0, 0, 0, 0))
+      circos.initialize(factors = factors, xlim = xlim)
+      circos.trackPlotRegion(factors = factors, ylim = c(0, 1), bg.border = NA,
+                             bg.col = rep("grey", dim(chr_count)[1]), track.height = 0.05,
+                             panel.fun = function(x, y) {
+                               sector.name = get.cell.meta.data("sector.index")
+                               xlim = get.cell.meta.data("xlim")
+                               circos.text(mean(xlim), 2.5,
+                                           facing = "outside", niceFacing = T,
+                                           sector.name, cex = 0.8, adj = c(0.5, 0))
+                               #plot main sector
+                               # circos.rect(xleft=xlim[1], ybottom=ylim[1], xright=xlim[2], ytop=ylim[2], 
+                               #             col = df1$rcol[i], border=df1$rcol[i])
+                             })
+      
+      circos.clear()
+      
+      
+      output$circos_plot_component <- renderPlot({
+        
+      })
+      
+      print('tab4_functional_plots')
+      session$sendCustomMessage("myCallbackHandler", "tab4_functional_plots")
+    }
   })
 
   #   +------------------------------------------------------------+
@@ -952,16 +908,11 @@ observeEvent(input$dataset_lastClickId,{
   #   +--------------------------------
 
   output$downloadData1 <- downloadHandler(
-    # This function returns a string which tells the client
-    # browser what name to use when saving the file.
     filename = function() {
       name = "mergedCluster"
       # name = paste("lmQCMresult","gamma",gamma(),"lambda",lambda(),"t",t(),"beta",beta(),"minClusterSize",minClusterSize(), sep = "_", collapse = NULL)
       paste(name, input$filetype1, sep = ".")
     },
-
-    # This function should write data to a file given to it by
-    # the argument 'file'.
     content = function(file) {
       sep <- switch(input$filetype1, "csv" = 0, "txt" = 1)
       if (sep == 0){
@@ -977,16 +928,10 @@ observeEvent(input$dataset_lastClickId,{
     }
   )
   output$downloadData2 <- downloadHandler(
-    # This function returns a string which tells the client
-    # browser what name to use when saving the file.
     filename = function() {
       name = "EigengeneMatrix"
-      # name = paste("lmQCMresult","gamma",gamma(),"lambda",lambda(),"t",t(),"beta",beta(),"minClusterSize",minClusterSize(), sep = "_", collapse = NULL)
       paste(name, input$filetype2, sep = ".")
     },
-
-    # This function should write data to a file given to it by
-    # the argument 'file'.
     content = function(file) {
       separator <- switch(input$filetype2, "csv" = ',', "txt" = '\t')
       write.table(eigengene_matrix, file = file, append = FALSE, quote = TRUE, sep = separator,
@@ -997,12 +942,9 @@ observeEvent(input$dataset_lastClickId,{
   )
 
   output$download_finaldata <- downloadHandler(
-    # This function returns a string which tells the client
-    # browser what name to use when saving the file.
     filename = function() {
       name = "finaldata.csv"
     },
-    
     content = function(file) {
       write.table(data_final, file = file, append = FALSE, quote = TRUE, sep = ',',
                   eol = "\r\n", na = "NA", dec = ".", row.names = F,
@@ -1012,16 +954,9 @@ observeEvent(input$dataset_lastClickId,{
   )
   
   output$downloadData3 <- downloadHandler(
-    # This function returns a string which tells the client
-    # browser what name to use when saving the file.
     filename = 'GO_results.zip',
     content = function(fname) {
       separator <- switch(input$filetype3, "csv" = ',', "txt" = '\t')
-      # write.table(eigengene_matrix, file = file, append = FALSE, quote = TRUE, sep = separator,
-      #             eol = "\r\n", na = "NA", dec = ".", row.names = F,
-      #             col.names = F, qmethod = c("escape", "double"),
-      #             fileEncoding = "")
-
       if(separator == ','){
         fs <- paste0(enrichr_dbs, '.csv')
       }
@@ -1037,7 +972,7 @@ observeEvent(input$dataset_lastClickId,{
         write(final_genes_str, file = 'genes_list.txt', sep = "\n")
       }
       else{
-        write("Why you still download a group of files that you know they all should be empty?", file = 'genes_list.txt')
+        write("You cannot believe I disabled this function. Haha.", file = 'genes_list.txt')
       }
       zip(zipfile=fname, files=fs)
       if(file.exists(paste0(fname, ".zip"))) {file.rename(paste0(fname, ".zip"), fname)}
@@ -1045,12 +980,4 @@ observeEvent(input$dataset_lastClickId,{
     },
     contentType = "application/zip"
   )
-  #   +------------------------------------------------------------+
-  #   |
-  #   |
-  #   |                       External URLs
-  #   |
-  #   |
-  #   +--------------------------------
-  
 }
