@@ -825,18 +825,13 @@ observeEvent(input$dataset_lastClickId,{
     
     
     if (input$button_lastClickId%like%"circos"){
+      smartModal(error=F, title = "Processing", content = "We are working on your customized circos plot ...")
       cluster <- as.numeric(gsub("circos_","",input$button_lastClickId))
       genes_str <- geneCharVector_global[[cluster]]
       genes_str <- unlist(strsplit(genes_str, " /// "))
       # genes_str <- c('PHF|14','RBM|3','Nlrx1','MSL1','PHF21A','ARL10','INSR')
       print("genes_str for circos plot: ")
       print(genes_str[-1])
-      final_genes_str <<- genes_str[-1]
-      
-      output$circos_plot_ui <- renderUI({
-        plotOutput('circos_plot_component_hg38', height = "500px")
-        plotOutput('circos_plot_component_hg19', height = "500px")
-      })
       
       # import hg19 and hg38
       load("./data/UCSC_hg19_refGene_20180330.Rdata") # varname: hg19
@@ -872,13 +867,60 @@ observeEvent(input$dataset_lastClickId,{
         BED.data <- data.frame(hg19.matched[,c(4,6:7,10,14)])
         circlizeGenomics(BED.data, factors, xlim, mySpecies="hg19", myTitle = "Human Genomics (GRCh37/hg19)")
       })
-      
+      removeModal()
       print('tab4_functional_plots')
       session$sendCustomMessage("myCallbackHandler", "tab4_functional_plots")
     }
     
   })
-
+  
+  observeEvent(input$circos_button_update_1,{
+    smartModal(error=F, title = "Processing", content = "We are working on your customized circos plot ...")
+    cluster <- as.numeric(gsub("circos_","",input$button_lastClickId))
+    genes_str <- strsplit(input$textareainput_circos, "\n")[[1]]
+    genes_str <- unlist(strsplit(genes_str, " /// "))
+    print("genes_str for circos plot: ")
+    print(genes_str)
+    
+    # import hg19 and hg38
+    load("./data/UCSC_hg19_refGene_20180330.Rdata") # varname: hg19
+    load("./data/UCSC_hg38_refGene_20180330.Rdata") # varname: hg38
+    # genes_str <- c("LOC102725121", "FAM138A", "RIMS2", "LINC01128", "MMP23A", "ULK4P1")
+    hg19 <- data.frame(cbind(rownames(hg19), hg19, hg19[6]-hg19[5]))
+    hg38 <- data.frame(cbind(rownames(hg38), hg38, hg38[6]-hg38[5]))
+    colnames(hg38) = c("id","","name","chrom","strand","txStart","txEnd","cdsStart","cdsEnd","exonCount","exonStarts","exonEnds","proteinID","alignID","","","","length")
+    colnames(hg19) = c("id","","name","chrom","strand","txStart","txEnd","cdsStart","cdsEnd","exonCount","exonStarts","exonEnds","proteinID","alignID","","","","length")
+    hg19.ring <- hg19[!grepl("_", hg19$chrom),] # remove undefined chromosome
+    hg38.ring <- hg38[!grepl("_", hg38$chrom),]
+    hg19.ring <- hg19.ring[!grepl("chrM", hg19.ring$chrom),]
+    hg38.ring <- hg38.ring[!grepl("chrM", hg38.ring$chrom),]
+    hg19.matched <- hg19.ring[match(genes_str, hg19.ring$alignID, nomatch = 0), ]
+    hg38.matched <- hg38.ring[match(genes_str, hg38.ring$alignID, nomatch = 0), ]
+    hg19.ring.lengthsum <- aggregate(hg19.ring["length"],hg19.ring["chrom"],sum)
+    hg38.ring.lengthsum <- aggregate(hg38.ring["length"],hg38.ring["chrom"],sum)
+    
+    output$circos_plot_component_hg38 <- renderPlot({
+      factors_count = as.data.frame(hg38.ring.lengthsum)
+      factors = factor(factors_count[,1], levels = factors_count[,1])
+      xlim = cbind(rep(0, dim(factors_count)[1]), factors_count[,2])
+      rownames(xlim) = factors_count[,1]
+      BED.data <- data.frame(hg38.matched[,c(4,6:7,10,14)])
+      circlizeGenomics(BED.data, factors, xlim, mySpecies="hg38", myTitle = "Human Genomics (GRCh38/hg38)")
+    })
+    
+    output$circos_plot_component_hg19 <- renderPlot({
+      factors_count = as.data.frame(hg19.ring.lengthsum)
+      factors = factor(factors_count[,1], levels = factors_count[,1])
+      xlim = cbind(rep(0, dim(factors_count)[1]), factors_count[,2])
+      rownames(xlim) = factors_count[,1]
+      BED.data <- data.frame(hg19.matched[,c(4,6:7,10,14)])
+      circlizeGenomics(BED.data, factors, xlim, mySpecies="hg19", myTitle = "Human Genomics (GRCh37/hg19)")
+    })
+    removeModal()
+  })
+  
+  
+  
   #   +------------------------------------------------------------+
   #   |
   #   |

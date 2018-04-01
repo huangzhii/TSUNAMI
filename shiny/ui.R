@@ -411,24 +411,16 @@ navbarPage( theme = "style.css",
                                                tabPanel("Merged Clusters", DT::dataTableOutput("clusterResult")),
                                                tabPanel("Eigengene Matrix", tableOutput("mytable7")),
                                                tabPanel("Functional Plots",
-                                                        sidebarLayout(
-                                                          position = "right",
-                                                          sidebarPanel(
-                                                            h4("Parameters of Circos Plot", style="color: STEELBLUE"),
-                                                            textAreaInput("textareainput_circos", "Gene Symbols", value = "EXAMPLEGENE1\nEXAMPLEGENE2", width = 'auto', height = '300px', placeholder = NULL),
-                                                            actionButton("circos_button_update_1", "Update Gene Symbols",style="color: WHITE; background-color: DODGERBLUE"),
-                                                            helpText("You can directly use your own data here without any previous operation."),
-                                                            # Horizontal line ----
-                                                            tags$hr(),
-                                                            actionButton("circos_button_update_2", "Update Parameters and Plot")
-                                                          ),
-                                                          
-                                                          # Show a plot of the generated distribution
-                                                          mainPanel(
+                                                        
                                                             h4("Circos Plot", style="color: STEELBLUE"),
-                                                            uiOutput("circos_plot_ui")
-                                                          )
-                                                        )
+                                                            plotOutput("circos_plot_component_hg38", width = "500px"),
+                                                            plotOutput("circos_plot_component_hg19", width = "500px"),
+                                                            h4("Parameters of Circos Plot", style="color: STEELBLUE"),
+                                                            textAreaInput("textareainput_circos", "Gene Symbols",
+                                                                          value = "NKX2-5\nMEF2A\nGATA4\nHAND1\nHAND2\nTBX5\nSRF",
+                                                                          width = 'auto', height = '300px', placeholder = NULL),
+                                                            actionButton("circos_button_update_1", "Update Gene Symbols",style="color: WHITE; background-color: DODGERBLUE"),
+                                                            helpText("You can directly use your own data here without any previous operation.")
                                                 )
                                              ),
                                              
