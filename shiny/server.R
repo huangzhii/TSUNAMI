@@ -146,17 +146,14 @@ observeEvent(input$dataset_lastClickId,{
   removeModal()
   output$mytable4 <- DT::renderDataTable({
     # Expression Value
-    DT::datatable(data[1:ifelse(is.na(input$quicklook_row),100,input$quicklook_row), 1:ifelse(is.na(input$quicklook_col),10,input$quicklook_col)],
-                  extensions = 'Responsive', escape=F, selection = 'none')
+    DT::datatable(data,extensions = 'Responsive', escape=F, selection = 'none')
   })
   output$mytable5 <- DT::renderDataTable({
     # Expression Value
-    DT::datatable(data[ifelse(is.na(input$starting_row),1,input$starting_row):ifelse(is.na(input$quicklook_row),100,input$quicklook_row), ifelse(is.na(input$starting_col),2,input$starting_col):ifelse(is.na(input$quicklook_col),10,input$quicklook_col)],
-                  extensions = 'Responsive', escape=F, selection = 'none')
-  })
-  output$mytable6 <- renderTable({
-    # Gene ID
-    data[ifelse(is.na(input$starting_gene_row),1,input$starting_gene_row):ifelse(is.na(input$quicklook_row),100,input$quicklook_row), 1]
+    verified_data = data[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data)[1],
+                         c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data)[2])]
+    colnames(verified_data)[1] <- "Gene"
+    DT::datatable(verified_data,extensions = 'Responsive', escape=F, selection = 'none')
   })
   print('tab2')
   session$sendCustomMessage("myCallbackHandler", "tab2")
@@ -171,6 +168,7 @@ observeEvent(input$dataset_lastClickId,{
 
 
   observeEvent(input$action2,{
+    options(stringsAsFactors = FALSE)
       if(is.null(input$csvfile)){
         print("no files!")
         smartModal(error=T, title = "Important message", content = "No file uploaded! Please retry!")
@@ -197,6 +195,7 @@ observeEvent(input$dataset_lastClickId,{
             print("remove last row with \"!series_matrix_table_end\" ")
             data_temp = data_temp[-dim(data_temp)[1],]
           }
+          # data_temp <- print.data.frame(data.frame(data_temp), quote=FALSE)
           data <<- data_temp
           print("txt file Processed.")
         } else if(fileExtension == "xlsx" || fileExtension == "xls"){
@@ -205,6 +204,7 @@ observeEvent(input$dataset_lastClickId,{
             print("remove last row with \"!series_matrix_table_end\" ")
             data_temp = data_temp[-dim(data_temp)[1],]
           }
+          # data_temp <- print.data.frame(data.frame(data_temp), quote=FALSE)
           data <<- data_temp
           print("xlsx / xls file Processed.")
         }
@@ -222,17 +222,14 @@ observeEvent(input$dataset_lastClickId,{
         }
         output$mytable4 <- DT::renderDataTable({
           # Expression Value
-          DT::datatable(data[1:ifelse(is.na(input$quicklook_row),100,input$quicklook_row), 1:ifelse(is.na(input$quicklook_col),10,input$quicklook_col)],
-                        , extensions = 'Responsive', escape=F, selection = 'none')
+          DT::datatable(data,extensions = 'Responsive', escape=F, selection = 'none')
         })
         output$mytable5 <- DT::renderDataTable({
           # Expression Value
-          DT::datatable(data[ifelse(is.na(input$starting_row),1,input$starting_row):ifelse(is.na(input$quicklook_row),100,input$quicklook_row), ifelse(is.na(input$starting_col),2,input$starting_col):ifelse(is.na(input$quicklook_col),10,input$quicklook_col)],
-                        , extensions = 'Responsive', escape=F, selection = 'none')
-        })
-        output$mytable6 <- renderTable({
-          # Gene ID
-          data[ifelse(is.na(input$starting_gene_row),1,input$starting_gene_row):ifelse(is.na(input$quicklook_row),100,input$quicklook_row), 1]
+          verified_data = data[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data)[1],
+                               c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data)[2])]
+          colnames(verified_data)[1] <- "Gene"
+          DT::datatable(verified_data,extensions = 'Responsive', escape=F, selection = 'none')
         })
         print('tab2')
         session$sendCustomMessage("myCallbackHandler", "tab2")
@@ -271,7 +268,8 @@ observeEvent(input$dataset_lastClickId,{
     if (is.null(fname)){
       # data is not from GEO
       print("data is self-uploaded, so no fname defined.")
-      fname <- data[ifelse(is.na(input$starting_gene_row),1,input$starting_gene_row):dim(data)[1], 1]# Gene ID
+      fname <- data[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data)[1], 1]# Gene ID
+      fname <- noquote(fname) # convert "\"1553418_a_at\"" to "1553418_a_at" (safer)
       fname <- gsub("\"","",fname) # convert "\"1553418_a_at\"" to "1553418_a_at"
       # save(fname,file="/Users/zhi/Desktop/fname.Rdata")
     }
@@ -294,21 +292,18 @@ observeEvent(input$dataset_lastClickId,{
 
     print(dim(data))
     print(length(fname2))
-    data[ifelse(is.na(input$starting_gene_row),1,input$starting_gene_row):dim(data)[1],1] <<- fname2
+    data[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data)[1],1] <<- fname2
     # row.names(data) <- seq(1, length(fname2))
     output$mytable4 <- DT::renderDataTable({
       # Expression Value
-      DT::datatable(data[1:ifelse(is.na(input$quicklook_row),100,input$quicklook_row), 1:ifelse(is.na(input$quicklook_col),10,input$quicklook_col)],
-                    extensions = 'Responsive', escape=F, selection = 'none')
+      DT::datatable(data,extensions = 'Responsive', escape=F, selection = 'none')
     })
     output$mytable5 <- DT::renderDataTable({
       # Expression Value
-      DT::datatable(data[ifelse(is.na(input$starting_row),1,input$starting_row):ifelse(is.na(input$quicklook_row),100,input$quicklook_row), ifelse(is.na(input$starting_col),2,input$starting_col):ifelse(is.na(input$quicklook_col),10,input$quicklook_col)],
-                    extensions = 'Responsive', escape=F, selection = 'none')
-    })
-    output$mytable6 <- renderTable({
-      # Gene ID
-      data[ifelse(is.na(input$starting_gene_row),1,input$starting_gene_row):ifelse(is.na(input$quicklook_row),100,input$quicklook_row), 1]
+      verified_data = data[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data)[1],
+                           c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data)[2])]
+      colnames(verified_data)[1] <- "Gene"
+      DT::datatable(verified_data,extensions = 'Responsive', escape=F, selection = 'none')
     })
     print("Platform Conversion finished")
 
@@ -333,7 +328,7 @@ observeEvent(input$dataset_lastClickId,{
       # Step 0
       RNA <- as.matrix(data[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data)[1], ifelse(is.na(input$starting_col),2,input$starting_col):dim(data)[2]])
       class(RNA) <- "numeric"
-      geneID <- data.frame(data[ifelse(is.na(input$starting_gene_row),1,input$starting_gene_row):dim(data)[1], 1])
+      geneID <- data.frame(data[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data)[1], 1])
       print(dim(RNA))
       print(dim(geneID))
       
@@ -420,11 +415,6 @@ observeEvent(input$dataset_lastClickId,{
       finalSym <- uniGene[sortInd[1:topN]]
       finalSymChar <- as.character(finalSym)
       
-      output$summary_advanced <- renderPrint({
-        print(sprintf("Number of Genes: %d",dim(finalExp)[1]))
-        print(sprintf("Number of Samples: %d",dim(finalExp)[2]))
-      })
-      
       # advanced
       if (input$sorting_adv_checkbox){
         finalPValue <- matrix(0, ncol = 0, nrow = length(finalSym))
@@ -446,7 +436,7 @@ observeEvent(input$dataset_lastClickId,{
         # print("final P value:")
         # print(finalPValue)
         finalPValue <- as.numeric(finalPValue)
-        save(finalPValue,file="~/Desktop/finalPValue.Rdata")
+        # save(finalPValue,file="~/Desktop/finalPValue.Rdata")
         if (input$select_pval_adv_checkbox){
           finalExp <- finalExp[finalPValue<=input$advance_selection_pvalue,]
           finalSym <- finalSym[finalPValue<=input$advance_selection_pvalue]
@@ -829,9 +819,13 @@ observeEvent(input$dataset_lastClickId,{
       cluster <- as.numeric(gsub("circos_","",input$button_lastClickId))
       genes_str <- geneCharVector_global[[cluster]]
       genes_str <- unlist(strsplit(genes_str, " /// "))
+      genes_str <- genes_str[-1]
       # genes_str <- c('PHF|14','RBM|3','Nlrx1','MSL1','PHF21A','ARL10','INSR')
       print("genes_str for circos plot: ")
-      print(genes_str[-1])
+      print(genes_str)
+      updateTextAreaInput(session, "textareainput_circos",
+                          label = paste(sprintf("Number of Genes: %d", length(genes_str)), input$controller),
+                          value = paste(paste(genes_str, collapse = '\n'), input$controller))
       
       # import hg19 and hg38
       load("./data/UCSC_hg19_refGene_20180330.Rdata") # varname: hg19
@@ -849,14 +843,22 @@ observeEvent(input$dataset_lastClickId,{
       hg38.matched <- hg38.ring[match(genes_str, hg38.ring$alignID, nomatch = 0), ]
       hg19.ring.lengthsum <- aggregate(hg19.ring["length"],hg19.ring["chrom"],sum)
       hg38.ring.lengthsum <- aggregate(hg38.ring["length"],hg38.ring["chrom"],sum)
-      
+      output$circos_plot_ui_hg38 <- renderUI({
+        plotOutput("circos_plot_component_hg38", width = input$circos_param_size, height = input$circos_param_size)
+      })
+      output$circos_plot_ui_hg19 <- renderUI({
+        plotOutput("circos_plot_component_hg19", width = input$circos_param_size, height = input$circos_param_size)
+      })
       output$circos_plot_component_hg38 <- renderPlot({
         factors_count = as.data.frame(hg38.ring.lengthsum)
         factors = factor(factors_count[,1], levels = factors_count[,1])
         xlim = cbind(rep(0, dim(factors_count)[1]), factors_count[,2])
         rownames(xlim) = factors_count[,1]
         BED.data <- data.frame(hg38.matched[,c(4,6:7,10,14)])
-        circlizeGenomics(BED.data, factors, xlim, mySpecies="hg38", myTitle = "Human Genomics (GRCh38/hg38)")
+        circlizeGenomics(BED.data, factors, xlim, mySpecies="hg38", myTitle = "Human Genome (GRCh38/hg38)",
+                         input$circos_param_size,
+                         input$circos_param_genelink,
+                         input$circos_param_genesymbol)
       })
       
       output$circos_plot_component_hg19 <- renderPlot({
@@ -865,7 +867,10 @@ observeEvent(input$dataset_lastClickId,{
         xlim = cbind(rep(0, dim(factors_count)[1]), factors_count[,2])
         rownames(xlim) = factors_count[,1]
         BED.data <- data.frame(hg19.matched[,c(4,6:7,10,14)])
-        circlizeGenomics(BED.data, factors, xlim, mySpecies="hg19", myTitle = "Human Genomics (GRCh37/hg19)")
+        circlizeGenomics(BED.data, factors, xlim, mySpecies="hg19", myTitle = "Human Genome (GRCh37/hg19)",
+                         input$circos_param_size,
+                         input$circos_param_genelink,
+                         input$circos_param_genesymbol)
       })
       removeModal()
       print('tab4_functional_plots')
@@ -898,14 +903,22 @@ observeEvent(input$dataset_lastClickId,{
     hg38.matched <- hg38.ring[match(genes_str, hg38.ring$alignID, nomatch = 0), ]
     hg19.ring.lengthsum <- aggregate(hg19.ring["length"],hg19.ring["chrom"],sum)
     hg38.ring.lengthsum <- aggregate(hg38.ring["length"],hg38.ring["chrom"],sum)
-    
+    output$circos_plot_ui_hg38 <- renderUI({
+      plotOutput("circos_plot_component_hg38", width = input$circos_param_size, height = input$circos_param_size)
+    })
+    output$circos_plot_ui_hg19 <- renderUI({
+      plotOutput("circos_plot_component_hg19", width = input$circos_param_size, height = input$circos_param_size)
+    })
     output$circos_plot_component_hg38 <- renderPlot({
       factors_count = as.data.frame(hg38.ring.lengthsum)
       factors = factor(factors_count[,1], levels = factors_count[,1])
       xlim = cbind(rep(0, dim(factors_count)[1]), factors_count[,2])
       rownames(xlim) = factors_count[,1]
       BED.data <- data.frame(hg38.matched[,c(4,6:7,10,14)])
-      circlizeGenomics(BED.data, factors, xlim, mySpecies="hg38", myTitle = "Human Genomics (GRCh38/hg38)")
+      circlizeGenomics(BED.data, factors, xlim, mySpecies="hg38", myTitle = "Human Genome (GRCh38/hg38)",
+                       input$circos_param_size,
+                       input$circos_param_genelink,
+                       input$circos_param_genesymbol)
     })
     
     output$circos_plot_component_hg19 <- renderPlot({
@@ -914,12 +927,72 @@ observeEvent(input$dataset_lastClickId,{
       xlim = cbind(rep(0, dim(factors_count)[1]), factors_count[,2])
       rownames(xlim) = factors_count[,1]
       BED.data <- data.frame(hg19.matched[,c(4,6:7,10,14)])
-      circlizeGenomics(BED.data, factors, xlim, mySpecies="hg19", myTitle = "Human Genomics (GRCh37/hg19)")
+      circlizeGenomics(BED.data, factors, xlim, mySpecies="hg19", myTitle = "Human Genome (GRCh37/hg19)",
+                       input$circos_param_size,
+                       input$circos_param_genelink,
+                       input$circos_param_genesymbol)
     })
     removeModal()
   })
   
-  
+  observeEvent(input$action_finaldata4circos,{
+    smartModal(error=F, title = "Processing", content = "We are working on your customized circos plot ...")
+    
+    genes_str <- data_final[,1]
+    genes_str <- unlist(strsplit(genes_str, " /// "))
+    print("genes_str for circos plot: ")
+    print(genes_str)
+    
+    updateTextAreaInput(session, "textareainput_circos",
+                        label = paste(sprintf("Number of Genes: %d", length(genes_str)), input$controller),
+                        value = paste(paste(genes_str, collapse = '\n'), input$controller))
+    # import hg19 and hg38
+    load("./data/UCSC_hg19_refGene_20180330.Rdata") # varname: hg19
+    load("./data/UCSC_hg38_refGene_20180330.Rdata") # varname: hg38
+    # genes_str <- c("LOC102725121", "FAM138A", "RIMS2", "LINC01128", "MMP23A", "ULK4P1")
+    hg19 <- data.frame(cbind(rownames(hg19), hg19, hg19[6]-hg19[5]))
+    hg38 <- data.frame(cbind(rownames(hg38), hg38, hg38[6]-hg38[5]))
+    colnames(hg38) = c("id","","name","chrom","strand","txStart","txEnd","cdsStart","cdsEnd","exonCount","exonStarts","exonEnds","proteinID","alignID","","","","length")
+    colnames(hg19) = c("id","","name","chrom","strand","txStart","txEnd","cdsStart","cdsEnd","exonCount","exonStarts","exonEnds","proteinID","alignID","","","","length")
+    hg19.ring <- hg19[!grepl("_", hg19$chrom),] # remove undefined chromosome
+    hg38.ring <- hg38[!grepl("_", hg38$chrom),]
+    hg19.ring <- hg19.ring[!grepl("chrM", hg19.ring$chrom),]
+    hg38.ring <- hg38.ring[!grepl("chrM", hg38.ring$chrom),]
+    hg19.matched <- hg19.ring[match(genes_str, hg19.ring$alignID, nomatch = 0), ]
+    hg38.matched <- hg38.ring[match(genes_str, hg38.ring$alignID, nomatch = 0), ]
+    hg19.ring.lengthsum <- aggregate(hg19.ring["length"],hg19.ring["chrom"],sum)
+    hg38.ring.lengthsum <- aggregate(hg38.ring["length"],hg38.ring["chrom"],sum)
+    output$circos_plot_ui_hg38 <- renderUI({
+      plotOutput("circos_plot_component_hg38", width = input$circos_param_size, height = input$circos_param_size)
+    })
+    output$circos_plot_ui_hg19 <- renderUI({
+      plotOutput("circos_plot_component_hg19", width = input$circos_param_size, height = input$circos_param_size)
+    })
+    output$circos_plot_component_hg38 <- renderPlot({
+      factors_count = as.data.frame(hg38.ring.lengthsum)
+      factors = factor(factors_count[,1], levels = factors_count[,1])
+      xlim = cbind(rep(0, dim(factors_count)[1]), factors_count[,2])
+      rownames(xlim) = factors_count[,1]
+      BED.data <- data.frame(hg38.matched[,c(4,6:7,10,14)])
+      circlizeGenomics(BED.data, factors, xlim, mySpecies="hg38", myTitle = "Human Genome (GRCh38/hg38)",
+                       input$circos_param_size,
+                       input$circos_param_genelink,
+                       input$circos_param_genesymbol)
+    })
+    
+    output$circos_plot_component_hg19 <- renderPlot({
+      factors_count = as.data.frame(hg19.ring.lengthsum)
+      factors = factor(factors_count[,1], levels = factors_count[,1])
+      xlim = cbind(rep(0, dim(factors_count)[1]), factors_count[,2])
+      rownames(xlim) = factors_count[,1]
+      BED.data <- data.frame(hg19.matched[,c(4,6:7,10,14)])
+      circlizeGenomics(BED.data, factors, xlim, mySpecies="hg19", myTitle = "Human Genome (GRCh37/hg19)",
+                       input$circos_param_size,
+                       input$circos_param_genelink,
+                       input$circos_param_genesymbol)
+    })
+    removeModal()
+  })
   
   #   +------------------------------------------------------------+
   #   |

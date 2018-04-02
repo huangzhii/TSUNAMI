@@ -82,7 +82,8 @@ smartModal <- function(error=c(T,F), title = "Title", content = "Content"){
   }
 }
 
-circlizeGenomics <- function(BED.data, factors, xlim, mySpecies, myTitle){
+circlizeGenomics <- function(BED.data, factors, xlim, mySpecies, myTitle, circos_param_size, circos_param_genelink, circos_param_genesymbol){
+  # save(BED.data, file ="~/Desktop/BEDdata.Rdata")
   par(mar = c(1, 1, 1, 1))
   # reference: http://zuguang.de/circlize_book/book/initialize-genomic-plot.html#initialize-cytoband
   circos.clear()
@@ -123,7 +124,24 @@ circlizeGenomics <- function(BED.data, factors, xlim, mySpecies, myTitle){
                         # numeric.column is automatically passed to `circos.genomicPoints()`
                         circos.genomicPoints(region, value = 1, ...)
                       })
-  circos.genomicLabels(BED.data, labels.column = 5, side = "inside",
+  if(circos_param_genelink){
+    # circos.initializeWithIdeogram(plotType = NULL)
+    for (i in 1:length(BED.data$chrom)){
+      for (j in 1:length(BED.data$chrom)){
+        if(j<i){
+          circos.link(sector.index1=BED.data$chrom[i], point1=c(BED.data$txStart[i],BED.data$txEnd[i]),
+                      sector.index2=BED.data$chrom[j], point2=c(BED.data$txStart[j],BED.data$txEnd[j]),
+                      col = "cadetblue1")
+          # R color: http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf
+        }
+      }
+    }
+  }
+  if(circos_param_genesymbol){
+    circos.genomicLabels(BED.data, labels.column = 5, side = "inside",
                        col = as.numeric(factor(BED.data[[1]])), line_col = as.numeric(factor(BED.data[[1]])))
+  }
+  
+  
   circos.clear()
 }

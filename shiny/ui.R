@@ -192,14 +192,14 @@ navbarPage( theme = "style.css",
                                                tabsetPanel(
                                                  tabPanel("Main",
                                                    # Input: Select a file ----
-                                                   h5("Choose Preview dimensions"),
-                                                   helpText("Preview starting from the beginning to specific rows and columns.", style="margin: 0px"),
-                                                   helpText("Default value when leave it blank: # of rows = 100, # of columns = 10.", style="color: STEELBLUE; font-size: 12px"),
-                                                   
-                                                   fluidRow(
-                                                     column(6, numericInput("quicklook_row", "# of rows:", 100, step = 1, min = 1)),
-                                                     column(6, numericInput("quicklook_col", "# of columns:", 10, step = 1, min = 1))
-                                                   ),
+                                                   # h5("Choose Preview dimensions"),
+                                                   # helpText("Preview starting from the beginning to specific rows and columns.", style="margin: 0px"),
+                                                   # helpText("Default value when leave it blank: # of rows = 100, # of columns = 10.", style="color: STEELBLUE; font-size: 12px"),
+                                                   # 
+                                                   # fluidRow(
+                                                   #   column(6, numericInput("quicklook_row", "# of rows:", 100, step = 1, min = 1)),
+                                                   #   column(6, numericInput("quicklook_col", "# of columns:", 10, step = 1, min = 1))
+                                                   # ),
                                                    # Horizontal line ----
                                                    # tags$hr(),
                                                    h5("Verify starting column and row of expression data"),
@@ -207,15 +207,15 @@ navbarPage( theme = "style.css",
                                                    helpText("Default value when leave them blank: starting row = 1, starting column = 2.", style="color: STEELBLUE; font-size: 12px"),
                                                    
                                                    fluidRow(
-                                                     column(6, numericInput("starting_row", "starting row:", 1, step = 1, min = 1)),
-                                                     column(6, numericInput("starting_col", "starting column:", 2, step = 1, min = 1))
+                                                     column(6, numericInput("starting_row", "Gene and Expression starting row:", 1, step = 1, min = 1)),
+                                                     column(6, numericInput("starting_col", "Expression starting column:", 2, step = 1, min = 1))
                                                    ),
                                                    # Horizontal line ----
                                                    # tags$hr(),
-                                                   h5("Verify Gene Symbol"),
-                                                   helpText("We suppose Gene Symbol is in column 1.", style="margin: 0px"),
-                                                   helpText("Default value when leave it blank: 1.", style="color: STEELBLUE; font-size: 12px"),
-                                                   numericInput("starting_gene_row", "starting row:", 1, step = 1, min = 1),
+                                                   # h5("Verify Gene Symbol"),
+                                                   # helpText("We suppose Gene Symbol is in column 1.", style="margin: 0px"),
+                                                   # helpText("Default value when leave it blank: 1.", style="color: STEELBLUE; font-size: 12px"),
+                                                   # numericInput("starting_gene_row", "starting row:", 1, step = 1, min = 1),
                                                    
                                                    # Horizontal line ----
                                                    tags$hr(),
@@ -235,13 +235,13 @@ navbarPage( theme = "style.css",
                                                  ), # EOF tabpanel main
                                                  tabPanel("Advanced",
                                                     h5("Choose Advanced Processes"),
-                                                    verbatimTextOutput("summary_advanced"),
                                                     h5("Sorting"),
                                                     checkboxInput("sorting_adv_checkbox", "Sort expression data ascending to learn OS / EFS", F),
                                                     selectizeInput(
                                                       'choose_OS_EFS', 'Specify OS or EFS:',
                                                       choices = c("OS", "EFS")),
-                                                    helpText("If yes, please select objective row: row index and range of columns."),
+                                                    helpText("If yes, please select objective row: row index and range of columns. Please refer OS/EFS position from Original Data (not Verified Data)."),
+                                                    helpText("OS_IND/EFS_IND must either valued 0 or 1. OS/EFS must be numeric."),
                                                     numericInput("row_osefs_ind", "Row of OS_IND/EFS_IND:", 9, step = 1, width = NULL, min = 1),
                                                     numericInput("row_osefs", "Row of OS/EFS:", 10, step = 1, width = NULL, min = 1),
                                                     numericInput("sort_col_start", "Starting Col:", 2, step = 1, width = NULL, min = 1),
@@ -267,8 +267,7 @@ navbarPage( theme = "style.css",
                                                tabsetPanel(
                                                  id = 'tabset2',
                                                  tabPanel("Original Data", DT::dataTableOutput("mytable4")),
-                                                 tabPanel("Expression Value", DT::dataTableOutput("mytable5")),
-                                                 tabPanel("Gene Symbol", tableOutput("mytable6"))
+                                                 tabPanel("Verified Data", DT::dataTableOutput("mytable5"))
                                                )
                                              )
                                            ) # EOF siderbarLayout
@@ -413,14 +412,31 @@ navbarPage( theme = "style.css",
                                                tabPanel("Functional Plots",
                                                         
                                                             h4("Circos Plot", style="color: STEELBLUE"),
-                                                            plotOutput("circos_plot_component_hg38", width = "500px"),
-                                                            plotOutput("circos_plot_component_hg19", width = "500px"),
-                                                            h4("Parameters of Circos Plot", style="color: STEELBLUE"),
-                                                            textAreaInput("textareainput_circos", "Gene Symbols",
-                                                                          value = "NKX2-5\nMEF2A\nGATA4\nHAND1\nHAND2\nTBX5\nSRF",
-                                                                          width = 'auto', height = '300px', placeholder = NULL),
-                                                            actionButton("circos_button_update_1", "Update Gene Symbols",style="color: WHITE; background-color: DODGERBLUE"),
-                                                            helpText("You can directly use your own data here without any previous operation.")
+                                                            uiOutput("circos_plot_ui_hg38"),
+                                                            uiOutput("circos_plot_ui_hg19"),
+                                                            # plotOutput("circos_plot_component_hg38", width = "500px"),
+                                                            # plotOutput("circos_plot_component_hg19", width = "500px"),
+                                                        
+                                                        h4("Parameters of Circos Plot", style="color: STEELBLUE"),
+                                                        fluidRow(
+                                                            column(6,
+                                                              textAreaInput("textareainput_circos", "Gene Symbols",
+                                                                            value = "NKX2-5\nMEF2A\nGATA4\nHAND1\nHAND2\nTBX5\nSRF",
+                                                                            width = 'auto', height = '300px', placeholder = NULL)
+                                                            ),
+                                                            column(6,
+                                                                   sliderInput("circos_param_size", "Plot Size:",
+                                                                               min = 100, max = 2000,
+                                                                               value = 500),
+                                                                   fluidRow(
+                                                                     column(6, checkboxInput("circos_param_genelink", "Show Gene Links", TRUE)),
+                                                                     column(6, checkboxInput("circos_param_genesymbol", "Show Gene Symbols", TRUE))
+                                                                   )
+                                                            )
+                                                        ),
+                                                        actionButton("circos_button_update_1", "Update Plots",style="color: WHITE; background-color: DODGERBLUE"),
+                                                        helpText("You can directly use your own data here without any previous operation.")
+                                                        
                                                 )
                                              ),
                                              
