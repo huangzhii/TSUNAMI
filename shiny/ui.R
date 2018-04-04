@@ -493,7 +493,7 @@ navbarPage( theme = "style.css",
                                              downloadButton('downloadData3', 'Download'),
                                              br(),
                                              br(),
-                                             textAreaInput("textareainput_GOEA", "Gene Symbols", value = "", width = 'auto', height = '300px', placeholder = NULL),
+                                             textAreaInput("textareainput_GOEA", "Gene Symbols", value = "", height = '300px', placeholder = NULL),
                                              helpText("The target gene symbols allow users to copy and use in other GO analysis website."),
                                              
                                              h5(a("ToppGene", href="https://toppgene.cchmc.org/enrichment.jsp", target="_blank")),
