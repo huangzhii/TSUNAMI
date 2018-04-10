@@ -237,17 +237,22 @@ navbarPage( theme = "style.css",
                                                     h5("Choose Advanced Processes"),
                                                     h5("Sorting"),
                                                     checkboxInput("sorting_adv_checkbox", "Sort expression data ascending to learn OS / EFS", F),
-                                                    selectizeInput(
-                                                      'choose_OS_EFS', 'Specify OS or EFS:',
-                                                      choices = c("OS", "EFS")),
-                                                    helpText("If yes, please select objective row: row index and range of columns. Please refer OS/EFS position from Original Data (not Verified Data)."),
-                                                    helpText("OS_IND/EFS_IND must either valued 0 or 1. OS/EFS must be numeric."),
-                                                    numericInput("row_osefs_ind", "Row of OS_IND/EFS_IND:", 9, step = 1, width = NULL, min = 1),
-                                                    numericInput("row_osefs", "Row of OS/EFS:", 10, step = 1, width = NULL, min = 1),
-                                                    numericInput("sort_col_start", "Starting Col:", 2, step = 1, width = NULL, min = 1),
-                                                    checkboxInput("select_pval_adv_checkbox", "Pick Expression Data only with satisfied P-value.", F),
-                                                    helpText("Calculated by median and the (non-central) Chi-Squared Distribution."),
-                                                    numericInput("advance_selection_pvalue", "P-value smaller than:", 0.05, step = 0.001, width = NULL, min = 0)
+                                                    conditionalPanel(condition="input.sorting_adv_checkbox",
+                                                                     selectizeInput(
+                                                                       'choose_OS_EFS', 'Specify OS or EFS:',
+                                                                       choices = c("OS", "EFS")),
+                                                                     helpText("If yes, please select objective row: row index and range of columns. Please refer OS/EFS position from Original Data (not Verified Data)."),
+                                                                     helpText("OS_IND/EFS_IND must either valued 0 or 1. OS/EFS must be numeric."),
+                                                                     numericInput("row_osefs_ind", "Row of OS_IND/EFS_IND:", 9, step = 1, width = NULL, min = 1),
+                                                                     numericInput("row_osefs", "Row of OS/EFS:", 10, step = 1, width = NULL, min = 1),
+                                                                     numericInput("sort_col_start", "Starting Col:", 2, step = 1, width = NULL, min = 1),
+                                                                     checkboxInput("select_pval_adv_checkbox", "Pick Expression Data only with satisfied P-value.", F),
+                                                                     conditionalPanel(condition="input.select_pval_adv_checkbox",
+                                                                                      helpText("Calculated by median and the (non-central) Chi-Squared Distribution."),
+                                                                                      numericInput("advance_selection_pvalue", "P-value smaller than:", 0.05, step = 0.001, width = NULL, min = 0)
+                                                                     )
+                                                                     )
+                                                    
                                                  )
                                                ), # EOF tabsetPanel
                                                actionButton("action3", "Continue to Co-Expression Analysis",style="color: WHITE; background-color: DODGERBLUE")
