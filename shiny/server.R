@@ -873,8 +873,8 @@ observeEvent(input$dataset_lastClickId,{
                          input$circos_param_genesymbol)
       })
       removeModal()
-      print('tab4_functional_plots')
-      session$sendCustomMessage("myCallbackHandler", "tab4_functional_plots")
+      print('tab4_circos_plots')
+      session$sendCustomMessage("myCallbackHandler", "tab4_circos_plots")
     }
     
   })

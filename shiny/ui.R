@@ -85,8 +85,8 @@ navbarPage( theme = "style.css",
                                                                      if(typeMessage == "tab4"){
                                                                      $("a:contains(4. Result)").click();
                                                                      }
-                                                                     if(typeMessage == "tab4_functional_plots"){
-                                                                     $("a:contains(Functional Plots)").click();
+                                                                     if(typeMessage == "tab4_circos_plots"){
+                                                                     $("a:contains(Circos Plots)").click();
                                                                      }
                                                                      if(typeMessage == "tab5"){
                                                                      $("a:contains(5. GO Enrichment Analysis)").click();
@@ -376,7 +376,7 @@ navbarPage( theme = "style.css",
                                                                helpText("Circos Plot"),
                                                                actionButton("action_finaldata4circos", "Circos Plot for All Genes",
                                                                             style="color: WHITE; background-color: #FFC300"),
-                                                               helpText("When finished, go to 4. Result functional plots section.", style="color: #D5A200; font-size: 12px"),
+                                                               helpText("When finished, go to 4. Result Circos plots section.", style="color: #D5A200; font-size: 12px"),
                                                                helpText("We strongly recomment user clean the genes first through our Data Preprocessing section. If genes are not get cleaned, such as RBM|123 cannot be found which RBM is supposed to be in hg38 database.", style="color: #D5A200; font-size: 12px")
                                                         )
                                                       ),
@@ -409,7 +409,7 @@ navbarPage( theme = "style.css",
                                                id = 'tabset',
                                                tabPanel("Merged Clusters", DT::dataTableOutput("clusterResult")),
                                                tabPanel("Eigengene Matrix", tableOutput("mytable7")),
-                                               tabPanel("Functional Plots",
+                                               tabPanel("Circos Plots",
                                                         
                                                         h4("Circos Plot", style="color: STEELBLUE"),
                                                         uiOutput("circos_plot_ui_hg38"),
