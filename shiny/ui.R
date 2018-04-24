@@ -567,6 +567,13 @@ navbarPage( theme = "style.css",
             ),
             tabPanel("News",
                      h3("News", style="color: STEELBLUE; padding-bottom: 20px"),
+                     h4("April 24, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
+                     tags$ul(
+                       tags$li("Updated GEO offline data list to date 04/24/2018."),
+                       tags$li("Fixed a bug when percentiles are 0 or NULL."),
+                       tags$li("Moved platform converter to the right siderbar."),
+                       tags$li("Add conditional Panel on Advanced Data Preprocessing.")
+                     ),
                      h4("March 27, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
                      tags$ul(
                        tags$li("Texts are modified."),
