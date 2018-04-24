@@ -14,12 +14,14 @@ library(plotly)
 library(openxlsx)
 library(survival)
 library(naturalsort)
+library(shinyWidgets)
 # circos plot
 library(circlize)
 # library(topGO) # Somehow conflict with WGCNA and GEOquery. Deprecated.
 
 options(shiny.maxRequestSize=300*1024^2) # to the top of server.R would increase the limit to 300MB
 options(shiny.sanitize.errors = FALSE)
+options(stringAsFactors = FALSE)
 source("utils.R")
 # setwd("/Users/zhi/Desktop/GeneCoexpression/RGUI"); #mac #remove when deploy to shinyapps.io
 # source("./lmQCM/GeneCoExpressionAnalysis.R")
@@ -936,12 +938,17 @@ observeEvent(input$dataset_lastClickId,{
   })
   
   observeEvent(input$action_finaldata4circos,{
+    if(is.null(data_final)){
+      sendSweetAlert(session, title = "Insufficient Input Data", text = "Please finish previous steps.",
+                     type = "error", btn_labels = "OK", html = F, closeOnClickOutside = T)
+      return()
+    }
     smartModal(error=F, title = "Processing", content = "We are working on your customized circos plot ...")
-    
-    genes_str <- data_final[,1]
+    # save(data_final, file = "~/Desktop/datafinal.Rdata")
+    genes_str <- levels(data_final[,1])
     genes_str <- unlist(strsplit(genes_str, " /// "))
-    print("genes_str for circos plot: ")
-    print(genes_str)
+    # print("genes_str for circos plot: ")
+    # print(genes_str)
     
     updateTextAreaInput(session, "textareainput_circos",
                         label = paste(sprintf("Number of Genes: %d", length(genes_str)), input$controller),
@@ -992,6 +999,8 @@ observeEvent(input$dataset_lastClickId,{
                        input$circos_param_genesymbol)
     })
     removeModal()
+    session$sendCustomMessage("myCallbackHandler", "tab4")
+    session$sendCustomMessage("myCallbackHandler", "tab4_circos_plots")
   })
   
   #   +------------------------------------------------------------+
