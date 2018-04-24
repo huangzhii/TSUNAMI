@@ -65,11 +65,11 @@ function(input, output, session) {
     
     # Create a Progress object
     progress <- shiny::Progress$new(session)
-    progress$set(message = "Loading NCBI GEO database. Last fetched version: 01/31/2018", value = 0)
+    progress$set(message = "Loading NCBI GEO database. Last fetched version: 04/24/2018", value = 0)
     # Close the progress when this reactive exits (even if there's an error)
     on.exit(progress$close())
     # NCBI GEO
-    load("./data/GEO_20180131.Rdata")
+    load("./data/GEO_20180424.Rdata")
     GEO[["Actions"]] <- paste0('<div><button type="button" class="btn-analysis" id=dataset_analysis_',1:nrow(GEO),'>Analyze</button></div>')
     colnames(GEO)[which(names(GEO) == "Sample.Count")] <- "Samples"
     GEO <- GEO %>% select("Samples", everything())
@@ -334,20 +334,22 @@ observeEvent(input$dataset_lastClickId,{
       print(dim(RNA))
       print(dim(geneID))
       
+      
       # convert na to 0
       if (input$checkbox_NA){RNA[is.na(RNA)] <- 0}
 
       # Remove data with lowest 20% absolute exp value shared by all samples
       percentile <- ifelse(is.na(input$absolute_expval),0,input$absolute_expval)/100.
       print(sprintf("percentile 1: %f",percentile))
-      # save(RNA, file="/Users/zhi/Desktop/RNA.Rdata")
+      # save(RNA, file="~/Desktop/RNA.Rdata")
+      # save(geneID, file="~/Desktop/geneID.Rdata")
       if (percentile > 0){
         RNA_filtered1 = RNA[apply(RNA,1,max) > quantile(RNA, percentile)[[1]], ]
         geneID_filtered1 = geneID[apply(RNA,1,max) > quantile(RNA, percentile)[[1]], ]
       }
       else {
         RNA_filtered1 = RNA
-        geneID_filtered1 = geneID
+        geneID_filtered1 = as.matrix(geneID)
       }
       
       print("after remove lowest k% abs exp value:")

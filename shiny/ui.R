@@ -210,8 +210,13 @@ navbarPage( theme = "style.css",
                                                             column(6, numericInput("starting_row", "Gene and Expression starting row:", 1, step = 1, min = 1)),
                                                             column(6, numericInput("starting_col", "Expression starting column:", 2, step = 1, min = 1))
                                                           ),
-                                                          # Horizontal line ----
-                                                          # tags$hr(),
+                                                          h5("Convert Probe ID to Gene Symbol"),
+                                                          helpText("Convert Probe ID to Gene Symbol with Platform GPL*** (Optional for self-uploaded data):"),
+                                                          tags$span(style="color:STEELBLUE", "Be sure to verify (modify) Gene Symbol."),
+                                                          fluidRow(
+                                                            column(8, textInput("platform_text", NULL, value = "Unknown", width = NULL, placeholder = NULL)),
+                                                            column(4, actionButton("action_platform", "Convert"))
+                                                          ),
                                                           # h5("Verify Gene Symbol"),
                                                           # helpText("We suppose Gene Symbol is in column 1.", style="margin: 0px"),
                                                           # helpText("Default value when leave it blank: 1.", style="color: STEELBLUE; font-size: 12px"),
@@ -235,19 +240,23 @@ navbarPage( theme = "style.css",
                                                  ), # EOF tabpanel main
                                                  tabPanel("Advanced",
                                                           h5("Choose Advanced Processes"),
-                                                          h5("Sorting"),
                                                           checkboxInput("sorting_adv_checkbox", "Sort expression data ascending to learn OS / EFS", F),
-                                                          selectizeInput(
-                                                            'choose_OS_EFS', 'Specify OS or EFS:',
-                                                            choices = c("OS", "EFS")),
-                                                          helpText("If yes, please select objective row: row index and range of columns. Please refer OS/EFS position from Original Data (not Verified Data)."),
-                                                          helpText("OS_IND/EFS_IND must either valued 0 or 1. OS/EFS must be numeric."),
-                                                          numericInput("row_osefs_ind", "Row of OS_IND/EFS_IND:", 9, step = 1, width = NULL, min = 1),
-                                                          numericInput("row_osefs", "Row of OS/EFS:", 10, step = 1, width = NULL, min = 1),
-                                                          numericInput("sort_col_start", "Starting Col:", 2, step = 1, width = NULL, min = 1),
+                                                          conditionalPanel(condition = "input.sorting_adv_checkbox == 1",
+                                                                           selectizeInput(
+                                                                             'choose_OS_EFS', 'Specify OS or EFS:',
+                                                                             choices = c("OS", "EFS")),
+                                                                           helpText("If yes, please select objective row: row index and range of columns. Please refer OS/EFS position from Original Data (not Verified Data)."),
+                                                                           helpText("OS_IND/EFS_IND must either valued 0 or 1. OS/EFS must be numeric."),
+                                                                           numericInput("row_osefs_ind", "Row of OS_IND/EFS_IND:", 9, step = 1, width = NULL, min = 1),
+                                                                           numericInput("row_osefs", "Row of OS/EFS:", 10, step = 1, width = NULL, min = 1),
+                                                                           numericInput("sort_col_start", "Starting Col:", 2, step = 1, width = NULL, min = 1)
+                                                          ),
                                                           checkboxInput("select_pval_adv_checkbox", "Pick Expression Data only with satisfied P-value.", F),
-                                                          helpText("Calculated by median and the (non-central) Chi-Squared Distribution."),
-                                                          numericInput("advance_selection_pvalue", "P-value smaller than:", 0.05, step = 0.001, width = NULL, min = 0)
+                                                          conditionalPanel(condition = "input.select_pval_adv_checkbox == 1",
+                                                                           helpText("Calculated by median and the (non-central) Chi-Squared Distribution."),
+                                                                           numericInput("advance_selection_pvalue", "P-value smaller than:", 0.05, step = 0.001, width = NULL, min = 0)
+                                                          )
+                                                          
                                                  )
                                                ), # EOF tabsetPanel
                                                actionButton("action3", "Continue to Co-Expression Analysis",style="color: WHITE; background-color: DODGERBLUE")
@@ -257,12 +266,6 @@ navbarPage( theme = "style.css",
                                              mainPanel(
                                                h5("Data Summary"),
                                                verbatimTextOutput("summary"),
-                                               helpText("Convert Probe ID to Gene Symbol with Platform GPL*** (Optional for self-uploaded data):"),
-                                               tags$span(style="color:STEELBLUE", "Be sure to verify (modify) Gene Symbol starting row on the Sidebar Panel!"),
-                                               fluidRow(
-                                                 column(6, textInput("platform_text", NULL, value = "Unknown", width = NULL, placeholder = NULL)),
-                                                 column(6, actionButton("action_platform", "Convert"))
-                                               ),
                                                h5("Data Preview"),
                                                tabsetPanel(
                                                  id = 'tabset2',
@@ -528,11 +531,11 @@ navbarPage( theme = "style.css",
                        HTML("<iframe src=\"https://docs.google.com/presentation/d/e/2PACX-1vSv-c_P5P2dFCo9oP67JeBWRIrjZkxLgEkytC6edxUps7l4udMdWHqZx9kiltOwlIoWyWgJH-yDPqJY/embed?start=false&loop=false&delayms=3000\" frameborder=\"0\" width=\"960\" height=\"749\" allowfullscreen=\"true\" mozallowfullscreen=\"true\" webkitallowfullscreen=\"true\"></iframe>"),
                        style="text-align: center; padding: 20px"
                      ),
-                     h4("Video Tutorial", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
-                     tags$div(
-                       HTML('<iframe width="720" height="480" src="https://www.youtube.com/embed/d3eDKqm5yA0" frameborder="0" allowfullscreen></iframe>'),
-                       style="text-align: center; padding: 20px"
-                     ),
+                     # h4("Video Tutorial", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
+                     # tags$div(
+                     #   HTML('<iframe width="720" height="480" src="https://www.youtube.com/embed/d3eDKqm5yA0" frameborder="0" allowfullscreen></iframe>'),
+                     #   style="text-align: center; padding: 20px"
+                     # ),
                      h4("Github", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
                      tags$div(
                        a("https://github.com/huangzhii/TSUNAMI", href="https://github.com/huangzhii/TSUNAMI"),
