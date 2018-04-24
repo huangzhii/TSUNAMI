@@ -668,7 +668,7 @@ navbarPage( theme = "style.css",
             # )
             tags$div(
               p(a("TSUNAMI", href="https://apps.medgen.iupui.edu/rsc/tsunami"), "Version v1.8 | ", a("IUSM",href="https://medicine.iu.edu/", target="_blank"), " | ", a("RI",href="http://www.regenstrief.org/", target="_blank"), style="color: grey; font-size: 12px"), 
-              p("Questions and feedback: zhihuan(at)umail(dot)iu(dot)edu | ", a("Report Issue", href="https://github.com/huangzhii/TSUNAMI/issues", target="_blank"), " | ", a("Github", href="https://github.com/huangzhii/TSUNAMI/", target="_blank"), style="color: grey; font-size: 12px"),
+              p("Questions and feedback: zhihuan@iu.edu | ", a("Report Issue", href="https://github.com/huangzhii/TSUNAMI/issues", target="_blank"), " | ", a("Github", href="https://github.com/huangzhii/TSUNAMI/", target="_blank"), style="color: grey; font-size: 12px"),
               style="text-align: center; padding-top: 40px"
             )
 )
