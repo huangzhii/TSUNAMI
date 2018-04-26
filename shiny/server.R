@@ -419,9 +419,9 @@ observeEvent(input$dataset_lastClickId,{
       finalSym <- uniGene[sortInd[1:topN]]
       finalSymChar <- as.character(finalSym)
       
-      save(finalExp, file = "~/Desktop/finalExp.Rdata")
-      save(finalSym, file = "~/Desktop/finalSym.Rdata")
-      save(finalSymChar, file = "~/Desktop/finalSymChar.Rdata")
+      # save(finalExp, file = "~/Desktop/finalExp.Rdata")
+      # save(finalSym, file = "~/Desktop/finalSym.Rdata")
+      # save(finalSymChar, file = "~/Desktop/finalSymChar.Rdata")
       
       # advanced
       if (input$sorting_adv_checkbox){
