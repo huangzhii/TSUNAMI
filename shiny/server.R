@@ -419,6 +419,10 @@ observeEvent(input$dataset_lastClickId,{
       finalSym <- uniGene[sortInd[1:topN]]
       finalSymChar <- as.character(finalSym)
       
+      save(finalExp, file = "~/Desktop/finalExp.Rdata")
+      save(finalSym, file = "~/Desktop/finalSym.Rdata")
+      save(finalSymChar, file = "~/Desktop/finalSymChar.Rdata")
+      
       # advanced
       if (input$sorting_adv_checkbox){
         finalPValue <- matrix(0, ncol = 0, nrow = length(finalSym))
@@ -433,7 +437,7 @@ observeEvent(input$dataset_lastClickId,{
           rr_sorted = rr_sorted_list$x
           rr_sorted_idx = rr_sorted_list$ix
           medianB <- rep(0, length(rr))
-          medianB[ rr_sorted_idx > length(rr)/2 ] = 1
+          medianB[ rr_sorted_idx[ceiling(length(rr)/2):length(rr)] ] = 1
           ss <- survdiff(Surv(OS, OS_IND) ~ medianB)
           finalPValue[i] <- 1-pchisq(ss$chisq, 1)
         }
