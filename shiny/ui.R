@@ -528,6 +528,12 @@ navbarPage( theme = "style.css",
                      h3("Tutorial", style="color: STEELBLUE; padding-bottom: 20px"),
                      h4("Google Slides", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
                      tags$div(
+                       HTML("<iframe src=\"https://docs.google.com/presentation/d/e/2PACX-1vRoTd-UJbIyX6JEraVA1jZw_BWunHm_3qiq3qtxFE3y2DXjopc-SsnGmPXIalOof4iRX5d2eMfqGbji/embed?start=false&loop=false&delayms=3000\" frameborder=\"0\" width=\"960\" height=\"600\" allowfullscreen=\"true\" mozallowfullscreen=\"true\" webkitallowfullscreen=\"true\"></iframe>"),
+                       style="text-align: center; padding: 20px"
+                     ),
+                     h3("Presentation", style="color: STEELBLUE; padding-bottom: 20px"),
+                     h4("Google Slides", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
+                     tags$div(
                        HTML("<iframe src=\"https://docs.google.com/presentation/d/e/2PACX-1vSv-c_P5P2dFCo9oP67JeBWRIrjZkxLgEkytC6edxUps7l4udMdWHqZx9kiltOwlIoWyWgJH-yDPqJY/embed?start=false&loop=false&delayms=3000\" frameborder=\"0\" width=\"960\" height=\"749\" allowfullscreen=\"true\" mozallowfullscreen=\"true\" webkitallowfullscreen=\"true\"></iframe>"),
                        style="text-align: center; padding: 20px"
                      ),
