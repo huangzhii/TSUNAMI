@@ -618,7 +618,7 @@ observeEvent(input$dataset_lastClickId,{
         return()
       }
       #WGCNA
-      smartModal <- function(error=F, title = "Using WGCNA to calculate merged clusters", content = "Calculating. This could take a while depend on number of genes. Please be patient.")
+      smartModal(error=F, title = "Using WGCNA to calculate merged clusters", content = "Calculating. This could take a while depend on number of genes. Please be patient.")
 
       row.names(finalExp) <- finalSym
       datExpr <- t(finalExp) # gene should be colnames, sample should be rownames
