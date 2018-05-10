@@ -342,7 +342,7 @@ navbarPage( theme = "style.css",
                                                       helpText("power (β, Default = 6): The soft thresholding. 6 is large enough so that the resulting network exhibited approximate scale free topology."),
                                                       helpText("reassignThreshold (Default = 0): P-value ratio threshold for reassigning genes between modules."),
                                                       helpText("mergeCutHeight (Default = 0.25): Dendrogram cut height for module merging."),
-                                                      helpText("verbose (Default = 3): Integer level of verbosity. Zero means silent, higher values make the output progressively more and more verbose."),
+                                                      # helpText("verbose (Default = 3): Integer level of verbosity. Zero means silent, higher values make the output progressively more and more verbose."),
                                                       helpText("minModuleSize (Default = 10): Minimum module size for module detection."),
                                                       fluidRow(
                                                         column(6, numericInput("power", "power (β):", 6, step = 1, min = 1)),
@@ -350,9 +350,9 @@ navbarPage( theme = "style.css",
                                                       ),
                                                       fluidRow(
                                                         column(6, numericInput("mergeCutHeight", "Merge Cut Height:", 0.25, step = 0.01)),
-                                                        column(6, numericInput("verbose", "verbose:", 3, step = 1))
+                                                        # column(6, numericInput("verbose", "verbose:", 3, step = 1))
+                                                        column(6, numericInput("minModuleSize", "Minimum Module Size:", 10, step = 1, width = NULL))
                                                       ),
-                                                      numericInput("minModuleSize", "Minimum Module Size:", 10, step = 1, width = NULL),
                                                       
                                                       # Horizontal line ----
                                                       tags$hr(),
