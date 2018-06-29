@@ -122,7 +122,13 @@ observeEvent(input$dataset_lastClickId,{
 
   if (length(gset) > 1) idx <- grep("GPL90", attr(gset, "names")) else idx <- 1
   gset <- gset[[idx]]
-  edata <- exprs(gset) #This is the expression matrix
+  edata <<- exprs(gset) #This is the expression matrix
+  if (is.null(dim(edata))){
+    removeModal()
+    print("edata doesn't have any value")
+    smartModal(error=T, title = "Important message", content = "edata doesn't have any value. Please contact the author.")
+    return()
+  }
   if (dim(edata)[1] == 0){
     removeModal()
     print("No expression data")
@@ -482,7 +488,7 @@ observeEvent(input$dataset_lastClickId,{
     }
       #lmQCM
       smartModal(error=F, title = "Using lmQCM to calculate merged clusters", content = "Calculating. This could be several seconds to several minutes depends on number of genes. Please be patient.")
-      mergedCluster <- lmQCM(finalExp, input$gamma, input$t, input$lambda, input$beta, input$minClusterSize, input$massiveCC)
+      mergedCluster <- lmQCM(finalExp, input$gamma, input$t, input$lambda, input$beta, input$minClusterSize, input$massiveCC, input$lmQCM_weight_normalization)
       geneCharVector <- matrix(0, nrow = 0, ncol = length(mergedCluster))
       temp_eigengene <- matrix(0, nrow = length(mergedCluster), ncol = dim(finalExp)[2]) # Clusters * Samples
 
@@ -610,7 +616,7 @@ observeEvent(input$dataset_lastClickId,{
         return()
       }
       #WGCNA
-      smartModal <- function(error=F, title = "Using WGCNA to calculate merged clusters", content = "Calculating. This could take a while depend on number of genes. Please be patient.")
+      smartModal(error=F, title = "Using WGCNA to calculate merged clusters", content = "Calculating. This could take a while depend on number of genes. Please be patient.")
 
       row.names(finalExp) <- finalSym
       datExpr <- t(finalExp) # gene should be colnames, sample should be rownames
@@ -633,7 +639,7 @@ observeEvent(input$dataset_lastClickId,{
                              numericLabels = TRUE, pamRespectsDendro = FALSE,
                              saveTOMs = FALSE,
                              saveTOMFileBase = "femaleMouseTOM",
-                             verbose = input$verbose)
+                             verbose = 0)
 
       netcolors = net$colors
       matrixdata<- data.frame(cbind(finalSymChar, netcolors))

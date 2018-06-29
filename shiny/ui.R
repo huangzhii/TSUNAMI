@@ -1,5 +1,6 @@
 # Zhi Huang 03/28/2018
 library(plotly)
+library(shinyWidgets)
 navbarPage( theme = "style.css",
 
             # title="bioinfo tool",
@@ -210,6 +211,13 @@ navbarPage( theme = "style.css",
                                                      column(6, numericInput("starting_row", "Gene and Expression starting row:", 1, step = 1, min = 1)),
                                                      column(6, numericInput("starting_col", "Expression starting column:", 2, step = 1, min = 1))
                                                    ),
+                                                   
+                                                   helpText("Convert Probe ID to Gene Symbol with Platform GPL*** (Optional for self-uploaded data):"),
+                                                   tags$span(style="color:STEELBLUE", "Be sure to verify (modify) Gene Symbol starting row on the Sidebar Panel!"),
+                                                   fluidRow(
+                                                     column(8, textInput("platform_text", NULL, value = "Unknown", width = NULL, placeholder = NULL)),
+                                                     column(4, actionButton("action_platform", "Convert"))
+                                                   ),
                                                    # Horizontal line ----
                                                    # tags$hr(),
                                                    # h5("Verify Gene Symbol"),
@@ -262,12 +270,6 @@ navbarPage( theme = "style.css",
                                              mainPanel(
                                                h5("Data Summary"),
                                                verbatimTextOutput("summary"),
-                                               helpText("Convert Probe ID to Gene Symbol with Platform GPL*** (Optional for self-uploaded data):"),
-                                               tags$span(style="color:STEELBLUE", "Be sure to verify (modify) Gene Symbol starting row on the Sidebar Panel!"),
-                                               fluidRow(
-                                                 column(6, textInput("platform_text", NULL, value = "Unknown", width = NULL, placeholder = NULL)),
-                                                 column(6, actionButton("action_platform", "Convert"))
-                                               ),
                                                h5("Data Preview"),
                                                tabsetPanel(
                                                  id = 'tabset2',
@@ -298,6 +300,9 @@ navbarPage( theme = "style.css",
                                                                threshold of the module density to ensure proper stopping
                                                                criterion for the greedy search for each module (Usually λ and t won't change), and beta (β) (Default = 0.4) is the
                                                                threshold for overlapping ratio for merging"),
+                                                      helpText("Weight Normalization is to normalize the correlation matrix (default: Not selected). However we recommend to check it while the expression data comes from microarray."),
+                                                      prettyCheckbox(inputId = "lmQCM_weight_normalization", label = "Weight Normalization",
+                                                                     value = F, status = "default", icon = icon("check")),
                                                       fluidRow(
                                                         column(6, numericInput("gamma", "gamma (γ):", 0.55, step = 0.05)),
                                                         column(6, numericInput("lambda", "lambda (λ)", 1, step = 0.05))

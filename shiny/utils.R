@@ -75,7 +75,7 @@ smartModal <- function(error=c(T,F), title = "Title", content = "Content"){
       title = title, footer = NULL,
       div(class = "busy",
           p(content),
-          img(src="images/loading.gif"),
+          img(src="https://cdn.dribbble.com/users/503653/screenshots/3143656/fluid-loader.gif"),
           style = "margin: auto; text-align: center"
       )
     ))
@@ -139,7 +139,7 @@ circlizeGenomics <- function(BED.data, factors, xlim, mySpecies, myTitle, circos
   }
   if(circos_param_genesymbol){
     circos.genomicLabels(BED.data, labels.column = 5, side = "inside",
-                       col = as.numeric(factor(BED.data[[1]])), line_col = as.numeric(factor(BED.data[[1]])))
+                         col = as.numeric(factor(BED.data[[1]])), line_col = as.numeric(factor(BED.data[[1]])))
   }
   
   
