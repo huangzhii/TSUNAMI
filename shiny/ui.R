@@ -2,15 +2,15 @@
 library(plotly)
 library(shinyWidgets)
 navbarPage( theme = "style.css",
-
+            
             # title="bioinfo tool",
             # title=div(img(src="images/iulogo.png",
             #               width = 20,
             #               style = "margin:0px 0px;"), "BioInfo Suite"),
-
+            
             title=div(a(img(src="images/tsunami_logo.png",
-                          height = 28,
-                          style = "margin:0px 0px; padding-bottom: 5px"), href="https://apps.medgen.iupui.edu/rsc/tsunami")),
+                            height = 28,
+                            style = "margin:0px 0px; padding-bottom: 5px"), href="https://apps.medgen.iupui.edu/rsc/tsunami")),
             tabPanel("Analysis",
                      navlistPanel(widths = c(2, 10),
                                   #theme = "style.css",
@@ -86,8 +86,8 @@ navbarPage( theme = "style.css",
                                                                      if(typeMessage == "tab4"){
                                                                      $("a:contains(4. Result)").click();
                                                                      }
-                                                                     if(typeMessage == "tab4_functional_plots"){
-                                                                     $("a:contains(Functional Plots)").click();
+                                                                     if(typeMessage == "tab4_circos_plots"){
+                                                                     $("a:contains(Circos Plots)").click();
                                                                      }
                                                                      if(typeMessage == "tab5"){
                                                                      $("a:contains(5. GO Enrichment Analysis)").click();
@@ -102,8 +102,8 @@ navbarPage( theme = "style.css",
                                                                      $("#download_finaldata").attr("disabled", "true").attr("onclick", "return false;");
                                                                      
                                                                      Shiny.addCustomMessageHandler("download_cluster_ready", function(message) {
-                                                                       $("#downloadData1").removeAttr("disabled").removeAttr("onclick");
-                                                                       $("#downloadData2").removeAttr("disabled").removeAttr("onclick");
+                                                                     $("#downloadData1").removeAttr("disabled").removeAttr("onclick");
+                                                                     $("#downloadData2").removeAttr("disabled").removeAttr("onclick");
                                                                      });
                                                                      Shiny.addCustomMessageHandler("download_go_ready", function(message) {
                                                                      $("#downloadData3").removeAttr("disabled").removeAttr("onclick");
@@ -192,75 +192,72 @@ navbarPage( theme = "style.css",
                                              sidebarPanel(
                                                tabsetPanel(
                                                  tabPanel("Main",
-                                                   # Input: Select a file ----
-                                                   # h5("Choose Preview dimensions"),
-                                                   # helpText("Preview starting from the beginning to specific rows and columns.", style="margin: 0px"),
-                                                   # helpText("Default value when leave it blank: # of rows = 100, # of columns = 10.", style="color: STEELBLUE; font-size: 12px"),
-                                                   # 
-                                                   # fluidRow(
-                                                   #   column(6, numericInput("quicklook_row", "# of rows:", 100, step = 1, min = 1)),
-                                                   #   column(6, numericInput("quicklook_col", "# of columns:", 10, step = 1, min = 1))
-                                                   # ),
-                                                   # Horizontal line ----
-                                                   # tags$hr(),
-                                                   h5("Verify starting column and row of expression data"),
-                                                   helpText("Choose starting column and row for expression data.", style="margin: 0px"),
-                                                   helpText("Default value when leave them blank: starting row = 1, starting column = 2.", style="color: STEELBLUE; font-size: 12px"),
-                                                   
-                                                   fluidRow(
-                                                     column(6, numericInput("starting_row", "Gene and Expression starting row:", 1, step = 1, min = 1)),
-                                                     column(6, numericInput("starting_col", "Expression starting column:", 2, step = 1, min = 1))
-                                                   ),
-                                                   
-                                                   helpText("Convert Probe ID to Gene Symbol with Platform GPL*** (Optional for self-uploaded data):"),
-                                                   tags$span(style="color:STEELBLUE", "Be sure to verify (modify) Gene Symbol starting row on the Sidebar Panel!"),
-                                                   fluidRow(
-                                                     column(8, textInput("platform_text", NULL, value = "Unknown", width = NULL, placeholder = NULL)),
-                                                     column(4, actionButton("action_platform", "Convert"))
-                                                   ),
-                                                   # Horizontal line ----
-                                                   # tags$hr(),
-                                                   # h5("Verify Gene Symbol"),
-                                                   # helpText("We suppose Gene Symbol is in column 1.", style="margin: 0px"),
-                                                   # helpText("Default value when leave it blank: 1.", style="color: STEELBLUE; font-size: 12px"),
-                                                   # numericInput("starting_gene_row", "starting row:", 1, step = 1, min = 1),
-                                                   
-                                                   # Horizontal line ----
-                                                   tags$hr(),
-                                                   h5("Remove Genes"),
-                                                   helpText("Remove data with lowest percentile absolute expression value shared by all samples. Then remove data with lowest percentile variance across samples.", style="margin: 0px"),
-                                                   helpText("Default value when leave them blank: 0.", style="color: STEELBLUE; font-size: 12px"),
-                                                   fluidRow(
-                                                     column(6, numericInput("absolute_expval", "Lowest Absolute Percentile (%) To Remove:", 20, step = 1, min = 0)),
-                                                     column(6, numericInput("variance_expval", "Lowest Variance Percentile (%) To Remove:", 10, step = 1, min = 0))
-                                                   ),
-                                                   checkboxInput("checkbox_NA", "Convert NA value to 0 in Expression Data", TRUE),
-                                                   checkboxInput("checkbox_logarithm", "Take the log (e) of Expression Data (Default: Unchecked)", FALSE),
-                                                   checkboxInput("checkbox_empty", "Remove rows with empty Gene Symbol", TRUE),
-                                                   checkboxInput("checkbox_duplicated", "Keep only one row with largest mean expression value when Gene Symbol is duplicated", TRUE),
-                                                   numericInput("max_gene_retain", "Maximum Number of Genes to Retain (i.e. Top N genes sorted by mean expression values among all samples. Leave blank for keeping all data):", 10000, step = 1000, min = 0)
-                                                   
+                                                          # Input: Select a file ----
+                                                          # h5("Choose Preview dimensions"),
+                                                          # helpText("Preview starting from the beginning to specific rows and columns.", style="margin: 0px"),
+                                                          # helpText("Default value when leave it blank: # of rows = 100, # of columns = 10.", style="color: STEELBLUE; font-size: 12px"),
+                                                          # 
+                                                          # fluidRow(
+                                                          #   column(6, numericInput("quicklook_row", "# of rows:", 100, step = 1, min = 1)),
+                                                          #   column(6, numericInput("quicklook_col", "# of columns:", 10, step = 1, min = 1))
+                                                          # ),
+                                                          # Horizontal line ----
+                                                          # tags$hr(),
+                                                          h5("Verify starting column and row of expression data"),
+                                                          helpText("Choose starting column and row for expression data.", style="margin: 0px"),
+                                                          helpText("Default value when leave them blank: starting row = 1, starting column = 2.", style="color: STEELBLUE; font-size: 12px"),
+                                                          
+                                                          fluidRow(
+                                                            column(6, numericInput("starting_row", "Gene and Expression starting row:", 1, step = 1, min = 1)),
+                                                            column(6, numericInput("starting_col", "Expression starting column:", 2, step = 1, min = 1))
+                                                          ),
+                                                          h5("Convert Probe ID to Gene Symbol"),
+                                                          helpText("Convert Probe ID to Gene Symbol with Platform GPL*** (Optional for self-uploaded data):"),
+                                                          tags$span(style="color:STEELBLUE", "Be sure to verify (modify) Gene Symbol."),
+                                                          fluidRow(
+                                                            column(8, textInput("platform_text", NULL, value = "Unknown", width = NULL, placeholder = NULL)),
+                                                            column(4, actionButton("action_platform", "Convert"))
+                                                          ),
+                                                          # h5("Verify Gene Symbol"),
+                                                          # helpText("We suppose Gene Symbol is in column 1.", style="margin: 0px"),
+                                                          # helpText("Default value when leave it blank: 1.", style="color: STEELBLUE; font-size: 12px"),
+                                                          # numericInput("starting_gene_row", "starting row:", 1, step = 1, min = 1),
+                                                          
+                                                          # Horizontal line ----
+                                                          tags$hr(),
+                                                          h5("Remove Genes"),
+                                                          helpText("Remove data with lowest percentile absolute expression value shared by all samples. Then remove data with lowest percentile variance across samples.", style="margin: 0px"),
+                                                          helpText("Default value when leave them blank: 0.", style="color: STEELBLUE; font-size: 12px"),
+                                                          fluidRow(
+                                                            column(6, numericInput("absolute_expval", "Lowest Absolute Percentile (%) To Remove:", 20, step = 1, min = 0)),
+                                                            column(6, numericInput("variance_expval", "Lowest Variance Percentile (%) To Remove:", 10, step = 1, min = 0))
+                                                          ),
+                                                          checkboxInput("checkbox_NA", "Convert NA value to 0 in Expression Data", TRUE),
+                                                          checkboxInput("checkbox_logarithm", "Take the log (e) of Expression Data (Default: Unchecked)", FALSE),
+                                                          checkboxInput("checkbox_empty", "Remove rows with empty Gene Symbol", TRUE),
+                                                          checkboxInput("checkbox_duplicated", "Keep only one row with largest mean expression value when Gene Symbol is duplicated", TRUE),
+                                                          numericInput("max_gene_retain", "Maximum Number of Genes to Retain (i.e. Top N genes sorted by mean expression values among all samples. Leave blank for keeping all data):", 10000, step = 1000, min = 0)
+                                                          
                                                  ), # EOF tabpanel main
                                                  tabPanel("Advanced",
-                                                    h5("Choose Advanced Processes"),
-                                                    h5("Sorting"),
-                                                    checkboxInput("sorting_adv_checkbox", "Sort expression data ascending to learn OS / EFS", F),
-                                                    conditionalPanel(condition="input.sorting_adv_checkbox",
-                                                                     selectizeInput(
-                                                                       'choose_OS_EFS', 'Specify OS or EFS:',
-                                                                       choices = c("OS", "EFS")),
-                                                                     helpText("If yes, please select objective row: row index and range of columns. Please refer OS/EFS position from Original Data (not Verified Data)."),
-                                                                     helpText("OS_IND/EFS_IND must either valued 0 or 1. OS/EFS must be numeric."),
-                                                                     numericInput("row_osefs_ind", "Row of OS_IND/EFS_IND:", 9, step = 1, width = NULL, min = 1),
-                                                                     numericInput("row_osefs", "Row of OS/EFS:", 10, step = 1, width = NULL, min = 1),
-                                                                     numericInput("sort_col_start", "Starting Col:", 2, step = 1, width = NULL, min = 1),
-                                                                     checkboxInput("select_pval_adv_checkbox", "Pick Expression Data only with satisfied P-value.", F),
-                                                                     conditionalPanel(condition="input.select_pval_adv_checkbox",
-                                                                                      helpText("Calculated by median and the (non-central) Chi-Squared Distribution."),
-                                                                                      numericInput("advance_selection_pvalue", "P-value smaller than:", 0.05, step = 0.001, width = NULL, min = 0)
-                                                                     )
-                                                                     )
-                                                    
+                                                          h5("Choose Advanced Processes"),
+                                                          checkboxInput("sorting_adv_checkbox", "Sort expression data ascending to learn OS / EFS", F),
+                                                          conditionalPanel(condition = "input.sorting_adv_checkbox == 1",
+                                                                           selectizeInput(
+                                                                             'choose_OS_EFS', 'Specify OS or EFS:',
+                                                                             choices = c("OS", "EFS")),
+                                                                           helpText("If yes, please select objective row: row index and range of columns. Please refer OS/EFS position from Original Data (not Verified Data)."),
+                                                                           helpText("OS_IND/EFS_IND must either valued 0 or 1. OS/EFS must be numeric."),
+                                                                           numericInput("row_osefs_ind", "Row of OS_IND/EFS_IND:", 9, step = 1, width = NULL, min = 1),
+                                                                           numericInput("row_osefs", "Row of OS/EFS:", 10, step = 1, width = NULL, min = 1),
+                                                                           numericInput("sort_col_start", "Starting Col:", 2, step = 1, width = NULL, min = 1)
+                                                          ),
+                                                          checkboxInput("select_pval_adv_checkbox", "Pick Expression Data only with satisfied P-value.", F),
+                                                          conditionalPanel(condition = "input.select_pval_adv_checkbox == 1",
+                                                                           helpText("Calculated by median and the (non-central) Chi-Squared Distribution."),
+                                                                           numericInput("advance_selection_pvalue", "P-value smaller than:", 0.05, step = 0.001, width = NULL, min = 0)
+                                                          )
+                                                          
                                                  )
                                                ), # EOF tabsetPanel
                                                actionButton("action3", "Continue to Co-Expression Analysis",style="color: WHITE; background-color: DODGERBLUE")
@@ -278,7 +275,7 @@ navbarPage( theme = "style.css",
                                                )
                                              )
                                            ) # EOF siderbarLayout
-                                       ), # EOF tabPanel 2. Data Preprocessing
+                                  ), # EOF tabPanel 2. Data Preprocessing
                                   tabPanel("3. Choose Method",
                                            # titlePanel("Select Method for Gene Co-Expression Analysis"),
                                            
@@ -296,7 +293,7 @@ navbarPage( theme = "style.css",
                                                       a("Zhang, Jie, and Kun Huang. \"Normalized ImQCM: An Algorithm for Detecting Weak Quasi-Cliques in Weighted Graph with Applications in Gene Co-Expression Module Discovery in Cancers.\" Cancer informatics 13 (2014): CIN-S14021.",href="http://journals.sagepub.com/doi/abs/10.4137/CIN.S14021",target="_blank"),
                                                       tags$hr(),
                                                       h5("Parameter Choosing"),
-                                                      helpText("Gamma (γ) (Default = 0.55) controls the threshold for the initiation of each new module, lambda (λ) (Default = 1) and t (Default = 1) define the adaptive
+                                                      helpText("Gamma (γ) (Default = 0.7, Recommend: 0.70 ~ 0.75) controls the threshold for the initiation of each new module, lambda (λ) (Default = 1) and t (Default = 1) define the adaptive
                                                                threshold of the module density to ensure proper stopping
                                                                criterion for the greedy search for each module (Usually λ and t won't change), and beta (β) (Default = 0.4) is the
                                                                threshold for overlapping ratio for merging"),
@@ -304,7 +301,7 @@ navbarPage( theme = "style.css",
                                                       prettyCheckbox(inputId = "lmQCM_weight_normalization", label = "Weight Normalization",
                                                                      value = F, status = "default", icon = icon("check")),
                                                       fluidRow(
-                                                        column(6, numericInput("gamma", "gamma (γ):", 0.55, step = 0.05)),
+                                                        column(6, numericInput("gamma", "gamma (γ):", 0.7, step = 0.05)),
                                                         column(6, numericInput("lambda", "lambda (λ)", 1, step = 0.05))
                                                       ),
                                                       fluidRow(
@@ -349,7 +346,7 @@ navbarPage( theme = "style.css",
                                                       helpText("power (β, Default = 6): The soft thresholding. 6 is large enough so that the resulting network exhibited approximate scale free topology."),
                                                       helpText("reassignThreshold (Default = 0): P-value ratio threshold for reassigning genes between modules."),
                                                       helpText("mergeCutHeight (Default = 0.25): Dendrogram cut height for module merging."),
-                                                      helpText("verbose (Default = 3): Integer level of verbosity. Zero means silent, higher values make the output progressively more and more verbose."),
+                                                      # helpText("verbose (Default = 3): Integer level of verbosity. Zero means silent, higher values make the output progressively more and more verbose."),
                                                       helpText("minModuleSize (Default = 10): Minimum module size for module detection."),
                                                       fluidRow(
                                                         column(6, numericInput("power", "power (β):", 6, step = 1, min = 1)),
@@ -357,9 +354,9 @@ navbarPage( theme = "style.css",
                                                       ),
                                                       fluidRow(
                                                         column(6, numericInput("mergeCutHeight", "Merge Cut Height:", 0.25, step = 0.01)),
-                                                        column(6, numericInput("verbose", "verbose:", 3, step = 1))
+                                                        # column(6, numericInput("verbose", "verbose:", 3, step = 1))
+                                                        column(6, numericInput("minModuleSize", "Minimum Module Size:", 10, step = 1, width = NULL))
                                                       ),
-                                                      numericInput("minModuleSize", "Minimum Module Size:", 10, step = 1, width = NULL),
                                                       
                                                       # Horizontal line ----
                                                       tags$hr(),
@@ -380,13 +377,13 @@ navbarPage( theme = "style.css",
                                                         column(4,
                                                                helpText("GO Enrichment Analysis for following all Genes."),
                                                                actionButton("action_finaldata4enrichr", "GO Enrichment Analysis",
-                                                                               style="color: WHITE; background-color: DODGERBLUE"),
+                                                                            style="color: WHITE; background-color: DODGERBLUE"),
                                                                helpText("Warning: Directly process large # of genes may cause very slow GO process. We suggest user perform Co-expression clustering and do GO analysis with small amount of genes.", style="color: STEELBLUE; font-size: 12px")),
                                                         column(4,
                                                                helpText("Circos Plot"),
                                                                actionButton("action_finaldata4circos", "Circos Plot for All Genes",
                                                                             style="color: WHITE; background-color: #FFC300"),
-                                                               helpText("When finished, go to 4. Result functional plots section.", style="color: #D5A200; font-size: 12px"),
+                                                               helpText("When finished, go to 4. Result Circos plots section.", style="color: #D5A200; font-size: 12px"),
                                                                helpText("We strongly recomment user clean the genes first through our Data Preprocessing section. If genes are not get cleaned, such as RBM|123 cannot be found which RBM is supposed to be in hg38 database.", style="color: #D5A200; font-size: 12px")
                                                         )
                                                       ),
@@ -419,35 +416,35 @@ navbarPage( theme = "style.css",
                                                id = 'tabset',
                                                tabPanel("Merged Clusters", DT::dataTableOutput("clusterResult")),
                                                tabPanel("Eigengene Matrix", tableOutput("mytable7")),
-                                               tabPanel("Functional Plots",
+                                               tabPanel("Circos Plots",
                                                         
-                                                            h4("Circos Plot", style="color: STEELBLUE"),
-                                                            uiOutput("circos_plot_ui_hg38"),
-                                                            uiOutput("circos_plot_ui_hg19"),
-                                                            # plotOutput("circos_plot_component_hg38", width = "500px"),
-                                                            # plotOutput("circos_plot_component_hg19", width = "500px"),
+                                                        h4("Circos Plot", style="color: STEELBLUE"),
+                                                        uiOutput("circos_plot_ui_hg38"),
+                                                        uiOutput("circos_plot_ui_hg19"),
+                                                        # plotOutput("circos_plot_component_hg38", width = "500px"),
+                                                        # plotOutput("circos_plot_component_hg19", width = "500px"),
                                                         
                                                         h4("Parameters of Circos Plot", style="color: STEELBLUE"),
                                                         fluidRow(
-                                                            column(6,
-                                                              textAreaInput("textareainput_circos", "Gene Symbols",
-                                                                            value = "NKX2-5\nMEF2A\nGATA4\nHAND1\nHAND2\nTBX5\nSRF",
-                                                                            width = 'auto', height = '300px', placeholder = NULL)
-                                                            ),
-                                                            column(6,
-                                                                   sliderInput("circos_param_size", "Plot Size:",
-                                                                               min = 100, max = 2000,
-                                                                               value = 500),
-                                                                   fluidRow(
-                                                                     column(6, checkboxInput("circos_param_genelink", "Show Gene Links", TRUE)),
-                                                                     column(6, checkboxInput("circos_param_genesymbol", "Show Gene Symbols", TRUE))
-                                                                   )
-                                                            )
+                                                          column(6,
+                                                                 textAreaInput("textareainput_circos", "Gene Symbols",
+                                                                               value = "NKX2-5\nMEF2A\nGATA4\nHAND1\nHAND2\nTBX5\nSRF",
+                                                                               width = 'auto', height = '300px', placeholder = NULL)
+                                                          ),
+                                                          column(6,
+                                                                 sliderInput("circos_param_size", "Plot Size:",
+                                                                             min = 100, max = 2000,
+                                                                             value = 500),
+                                                                 fluidRow(
+                                                                   column(6, checkboxInput("circos_param_genelink", "Show Gene Links", TRUE)),
+                                                                   column(6, checkboxInput("circos_param_genesymbol", "Show Gene Symbols", TRUE))
+                                                                 )
+                                                          )
                                                         ),
                                                         actionButton("circos_button_update_1", "Update Plots",style="color: WHITE; background-color: DODGERBLUE"),
                                                         helpText("You can directly use your own data here without any previous operation.")
                                                         
-                                                )
+                                               )
                                              ),
                                              
                                              tags$script("$(document).on('click', '#clusterResult button', function () {
@@ -465,7 +462,7 @@ navbarPage( theme = "style.css",
                                                         h5("Adjusted P-value (q-value):"),
                                                         helpText("The q-value is an adjusted p-value using the Benjamini-Hochberg method for correction for multiple hypotheses testing. Users can read more about this method, and why it is needed here:"),
                                                         a("Yoav Benjamini and Yosef Hochberg. Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing. Journal of the Royal Statistical Society. Series B (Methodological)
-                                                                 Vol. 57, No. 1 (1995), pp. 289-300", href="http://www.jstor.org/stable/2346101", target="_blank"),
+                                                          Vol. 57, No. 1 (1995), pp. 289-300", href="http://www.jstor.org/stable/2346101", target="_blank"),
                                                         h5("Relationship between P-value, Z-score, and combined score:"),
                                                         helpText("The combined score is a combination of the p-value and z-score calculated by multiplying the two scores as follows:
                                                                  c = ln(p) * z
@@ -519,7 +516,7 @@ navbarPage( theme = "style.css",
                                              downloadButton('downloadData3', 'Download'),
                                              br(),
                                              br(),
-                                             textAreaInput("textareainput_GOEA", "Gene Symbols", value = "", height = '300px', placeholder = NULL),
+                                             textAreaInput("textareainput_GOEA", "Gene Symbols", value = "", width = 'auto', height = '300px', placeholder = NULL),
                                              helpText("The target gene symbols allow users to copy and use in other GO analysis website."),
                                              
                                              h5(a("ToppGene", href="https://toppgene.cchmc.org/enrichment.jsp", target="_blank")),
@@ -528,32 +525,38 @@ navbarPage( theme = "style.css",
                                              
                                            )
                                   )
-                                  )  #, style='width: 80%'
-                     
+            )  #, style='width: 80%'
+            
             ),
             tabPanel("Tutorial",
                      h3("Tutorial", style="color: STEELBLUE; padding-bottom: 20px"),
                      h4("Google Slides", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
                      tags$div(
-                        HTML("<iframe src=\"https://docs.google.com/presentation/d/e/2PACX-1vSv-c_P5P2dFCo9oP67JeBWRIrjZkxLgEkytC6edxUps7l4udMdWHqZx9kiltOwlIoWyWgJH-yDPqJY/embed?start=false&loop=false&delayms=3000\" frameborder=\"0\" width=\"960\" height=\"749\" allowfullscreen=\"true\" mozallowfullscreen=\"true\" webkitallowfullscreen=\"true\"></iframe>"),
-                        style="text-align: center; padding: 20px"
+                       HTML("<iframe src=\"https://docs.google.com/presentation/d/e/2PACX-1vRoTd-UJbIyX6JEraVA1jZw_BWunHm_3qiq3qtxFE3y2DXjopc-SsnGmPXIalOof4iRX5d2eMfqGbji/embed?start=false&loop=false&delayms=3000\" frameborder=\"0\" width=\"960\" height=\"600\" allowfullscreen=\"true\" mozallowfullscreen=\"true\" webkitallowfullscreen=\"true\"></iframe>"),
+                       style="text-align: center; padding: 20px"
                      ),
-                      h4("Video Tutorial", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
-                      tags$div(
-                        HTML('<iframe width="720" height="480" src="https://www.youtube.com/embed/d3eDKqm5yA0" frameborder="0" allowfullscreen></iframe>'),
-                        style="text-align: center; padding: 20px"
-                      ),
-                    h4("Github", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
-                    tags$div(
-                      a("https://github.com/huangzhii/TSUNAMI", href="https://github.com/huangzhii/TSUNAMI"),
-                      style="text-align: center; padding: 0px"
-                    ),
+                     h3("Presentation", style="color: STEELBLUE; padding-bottom: 20px"),
+                     h4("Google Slides", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
+                     tags$div(
+                       HTML("<iframe src=\"https://docs.google.com/presentation/d/e/2PACX-1vSv-c_P5P2dFCo9oP67JeBWRIrjZkxLgEkytC6edxUps7l4udMdWHqZx9kiltOwlIoWyWgJH-yDPqJY/embed?start=false&loop=false&delayms=3000\" frameborder=\"0\" width=\"960\" height=\"749\" allowfullscreen=\"true\" mozallowfullscreen=\"true\" webkitallowfullscreen=\"true\"></iframe>"),
+                       style="text-align: center; padding: 20px"
+                     ),
+                     # h4("Video Tutorial", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
+                     # tags$div(
+                     #   HTML('<iframe width="720" height="480" src="https://www.youtube.com/embed/d3eDKqm5yA0" frameborder="0" allowfullscreen></iframe>'),
+                     #   style="text-align: center; padding: 20px"
+                     # ),
+                     h4("Github", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
+                     tags$div(
+                       a("https://github.com/huangzhii/TSUNAMI", href="https://github.com/huangzhii/TSUNAMI"),
+                       style="text-align: center; padding: 0px"
+                     ),
                      h4("Report Bugs", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
-                    
-                    tags$div(
-                      a("https://github.com/huangzhii/TSUNAMI/issues/", href="https://github.com/huangzhii/TSUNAMI/issues/"),
-                      style="text-align: center; padding: 0px"
-                    )
+                     
+                     tags$div(
+                       a("https://github.com/huangzhii/TSUNAMI/issues/", href="https://github.com/huangzhii/TSUNAMI/issues/"),
+                       style="text-align: center; padding: 0px"
+                     )
             ),
             tabPanel("FAQ",
                      h3("Frequently Asked Questions", style="color: STEELBLUE; padding-bottom: 20px"),
@@ -573,34 +576,41 @@ navbarPage( theme = "style.css",
                      p("TSUNAMI website adopted responsive web design and is compatible with any mobile terminal. Every process, analysis, and computation is performed on the server behind your mobile browser. File uploading system would still work even on the phone when you are waiting a bus.")
             ),
             tabPanel("News",
-                      h3("News", style="color: STEELBLUE; padding-bottom: 20px"),
-                       h4("March 27, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
-                       tags$ul(
-                         tags$li("Texts are modified."),
-                         tags$li("Footer added."),
-                         tags$li("Update pipeline flowchart."),
-                         tags$li("Update funding information."),
-                         tags$li("Added a Google Slides tutorial talk.")
-                       ),
-                       h4("March 20, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
-                       tags$ul(
-                         tags$li("R package 'lmQCM' was released to CRAN."),
-                         tags$li("Create flowchart.")
-                       ),
-                       h4("March 16, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
-                       tags$ul(
-                         tags$li("Renamed our website as TSUNAMI."),
-                         tags$li("Various of bugs are fixed.")
-                       ),
-                      h4("March 02, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
-                      tags$ul(
-                        tags$li("First prototype platform has been deployed.")
-                      )
+                     h3("News", style="color: STEELBLUE; padding-bottom: 20px"),
+                     h4("April 24, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
+                     tags$ul(
+                       tags$li("Updated GEO offline data list to date 04/24/2018."),
+                       tags$li("Fixed a bug when percentiles are 0 or NULL."),
+                       tags$li("Moved platform converter to the right siderbar."),
+                       tags$li("Add conditional Panel on Advanced Data Preprocessing.")
+                     ),
+                     h4("March 27, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
+                     tags$ul(
+                       tags$li("Texts are modified."),
+                       tags$li("Footer added."),
+                       tags$li("Update pipeline flowchart."),
+                       tags$li("Update funding information."),
+                       tags$li("Added a Google Slides tutorial talk.")
+                     ),
+                     h4("March 20, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
+                     tags$ul(
+                       tags$li("R package 'lmQCM' was released to CRAN."),
+                       tags$li("Create flowchart.")
+                     ),
+                     h4("March 16, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
+                     tags$ul(
+                       tags$li("Renamed our website as TSUNAMI."),
+                       tags$li("Various of bugs are fixed.")
+                     ),
+                     h4("March 02, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
+                     tags$ul(
+                       tags$li("First prototype platform has been deployed.")
+                     )
             ),
             tabPanel("About",
-                      h3("About Us", style="color: STEELBLUE; padding-bottom: 20px"),
-                      "The TSUNAMI (Translational Bioinformatics Tool Suite for Network Analysis and Mining) was developed at Indiana University School of Medicine.",
-                      "The design of such user-friendly implementations of our TSUNAMI pipeline provides a comprehensive analysis tool suite for users to study gene interaction from raw transcriptomic data level all the way to the gene ontology level with just simple button clicks.",
+                     h3("About Us", style="color: STEELBLUE; padding-bottom: 20px"),
+                     "The TSUNAMI (Translational Bioinformatics Tool Suite for Network Analysis and Mining) was developed at Indiana University School of Medicine.",
+                     "The design of such user-friendly implementations of our TSUNAMI pipeline provides a comprehensive analysis tool suite for users to study gene interaction from raw transcriptomic data level all the way to the gene ontology level with just simple button clicks.",
                      tags$div(
                        tags$img(src='images/IUSM2.png',
                                 height="100",
@@ -625,35 +635,40 @@ navbarPage( theme = "style.css",
                      ),
                      br(),
                      tags$div(
-                       tags$img(src='images/iGenomicsR_logo.png',
-                                  height="40",
-                                  alt="iGenomicsR", class="center", style="padding: 5px"),
-                       br(),"Coming Soon",
+                       a(tags$img(src='images/iGenomicsR_logo2.png',
+                                height="40",
+                                alt="iGenomicsR", class="center", style="padding: 5px"), href="https://apps.medgen.iupui.edu/rsc/content/27/", target="_blank"),
+                       br(),a("iGenomicsR: An integrative platform to explore, visualize, and analyze multidimensional genomics data for disease", href="https://apps.medgen.iupui.edu/rsc/content/27/", target="_blank"),
                        br(),br(),
-                       tags$img(src='images/iGPSe_logo.png',
-                                  height="50",
-                                  alt="iGPSe", class="center", style="padding: 5px"),
-                       br(),"Coming Soon",
+                       a(tags$img(src='https://apps.medgen.iupui.edu/rsc/content/25/images/circosviewer_logo.png',
+                                height="50",
+                                alt="Circos Viewer", class="center", style="padding: 5px"), href="https://apps.medgen.iupui.edu/rsc/content/25/", target="_blank"),
+                       br(),a("Circos Viewer: A Circos Plot Viewer.", href="https://apps.medgen.iupui.edu/rsc/content/25/", target="_blank"),
+                       br(),br(),
+                       a(tags$img(src='https://apps.medgen.iupui.edu/rsc/content/23/_w_f03c09b9/images/iGPSeplus_logo.png',
+                                  height="40",
+                                  alt="iGPSe Plus", class="center", style="padding: 5px"), href="https://apps.medgen.iupui.edu/rsc/content/23/", target="_blank"),
+                       br(),a("iGPSe Plus: Integrative Genomic based Canser Patient Stratification", href="https://apps.medgen.iupui.edu/rsc/content/23/", target="_blank"),
                        style="text-align: center; padding: 5px"
                      ),
-                      h4("Development Team", style="color: STEELBLUE; padding-bottom: 20px"),
-                      h5("Prof. Kun Huang's Laboratory", style="color: STEELBLUE"),
-                      tags$ul(
-                        tags$li("Zhi Huang"),
-                        tags$li("Zhi Han"),
-                        tags$li("Jie Zhang"),
-                        tags$li("Kun Huang")
-                      ),
-                      h4("Publications", style="color: STEELBLUE; padding-bottom: 20px"),
-                      tags$ul(
-                        tags$li("-")
-                      ),
-                      h4("Funding for the TSUNAMI is or has been provided by:", style="color: STEELBLUE; padding-bottom: 20px"),
-                      tags$ul(
-                        tags$li("Partially supported by IUSM startup fund, the NCI ITCR U01 (CA188547)."),
-                        tags$li("Data Science and Bioinformatics Program for Precision Health Initiative, Indiana University.")
-                      )
-                   
+                     h4("Development Team", style="color: STEELBLUE; padding-bottom: 20px"),
+                     h5("Prof. Kun Huang's Laboratory", style="color: STEELBLUE"),
+                     tags$ul(
+                       tags$li("Zhi Huang"),
+                       tags$li("Zhi Han"),
+                       tags$li("Jie Zhang"),
+                       tags$li("Kun Huang")
+                     ),
+                     h4("Publications", style="color: STEELBLUE; padding-bottom: 20px"),
+                     tags$ul(
+                       tags$li("-")
+                     ),
+                     h4("Funding for the TSUNAMI is or has been provided by:", style="color: STEELBLUE; padding-bottom: 20px"),
+                     tags$ul(
+                       tags$li("Partially supported by IUSM startup fund, the NCI ITCR U01 (CA188547)."),
+                       tags$li("Data Science and Bioinformatics Program for Precision Health Initiative, Indiana University.")
+                     )
+                     
             ),
             
             
@@ -668,7 +683,7 @@ navbarPage( theme = "style.css",
             # )
             tags$div(
               p(a("TSUNAMI", href="https://apps.medgen.iupui.edu/rsc/tsunami"), "Version v1.8 | ", a("IUSM",href="https://medicine.iu.edu/", target="_blank"), " | ", a("RI",href="http://www.regenstrief.org/", target="_blank"), style="color: grey; font-size: 12px"), 
-              p("Questions and feedback: zhihuan(at)umail(dot)iu(dot)edu | ", a("Report Issue", href="https://github.com/huangzhii/TSUNAMI/issues", target="_blank"), " | ", a("Github", href="https://github.com/huangzhii/TSUNAMI/", target="_blank"), style="color: grey; font-size: 12px"),
+              p("Questions and feedback: zhihuan@iu.edu | ", a("Report Issue", href="https://github.com/huangzhii/TSUNAMI/issues", target="_blank"), " | ", a("Github", href="https://github.com/huangzhii/TSUNAMI/", target="_blank"), style="color: grey; font-size: 12px"),
               style="text-align: center; padding-top: 40px"
             )
-  )
+)

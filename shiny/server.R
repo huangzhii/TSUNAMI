@@ -14,12 +14,14 @@ library(plotly)
 library(openxlsx)
 library(survival)
 library(naturalsort)
+library(shinyWidgets)
 # circos plot
 library(circlize)
 # library(topGO) # Somehow conflict with WGCNA and GEOquery. Deprecated.
 
 options(shiny.maxRequestSize=300*1024^2) # to the top of server.R would increase the limit to 300MB
 options(shiny.sanitize.errors = FALSE)
+options(stringAsFactors = FALSE)
 source("utils.R")
 # setwd("/Users/zhi/Desktop/GeneCoexpression/RGUI"); #mac #remove when deploy to shinyapps.io
 # source("./lmQCM/GeneCoExpressionAnalysis.R")
@@ -63,11 +65,11 @@ function(input, output, session) {
     
     # Create a Progress object
     progress <- shiny::Progress$new(session)
-    progress$set(message = "Loading NCBI GEO database. Last fetched version: 01/31/2018", value = 0)
+    progress$set(message = "Loading NCBI GEO database. Last fetched version: 04/24/2018", value = 0)
     # Close the progress when this reactive exits (even if there's an error)
     on.exit(progress$close())
     # NCBI GEO
-    load("./data/GEO_20180131.Rdata")
+    load("./data/GEO_20180424.Rdata")
     GEO[["Actions"]] <- paste0('<div><button type="button" class="btn-analysis" id=dataset_analysis_',1:nrow(GEO),'>Analyze</button></div>')
     colnames(GEO)[which(names(GEO) == "Sample.Count")] <- "Samples"
     GEO <- GEO %>% select("Samples", everything())
@@ -122,7 +124,7 @@ observeEvent(input$dataset_lastClickId,{
 
   if (length(gset) > 1) idx <- grep("GPL90", attr(gset, "names")) else idx <- 1
   gset <- gset[[idx]]
-  edata <<- exprs(gset) #This is the expression matrix
+  edata <- exprs(gset) #This is the expression matrix
   if (is.null(dim(edata))){
     removeModal()
     print("edata doesn't have any value")
@@ -338,20 +340,22 @@ observeEvent(input$dataset_lastClickId,{
       print(dim(RNA))
       print(dim(geneID))
       
+      
       # convert na to 0
       if (input$checkbox_NA){RNA[is.na(RNA)] <- 0}
 
       # Remove data with lowest 20% absolute exp value shared by all samples
       percentile <- ifelse(is.na(input$absolute_expval),0,input$absolute_expval)/100.
       print(sprintf("percentile 1: %f",percentile))
-      # save(RNA, file="/Users/zhi/Desktop/RNA.Rdata")
+      # save(RNA, file="~/Desktop/RNA.Rdata")
+      # save(geneID, file="~/Desktop/geneID.Rdata")
       if (percentile > 0){
         RNA_filtered1 = RNA[apply(RNA,1,max) > quantile(RNA, percentile)[[1]], ]
         geneID_filtered1 = geneID[apply(RNA,1,max) > quantile(RNA, percentile)[[1]], ]
       }
       else {
         RNA_filtered1 = RNA
-        geneID_filtered1 = geneID
+        geneID_filtered1 = as.matrix(geneID)
       }
       
       print("after remove lowest k% abs exp value:")
@@ -421,6 +425,10 @@ observeEvent(input$dataset_lastClickId,{
       finalSym <- uniGene[sortInd[1:topN]]
       finalSymChar <- as.character(finalSym)
       
+      # save(finalExp, file = "~/Desktop/finalExp.Rdata")
+      # save(finalSym, file = "~/Desktop/finalSym.Rdata")
+      # save(finalSymChar, file = "~/Desktop/finalSymChar.Rdata")
+      
       # advanced
       if (input$sorting_adv_checkbox){
         finalPValue <- matrix(0, ncol = 0, nrow = length(finalSym))
@@ -435,7 +443,7 @@ observeEvent(input$dataset_lastClickId,{
           rr_sorted = rr_sorted_list$x
           rr_sorted_idx = rr_sorted_list$ix
           medianB <- rep(0, length(rr))
-          medianB[ rr_sorted_idx > length(rr)/2 ] = 1
+          medianB[ rr_sorted_idx[ceiling(length(rr)/2):length(rr)] ] = 1
           ss <- survdiff(Surv(OS, OS_IND) ~ medianB)
           finalPValue[i] <- 1-pchisq(ss$chisq, 1)
         }
@@ -488,7 +496,7 @@ observeEvent(input$dataset_lastClickId,{
     }
       #lmQCM
       smartModal(error=F, title = "Using lmQCM to calculate merged clusters", content = "Calculating. This could be several seconds to several minutes depends on number of genes. Please be patient.")
-      mergedCluster <- lmQCM(finalExp, input$gamma, input$t, input$lambda, input$beta, input$minClusterSize, input$massiveCC, input$lmQCM_weight_normalization)
+      mergedCluster <- lmQCM(finalExp, input$gamma, input$t, input$lambda, input$beta, input$minClusterSize, input$massiveCC)
       geneCharVector <- matrix(0, nrow = 0, ncol = length(mergedCluster))
       temp_eigengene <- matrix(0, nrow = length(mergedCluster), ncol = dim(finalExp)[2]) # Clusters * Samples
 
@@ -879,8 +887,8 @@ observeEvent(input$dataset_lastClickId,{
                          input$circos_param_genesymbol)
       })
       removeModal()
-      print('tab4_functional_plots')
-      session$sendCustomMessage("myCallbackHandler", "tab4_functional_plots")
+      print('tab4_circos_plots')
+      session$sendCustomMessage("myCallbackHandler", "tab4_circos_plots")
     }
     
   })
@@ -942,12 +950,17 @@ observeEvent(input$dataset_lastClickId,{
   })
   
   observeEvent(input$action_finaldata4circos,{
+    if(is.null(data_final)){
+      sendSweetAlert(session, title = "Insufficient Input Data", text = "Please finish previous steps.",
+                     type = "error", btn_labels = "OK", html = F, closeOnClickOutside = T)
+      return()
+    }
     smartModal(error=F, title = "Processing", content = "We are working on your customized circos plot ...")
-    
-    genes_str <- data_final[,1]
+    # save(data_final, file = "~/Desktop/datafinal.Rdata")
+    genes_str <- levels(data_final[,1])
     genes_str <- unlist(strsplit(genes_str, " /// "))
-    print("genes_str for circos plot: ")
-    print(genes_str)
+    # print("genes_str for circos plot: ")
+    # print(genes_str)
     
     updateTextAreaInput(session, "textareainput_circos",
                         label = paste(sprintf("Number of Genes: %d", length(genes_str)), input$controller),
@@ -998,6 +1011,8 @@ observeEvent(input$dataset_lastClickId,{
                        input$circos_param_genesymbol)
     })
     removeModal()
+    session$sendCustomMessage("myCallbackHandler", "tab4")
+    session$sendCustomMessage("myCallbackHandler", "tab4_circos_plots")
   })
   
   #   +------------------------------------------------------------+
