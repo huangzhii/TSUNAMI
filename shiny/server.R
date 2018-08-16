@@ -106,37 +106,37 @@ function(input, output, session) {
       layout(paper_bgcolor='transparent') %>% config(displayModeBar = F)
   })
 
+
 observeEvent(input$dataset_lastClickId,{
   if (input$dataset_lastClickId%like%"dataset_analysis"){
-  row_of_GEO <- as.numeric(gsub("dataset_analysis_","",input$dataset_lastClickId))
-  myGSE <- GEO$Accession[row_of_GEO]
-  GSE_name_title <<- GEO$Title[row_of_GEO]
-  print(myGSE)
-  smartModal(error=F, title = sprintf("Loading %s file from NCBI GEO Database", myGSE),
-                         content = "We are currently loading your selected file from NCBI GEO Database ...")
-  t <- try(gset <- getGEO(myGSE, GSEMatrix=TRUE, AnnotGPL=FALSE)) #AnnotGPL default is FALSE
-  if("try-error" %in% class(t)) {
-    removeModal()
-    print("HTTP error 404")
-    smartModal(error=T, title = "HTTP error 404", content = sprintf("%s is not available in NCBI GEO Database, please try another! (Hint: Maybe bad Internet connection)",myGSE))
-    return()
-  }
-
-  if (length(gset) > 1) idx <- grep("GPL90", attr(gset, "names")) else idx <- 1
-  gset <- gset[[idx]]
-  edata <- exprs(gset) #This is the expression matrix
-  if (is.null(dim(edata))){
-    removeModal()
-    print("edata doesn't have any value")
-    smartModal(error=T, title = "Important message", content = "edata doesn't have any value. Please contact the author.")
-    return()
-  }
-  if (dim(edata)[1] == 0){
-    removeModal()
-    print("No expression data")
-    smartModal(error=T, title = "Important message", content = sprintf("%s contains no expression data, please try another!", myGSE))
-    return()
-  }
+    row_of_GEO <- as.numeric(gsub("dataset_analysis_","",input$dataset_lastClickId))
+    myGSE <- GEO$Accession[row_of_GEO]
+    GSE_name_title <<- GEO$Title[row_of_GEO]
+    print(myGSE)
+    smartModal(error=F, title = sprintf("Loading %s file from NCBI GEO Database", myGSE),
+               content = "We are currently loading your selected file from NCBI GEO Database ...")
+    t <- try(gset <- getGEO(myGSE, GSEMatrix=TRUE, AnnotGPL=FALSE)) #AnnotGPL default is FALSE
+    if("try-error" %in% class(t)) {
+      removeModal()
+      print("HTTP error 404")
+      smartModal(error=T, title = "HTTP error 404", content = sprintf("%s is not available in NCBI GEO Database, please try another! (Hint: Maybe bad Internet connection)",myGSE))
+      return()
+    }
+    
+    if (length(gset) > 1) idx <- grep("GPL90", attr(gset, "names")) else idx <- 1
+    if (length(idx) == 0){    removeModal()
+      print("Object gset doesn't contain GPL90.")
+      smartModal(error=T, title = "Object gset doesn't contain GPL90.", content = sprintf("%s's object gset doesn't contain GPL90. Please try another.",myGSE))
+      return()
+    }
+    gset <- gset[[idx]]
+    edata <- exprs(gset) #This is the expression matrix
+    if (dim(edata)[1] == 0 || is.null(dim(edata))){
+      removeModal()
+      print("No expression data")
+      smartModal(error=T, title = "Important message", content = sprintf("%s contains no expression data, please try another!", myGSE))
+      return()
+    }
   # pdata <- pData(gset) # data.frame of phenotypic information.
   fname <<- featureNames(gset) # e.g. 12345_at
   data <<- cbind(fname, edata)
@@ -496,7 +496,7 @@ observeEvent(input$dataset_lastClickId,{
     }
       #lmQCM
       smartModal(error=F, title = "Using lmQCM to calculate merged clusters", content = "Calculating. This could be several seconds to several minutes depends on number of genes. Please be patient.")
-      mergedCluster <- lmQCM(finalExp, input$gamma, input$t, input$lambda, input$beta, input$minClusterSize, input$massiveCC)
+      mergedCluster <- lmQCM(finalExp, input$gamma, input$t, input$lambda, input$beta, input$minClusterSize, input$massiveCC, input$lmQCM_weight_normalization)
       geneCharVector <- matrix(0, nrow = 0, ncol = length(mergedCluster))
       temp_eigengene <- matrix(0, nrow = length(mergedCluster), ncol = dim(finalExp)[2]) # Clusters * Samples
 
@@ -647,7 +647,7 @@ observeEvent(input$dataset_lastClickId,{
                              numericLabels = TRUE, pamRespectsDendro = FALSE,
                              saveTOMs = FALSE,
                              saveTOMFileBase = "femaleMouseTOM",
-                             verbose = 0)
+                             verbose = input$verbose)
 
       netcolors = net$colors
       matrixdata<- data.frame(cbind(finalSymChar, netcolors))
