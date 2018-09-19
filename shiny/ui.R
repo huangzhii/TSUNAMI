@@ -171,6 +171,9 @@ navbarPage( theme = "style.css",
                                              # Main panel for displaying outputs ----
                                              mainPanel(
                                                h5("NCBI GEO Database"),
+                                               helpText("Example GSE Microarray Data: GSE17537; GSE88882; GSE98761; GSE40294.", style="font-size: 12px"),
+                                               helpText("Example Single-cell RNA-seq Microarray Data: GSE73119; GSE31399; GSE21361; GSE13002; GSE4309; GSE61084; GSE61085.", style="font-size: 12px"),
+                                               helpText("Example RNA-seq Expression Data: ", a("TCGA_BLCA",href="dataset/TCGA_BLCA.csv",target="_blank"), style="font-size: 12px"),
                                                tabsetPanel(
                                                  id = 'dataset',
                                                  tabPanel("Series", DT::dataTableOutput("mytable1"))

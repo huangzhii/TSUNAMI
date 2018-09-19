@@ -119,14 +119,15 @@ observeEvent(input$dataset_lastClickId,{
     if("try-error" %in% class(t)) {
       removeModal()
       print("HTTP error 404")
-      smartModal(error=T, title = "HTTP error 404", content = sprintf("%s is not available in NCBI GEO Database, please try another! (Hint: Maybe bad Internet connection)",myGSE))
+      smartModal(error=T, title = "HTTP error 404", content = sprintf("%s is not available in NCBI GEO Database, please try other available GSE data (e.g., GSE17537, GSE73119). (Hint: Maybe bad Internet connection)",myGSE))
       return()
     }
     
     if (length(gset) > 1) idx <- grep("GPL90", attr(gset, "names")) else idx <- 1
-    if (length(idx) == 0){    removeModal()
+    if (length(idx) == 0){
+      removeModal()
       print("Object gset doesn't contain GPL90.")
-      smartModal(error=T, title = "Object gset doesn't contain GPL90.", content = sprintf("%s's object gset doesn't contain GPL90. Please try another.",myGSE))
+      smartModal(error=T, title = "Object gset doesn't contain GPL90.", content = sprintf("%s's object gset doesn't contain GPL90, thus we cannot retrieve the expression data. Please try other available GSE data (e.g., GSE17537, GSE73119).",myGSE))
       return()
     }
     gset <- gset[[idx]]
@@ -134,7 +135,7 @@ observeEvent(input$dataset_lastClickId,{
     if (dim(edata)[1] == 0 || is.null(dim(edata))){
       removeModal()
       print("No expression data")
-      smartModal(error=T, title = "Important message", content = sprintf("%s contains no expression data, please try another!", myGSE))
+      smartModal(error=T, title = "Important message", content = sprintf("%s doesn't contain any expression data, please try other available GSE data (e.g., GSE17537, GSE73119).", myGSE))
       return()
     }
   # pdata <- pData(gset) # data.frame of phenotypic information.
@@ -364,9 +365,16 @@ observeEvent(input$dataset_lastClickId,{
       percentile <- ifelse(is.na(input$variance_expval),0,input$variance_expval)/100.
       print(sprintf("percentile 2: %f",percentile))
       if (percentile > 0){
-        index <- varFilter2(eset = RNA_filtered1, var.cutoff = percentile)
-        RNA_filtered2 = RNA_filtered1[index, ]
-        geneID_filtered2 = geneID_filtered1[index]
+        if (dim(RNA_filtered1)[2] > 3){
+          index <- varFilter2(eset = RNA_filtered1, var.cutoff = percentile)
+          RNA_filtered2 = RNA_filtered1[index, ]
+          geneID_filtered2 = geneID_filtered1[index]
+        }
+        else{
+          smartModal(error=F, title = "Preprocessing input data", content = "Preprocessing ... \n Cannot calculate order statistic on object with less than 3 columns, will not remove data based on variance.")
+          RNA_filtered2 = RNA_filtered1
+          geneID_filtered2 = geneID_filtered1
+        }
       }
       else {
         RNA_filtered2 = RNA_filtered1
@@ -496,7 +504,17 @@ observeEvent(input$dataset_lastClickId,{
     }
       #lmQCM
       smartModal(error=F, title = "Using lmQCM to calculate merged clusters", content = "Calculating. This could be several seconds to several minutes depends on number of genes. Please be patient.")
-      mergedCluster <- lmQCM(finalExp, input$gamma, input$t, input$lambda, input$beta, input$minClusterSize, input$massiveCC, input$lmQCM_weight_normalization)
+
+      t <- try( mergedCluster <- lmQCM(finalExp, input$gamma, input$t, input$lambda,
+                                       input$beta, input$minClusterSize, input$massiveCC,
+                                       input$lmQCM_weight_normalization))
+      if("try-error" %in% class(t)) {
+        removeModal()
+        smartModal(error=T, title = "Error in lmQCM",
+                   content = sprintf("Too few genes to do lmQCM merging."))
+        return()
+      }
+      
       geneCharVector <- matrix(0, nrow = 0, ncol = length(mergedCluster))
       temp_eigengene <- matrix(0, nrow = length(mergedCluster), ncol = dim(finalExp)[2]) # Clusters * Samples
 
@@ -640,14 +658,19 @@ observeEvent(input$dataset_lastClickId,{
       #                 'power', 'minModuliSize', and 'mergeCutHeight'
       #
       #=====================================================================================
-
-      net = blockwiseModules(datExpr, power = input$power,
-                             TOMType = "unsigned", minModuleSize = input$minModuleSize,     #30,
-                             reassignThreshold = input$reassignThreshold, mergeCutHeight =  input$mergeCutHeight,    # 0.25,
-                             numericLabels = TRUE, pamRespectsDendro = FALSE,
-                             saveTOMs = FALSE,
-                             saveTOMFileBase = "femaleMouseTOM",
-                             verbose = input$verbose)
+      t <- try(net <- blockwiseModules(datExpr, power = input$power,
+                                      TOMType = "unsigned", minModuleSize = input$minModuleSize,     #30,
+                                      reassignThreshold = input$reassignThreshold, mergeCutHeight =  input$mergeCutHeight,    # 0.25,
+                                      numericLabels = TRUE, pamRespectsDendro = FALSE,
+                                      saveTOMs = FALSE,
+                                      saveTOMFileBase = "femaleMouseTOM"))
+      if("try-error" %in% class(t)) {
+        removeModal()
+        smartModal(error=T, title = "Error in goodGenes",
+                   content = sprintf("Too few genes with valid expression levels in the required number of samples."))
+        return()
+      }
+      
 
       netcolors = net$colors
       matrixdata<- data.frame(cbind(finalSymChar, netcolors))
