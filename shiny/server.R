@@ -397,8 +397,8 @@ observeEvent(input$dataset_lastClickId,{
       tmpExp <- RNA_filtered2
 
       if (input$checkbox_logarithm){
-        tmpExp[tmpExp <= 0] <- 0.000001
-        tmpExp <- log2(tmpExp)
+        # tmpExp[tmpExp <= 0] <- 0.000001
+        tmpExp <- log2(tmpExp+1)
       }
       if (input$checkbox_empty){
         print(sprintf("data dimension before remove gene with empty symbol: %d x %d",dim(tmpExp)[1],dim(tmpExp)[2]))
@@ -792,7 +792,7 @@ observeEvent(input$dataset_lastClickId,{
   
   observeEvent(input$run_survival_analysis,{
     if(is.null(input$eigengene_matrix_select_row)){
-      sendSweetAlert(session, title = "Error", text = "You haven't indicate which row of eigengene matrix will be dichotomized and analyzed.", type = "error",
+      sendSweetAlert(session, title = "Error", text = "You haven't indicated which row of eigengene matrix will be dichotomized and analyzed.", type = "error",
                      btn_labels = "OK", html = FALSE, closeOnClickOutside = TRUE)
       return()
     }
@@ -1166,7 +1166,7 @@ observeEvent(input$dataset_lastClickId,{
     content = function(file) {
       write.table(data_final, file = file, append = FALSE, quote = TRUE, sep = ',',
                   eol = "\r\n", na = "NA", dec = ".", row.names = F,
-                  col.names = T, qmethod = c("escape", "double"),
+                  col.names = NA, qmethod = c("escape", "double"),
                   fileEncoding = "")
     }
   )
@@ -1183,7 +1183,7 @@ observeEvent(input$dataset_lastClickId,{
       }
       fs <- c(fs, 'genes_list.txt')
       for(i in 1:length(enrichr_dbs)){
-        write.table(enriched[[enrichr_dbs[i]]], file = fs[i], sep = separator)
+        write.table(enriched[[enrichr_dbs[i]]], file = fs[i], sep = separator, col.names = NA)
         print(fs[i])
       }
       if(length(final_genes_str) > 0){

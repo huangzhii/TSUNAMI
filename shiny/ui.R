@@ -172,7 +172,11 @@ navbarPage( theme = "style.css",
                                              mainPanel(
                                                h5("NCBI GEO Database"),
                                                helpText("Example GSE Microarray Data: GSE17537; GSE88882; GSE98761; GSE40294; GSE73119; GSE31399; GSE21361; GSE13002; GSE4309; GSE61084; GSE61085.", style="font-size: 12px"),
-                                               helpText("Example RNA-seq Expression Data: ", a("TCGA_BLCA",href="dataset/TCGA_BLCA.csv",target="_blank"), style="font-size: 12px"),
+                                               helpText("Example RNA-seq Expression Data: ", a("TCGA-BLCA",href="dataset/TCGA-BLCA.csv",target="_blank"), a("TCGA-BRCA",href="dataset/TCGA-BRCA.csv",target="_blank"),
+                                                        a("TCGA-CESC",href="dataset/TCGA-CESC.csv",target="_blank"),a("TCGA-ESCA",href="dataset/TCGA-ESCA.csv",target="_blank"),
+                                                        a("TCGA-HNSC",href="dataset/TCGA-HNSC.csv",target="_blank"),a("TCGA-KIRC",href="dataset/TCGA-KIRC.csv",target="_blank"),
+                                                        a("TCGA-KIRP",href="dataset/TCGA-KIRP.csv",target="_blank"),a("TCGA-LIHC",href="dataset/TCGA-LIHC.csv",target="_blank"),
+                                                        style="font-size: 12px"),
                                                helpText("Example Single-cell RNA-seq Data: ", a("GSE59739_DataTable",href="dataset/GSE59739_DataTable.txt",target="_blank"), style="font-size: 12px"),
                                                tabsetPanel(
                                                  id = 'dataset',
@@ -236,7 +240,7 @@ navbarPage( theme = "style.css",
                                                             column(6, numericInput("variance_expval", "Lowest Variance Percentile (%) To Remove:", 10, step = 1, min = 0))
                                                           ),
                                                           checkboxInput("checkbox_NA", "Convert NA value to 0 in Expression Data", TRUE),
-                                                          checkboxInput("checkbox_logarithm", "Take the log2 of Expression Data (Default: Unchecked)", FALSE),
+                                                          checkboxInput("checkbox_logarithm", "Take the log2(x+1) of Expression Data x (Default: Unchecked)", FALSE),
                                                           checkboxInput("checkbox_empty", "Remove rows with empty Gene Symbol", TRUE),
                                                           checkboxInput("checkbox_duplicated", "Keep only one row with largest mean expression value when Gene Symbol is duplicated", TRUE),
                                                           numericInput("max_gene_retain", "Maximum Number of Genes to Retain (i.e. Top N genes sorted by mean expression values among all samples. Leave blank for keeping all data):", 10000, step = 1000, min = 0)
@@ -396,7 +400,7 @@ navbarPage( theme = "style.css",
                                                       DT::dataTableOutput("mytable_finaldata")
                                                       
                                              ) # EOF TAB Verify Final Data
-                                             )
+                                                      )
                                            ),
                                   tabPanel("4. Result",
                                            mainPanel(
@@ -429,7 +433,7 @@ navbarPage( theme = "style.css",
                                                         textAreaInput("survival_time", "OS/EFS Times", value = "", width = '100%', height = "20%", placeholder = "e.g., 12.3, 10.6, 5.0, ..."),
                                                         actionButton("run_survival_analysis", "Confirm and Run"),
                                                         uiOutput("survival_analysis_results_ui")
-                                                        ),
+                                               ),
                                                tabPanel("Circos Plots",
                                                         
                                                         h4("Circos Plot", style="color: STEELBLUE"),
@@ -539,165 +543,165 @@ navbarPage( theme = "style.css",
                                              
                                            )
                                   )
-            )  #, style='width: 80%'
-            
-            ),
-            tabPanel("Tutorial",
-                     h3("Tutorial", style="color: STEELBLUE; padding-bottom: 20px"),
-                     h4("Google Slides", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
-                     tags$div(
-                       HTML("<iframe src=\"https://docs.google.com/presentation/d/e/2PACX-1vRoTd-UJbIyX6JEraVA1jZw_BWunHm_3qiq3qtxFE3y2DXjopc-SsnGmPXIalOof4iRX5d2eMfqGbji/embed?start=false&loop=false&delayms=3000\" frameborder=\"0\" width=\"960\" height=\"600\" allowfullscreen=\"true\" mozallowfullscreen=\"true\" webkitallowfullscreen=\"true\"></iframe>"),
-                       style="text-align: center; padding: 20px"
-                     ),
-                     h3("Presentation", style="color: STEELBLUE; padding-bottom: 20px"),
-                     h4("Google Slides", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
-                     tags$div(
-                       HTML("<iframe src=\"https://docs.google.com/presentation/d/e/2PACX-1vSv-c_P5P2dFCo9oP67JeBWRIrjZkxLgEkytC6edxUps7l4udMdWHqZx9kiltOwlIoWyWgJH-yDPqJY/embed?start=false&loop=false&delayms=3000\" frameborder=\"0\" width=\"960\" height=\"749\" allowfullscreen=\"true\" mozallowfullscreen=\"true\" webkitallowfullscreen=\"true\"></iframe>"),
-                       style="text-align: center; padding: 20px"
-                     ),
-                     # h4("Video Tutorial", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
-                     # tags$div(
-                     #   HTML('<iframe width="720" height="480" src="https://www.youtube.com/embed/d3eDKqm5yA0" frameborder="0" allowfullscreen></iframe>'),
-                     #   style="text-align: center; padding: 20px"
-                     # ),
-                     h4("Github", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
-                     tags$div(
-                       a("https://github.com/huangzhii/TSUNAMI", href="https://github.com/huangzhii/TSUNAMI"),
-                       style="text-align: center; padding: 0px"
-                     ),
-                     h4("Report Bugs", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
-                     
-                     tags$div(
-                       a("https://github.com/huangzhii/TSUNAMI/issues/", href="https://github.com/huangzhii/TSUNAMI/issues/"),
-                       style="text-align: center; padding: 0px"
-                     )
-            ),
-            tabPanel("FAQ",
-                     h3("Frequently Asked Questions", style="color: STEELBLUE; padding-bottom: 20px"),
-                     h4("General Questions", style="color: STEELBLUE; padding-bottom: 20px"),
-                     h5("What is the TSUNAMI website?", style="color: STEELBLUE"),
-                     p("The TSUNAMI (Translational Bioinformatics Tool Suite for Network Analysis and Mining) was developed at Indiana University School of Medicine."),
-                     h5("How do I get started?", style="color: STEELBLUE"),
-                     p("Please refer to our tutorial."),
-                     h5("Can I use TSUNAMI to analysis my data from my mobile devices?", style="color: STEELBLUE"),
-                     p("Yes you can!"),
-                     tags$div(
-                       tags$img(src='images/iphonex.png',
-                                width="200",
-                                alt="TSUNAMI_iPhoneX", style="padding: 0px"),
-                       style="padding: 10px"
-                     ),
-                     p("TSUNAMI website adopted responsive web design and is compatible with any mobile terminal. Every process, analysis, and computation is performed on the server behind your mobile browser. File uploading system would still work even on the phone when you are waiting a bus.")
-            ),
-            tabPanel("News",
-                     h3("News", style="color: STEELBLUE; padding-bottom: 20px"),
-                     h4("April 24, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
-                     tags$ul(
-                       tags$li("Updated GEO offline data list to date 04/24/2018."),
-                       tags$li("Fixed a bug when percentiles are 0 or NULL."),
-                       tags$li("Moved platform converter to the right siderbar."),
-                       tags$li("Add conditional Panel on Advanced Data Preprocessing.")
-                     ),
-                     h4("March 27, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
-                     tags$ul(
-                       tags$li("Texts are modified."),
-                       tags$li("Footer added."),
-                       tags$li("Update pipeline flowchart."),
-                       tags$li("Update funding information."),
-                       tags$li("Added a Google Slides tutorial talk.")
-                     ),
-                     h4("March 20, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
-                     tags$ul(
-                       tags$li("R package 'lmQCM' was released to CRAN."),
-                       tags$li("Create flowchart.")
-                     ),
-                     h4("March 16, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
-                     tags$ul(
-                       tags$li("Renamed our website as TSUNAMI."),
-                       tags$li("Various of bugs are fixed.")
-                     ),
-                     h4("March 02, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
-                     tags$ul(
-                       tags$li("First prototype platform has been deployed.")
-                     )
-            ),
-            tabPanel("About",
-                     h3("About Us", style="color: STEELBLUE; padding-bottom: 20px"),
-                     "The TSUNAMI (Translational Bioinformatics Tool Suite for Network Analysis and Mining) was developed at Indiana University School of Medicine.",
-                     "The design of such user-friendly implementations of our TSUNAMI pipeline provides a comprehensive analysis tool suite for users to study gene interaction from raw transcriptomic data level all the way to the gene ontology level with just simple button clicks.",
-                     tags$div(
-                       tags$img(src='images/IUSM2.png',
-                                height="100",
-                                alt="TSUNAMI", class="center", style="padding: 30px"),
-                       tags$img(src='images/regenstrief.png',
-                                height="100",
-                                alt="TSUNAMI", class="center", style="padding: 30px"),
-                       style="text-align: center; padding: 20px"
-                     ),
-                     h4("Our Other Softwares", style="color: STEELBLUE; padding-bottom: 20px"),
-                     tags$div(
-                       a(tags$img(src='images/lmQCM_logo.png',
-                                  height="60",
-                                  alt="lmQCM", class="center", style="padding: 5px"), href="https://CRAN.R-project.org/package=lmQCM", target="_blank"),
-                       br(),a("R package: lmQCM", href="https://CRAN.R-project.org/package=lmQCM", target="_blank"),
-                       br(),br(),
-                       a(tags$img(src='images/annoPeak_logo.png',
-                                  height="40",
-                                  alt="annoPeak", class="center", style="padding: 5px"), href="https://apps.medgen.iupui.edu/rsc/content/19/", target="_blank"),
-                       br(),a("annoPeakR: a web-tool to annotate, visualize and compare peak sets from ChIP-seq/ChIP-exo", href="https://apps.medgen.iupui.edu/rsc/content/19/", target="_blank"),
-                       style="text-align: center; padding: 5px"
-                     ),
-                     br(),
-                     tags$div(
-                       a(tags$img(src='images/iGenomicsR_logo2.png',
-                                height="40",
-                                alt="iGenomicsR", class="center", style="padding: 5px"), href="https://apps.medgen.iupui.edu/rsc/content/27/", target="_blank"),
-                       br(),a("iGenomicsR: An integrative platform to explore, visualize, and analyze multidimensional genomics data for disease", href="https://apps.medgen.iupui.edu/rsc/content/27/", target="_blank"),
-                       br(),br(),
-                       a(tags$img(src='https://apps.medgen.iupui.edu/rsc/content/25/images/circosviewer_logo.png',
-                                height="50",
-                                alt="Circos Viewer", class="center", style="padding: 5px"), href="https://apps.medgen.iupui.edu/rsc/content/25/", target="_blank"),
-                       br(),a("Circos Viewer: A Circos Plot Viewer.", href="https://apps.medgen.iupui.edu/rsc/content/25/", target="_blank"),
-                       br(),br(),
-                       a(tags$img(src='https://apps.medgen.iupui.edu/rsc/content/23/_w_f03c09b9/images/iGPSeplus_logo.png',
-                                  height="40",
-                                  alt="iGPSe Plus", class="center", style="padding: 5px"), href="https://apps.medgen.iupui.edu/rsc/content/23/", target="_blank"),
-                       br(),a("iGPSe Plus: Integrative Genomic based Canser Patient Stratification", href="https://apps.medgen.iupui.edu/rsc/content/23/", target="_blank"),
-                       style="text-align: center; padding: 5px"
-                     ),
-                     h4("Development Team", style="color: STEELBLUE; padding-bottom: 20px"),
-                     h5("Prof. Kun Huang's Laboratory", style="color: STEELBLUE"),
-                     tags$ul(
-                       tags$li("Zhi Huang"),
-                       tags$li("Zhi Han"),
-                       tags$li("Jie Zhang"),
-                       tags$li("Kun Huang")
-                     ),
-                     h4("Publications", style="color: STEELBLUE; padding-bottom: 20px"),
-                     tags$ul(
-                       tags$li("-")
-                     ),
-                     h4("Funding for the TSUNAMI is or has been provided by:", style="color: STEELBLUE; padding-bottom: 20px"),
-                     tags$ul(
-                       tags$li("Partially supported by IUSM startup fund, the NCI ITCR U01 (CA188547)."),
-                       tags$li("Data Science and Bioinformatics Program for Precision Health Initiative, Indiana University.")
-                     )
-                     
-            ),
-            
-            
-            # navbarMenu(
-            #   "More",
-            #   tabPanel("Developer",
-            #            h4("Author Information"),
-            #            helpText("Indiana University School of Medicine"),
-            #            h4("Publication"),
-            #            helpText("Please cite ...")
-            #            )
-            # )
-            tags$div(
-              p(a("TSUNAMI", href="https://apps.medgen.iupui.edu/rsc/tsunami"), "Version v1.8 | ", a("IUSM",href="https://medicine.iu.edu/", target="_blank"), " | ", a("RI",href="http://www.regenstrief.org/", target="_blank"), style="color: grey; font-size: 12px"), 
-              p("Questions and feedback: zhihuan@iu.edu | ", a("Report Issue", href="https://github.com/huangzhii/TSUNAMI/issues", target="_blank"), " | ", a("Github", href="https://github.com/huangzhii/TSUNAMI/", target="_blank"), style="color: grey; font-size: 12px"),
-              style="text-align: center; padding-top: 40px"
-            )
+)  #, style='width: 80%'
+
+),
+tabPanel("Tutorial",
+         h3("Tutorial", style="color: STEELBLUE; padding-bottom: 20px"),
+         h4("Google Slides", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
+         tags$div(
+           HTML("<iframe src=\"https://docs.google.com/presentation/d/e/2PACX-1vRoTd-UJbIyX6JEraVA1jZw_BWunHm_3qiq3qtxFE3y2DXjopc-SsnGmPXIalOof4iRX5d2eMfqGbji/embed?start=false&loop=false&delayms=3000\" frameborder=\"0\" width=\"960\" height=\"600\" allowfullscreen=\"true\" mozallowfullscreen=\"true\" webkitallowfullscreen=\"true\"></iframe>"),
+           style="text-align: center; padding: 20px"
+         ),
+         h3("Presentation", style="color: STEELBLUE; padding-bottom: 20px"),
+         h4("Google Slides", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
+         tags$div(
+           HTML("<iframe src=\"https://docs.google.com/presentation/d/e/2PACX-1vSv-c_P5P2dFCo9oP67JeBWRIrjZkxLgEkytC6edxUps7l4udMdWHqZx9kiltOwlIoWyWgJH-yDPqJY/embed?start=false&loop=false&delayms=3000\" frameborder=\"0\" width=\"960\" height=\"749\" allowfullscreen=\"true\" mozallowfullscreen=\"true\" webkitallowfullscreen=\"true\"></iframe>"),
+           style="text-align: center; padding: 20px"
+         ),
+         # h4("Video Tutorial", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
+         # tags$div(
+         #   HTML('<iframe width="720" height="480" src="https://www.youtube.com/embed/d3eDKqm5yA0" frameborder="0" allowfullscreen></iframe>'),
+         #   style="text-align: center; padding: 20px"
+         # ),
+         h4("Github", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
+         tags$div(
+           a("https://github.com/huangzhii/TSUNAMI", href="https://github.com/huangzhii/TSUNAMI"),
+           style="text-align: center; padding: 0px"
+         ),
+         h4("Report Bugs", style="text-align: center; color: STEELBLUE; padding-bottom: 20px"),
+         
+         tags$div(
+           a("https://github.com/huangzhii/TSUNAMI/issues/", href="https://github.com/huangzhii/TSUNAMI/issues/"),
+           style="text-align: center; padding: 0px"
+         )
+),
+tabPanel("FAQ",
+         h3("Frequently Asked Questions", style="color: STEELBLUE; padding-bottom: 20px"),
+         h4("General Questions", style="color: STEELBLUE; padding-bottom: 20px"),
+         h5("What is the TSUNAMI website?", style="color: STEELBLUE"),
+         p("The TSUNAMI (Translational Bioinformatics Tool Suite for Network Analysis and Mining) was developed at Indiana University School of Medicine."),
+         h5("How do I get started?", style="color: STEELBLUE"),
+         p("Please refer to our tutorial."),
+         h5("Can I use TSUNAMI to analysis my data from my mobile devices?", style="color: STEELBLUE"),
+         p("Yes you can!"),
+         tags$div(
+           tags$img(src='images/iphonex.png',
+                    width="200",
+                    alt="TSUNAMI_iPhoneX", style="padding: 0px"),
+           style="padding: 10px"
+         ),
+         p("TSUNAMI website adopted responsive web design and is compatible with any mobile terminal. Every process, analysis, and computation is performed on the server behind your mobile browser. File uploading system would still work even on the phone when you are waiting a bus.")
+),
+tabPanel("News",
+         h3("News", style="color: STEELBLUE; padding-bottom: 20px"),
+         h4("April 24, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
+         tags$ul(
+           tags$li("Updated GEO offline data list to date 04/24/2018."),
+           tags$li("Fixed a bug when percentiles are 0 or NULL."),
+           tags$li("Moved platform converter to the right siderbar."),
+           tags$li("Add conditional Panel on Advanced Data Preprocessing.")
+         ),
+         h4("March 27, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
+         tags$ul(
+           tags$li("Texts are modified."),
+           tags$li("Footer added."),
+           tags$li("Update pipeline flowchart."),
+           tags$li("Update funding information."),
+           tags$li("Added a Google Slides tutorial talk.")
+         ),
+         h4("March 20, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
+         tags$ul(
+           tags$li("R package 'lmQCM' was released to CRAN."),
+           tags$li("Create flowchart.")
+         ),
+         h4("March 16, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
+         tags$ul(
+           tags$li("Renamed our website as TSUNAMI."),
+           tags$li("Various of bugs are fixed.")
+         ),
+         h4("March 02, 2018", style="color: STEELBLUE; padding-bottom: 20px"),
+         tags$ul(
+           tags$li("First prototype platform has been deployed.")
+         )
+),
+tabPanel("About",
+         h3("About Us", style="color: STEELBLUE; padding-bottom: 20px"),
+         "The TSUNAMI (Translational Bioinformatics Tool Suite for Network Analysis and Mining) was developed at Indiana University School of Medicine.",
+         "The design of such user-friendly implementations of our TSUNAMI pipeline provides a comprehensive analysis tool suite for users to study gene interaction from raw transcriptomic data level all the way to the gene ontology level with just simple button clicks.",
+         tags$div(
+           tags$img(src='images/IUSM2.png',
+                    height="100",
+                    alt="TSUNAMI", class="center", style="padding: 30px"),
+           tags$img(src='images/regenstrief.png',
+                    height="100",
+                    alt="TSUNAMI", class="center", style="padding: 30px"),
+           style="text-align: center; padding: 20px"
+         ),
+         h4("Our Other Softwares", style="color: STEELBLUE; padding-bottom: 20px"),
+         tags$div(
+           a(tags$img(src='images/lmQCM_logo.png',
+                      height="60",
+                      alt="lmQCM", class="center", style="padding: 5px"), href="https://CRAN.R-project.org/package=lmQCM", target="_blank"),
+           br(),a("R package: lmQCM", href="https://CRAN.R-project.org/package=lmQCM", target="_blank"),
+           br(),br(),
+           a(tags$img(src='images/annoPeak_logo.png',
+                      height="40",
+                      alt="annoPeak", class="center", style="padding: 5px"), href="https://apps.medgen.iupui.edu/rsc/content/19/", target="_blank"),
+           br(),a("annoPeakR: a web-tool to annotate, visualize and compare peak sets from ChIP-seq/ChIP-exo", href="https://apps.medgen.iupui.edu/rsc/content/19/", target="_blank"),
+           style="text-align: center; padding: 5px"
+         ),
+         br(),
+         tags$div(
+           a(tags$img(src='images/iGenomicsR_logo2.png',
+                      height="40",
+                      alt="iGenomicsR", class="center", style="padding: 5px"), href="https://apps.medgen.iupui.edu/rsc/content/27/", target="_blank"),
+           br(),a("iGenomicsR: An integrative platform to explore, visualize, and analyze multidimensional genomics data for disease", href="https://apps.medgen.iupui.edu/rsc/content/27/", target="_blank"),
+           br(),br(),
+           a(tags$img(src='https://apps.medgen.iupui.edu/rsc/content/25/images/circosviewer_logo.png',
+                      height="50",
+                      alt="Circos Viewer", class="center", style="padding: 5px"), href="https://apps.medgen.iupui.edu/rsc/content/25/", target="_blank"),
+           br(),a("Circos Viewer: A Circos Plot Viewer.", href="https://apps.medgen.iupui.edu/rsc/content/25/", target="_blank"),
+           br(),br(),
+           a(tags$img(src='https://apps.medgen.iupui.edu/rsc/content/23/_w_f03c09b9/images/iGPSeplus_logo.png',
+                      height="40",
+                      alt="iGPSe Plus", class="center", style="padding: 5px"), href="https://apps.medgen.iupui.edu/rsc/content/23/", target="_blank"),
+           br(),a("iGPSe Plus: Integrative Genomic based Canser Patient Stratification", href="https://apps.medgen.iupui.edu/rsc/content/23/", target="_blank"),
+           style="text-align: center; padding: 5px"
+         ),
+         h4("Development Team", style="color: STEELBLUE; padding-bottom: 20px"),
+         h5("Prof. Kun Huang's Laboratory", style="color: STEELBLUE"),
+         tags$ul(
+           tags$li("Zhi Huang"),
+           tags$li("Zhi Han"),
+           tags$li("Jie Zhang"),
+           tags$li("Kun Huang")
+         ),
+         h4("Publications", style="color: STEELBLUE; padding-bottom: 20px"),
+         tags$ul(
+           tags$li("-")
+         ),
+         h4("Funding for the TSUNAMI is or has been provided by:", style="color: STEELBLUE; padding-bottom: 20px"),
+         tags$ul(
+           tags$li("Partially supported by IUSM startup fund, the NCI ITCR U01 (CA188547)."),
+           tags$li("Data Science and Bioinformatics Program for Precision Health Initiative, Indiana University.")
+         )
+         
+),
+
+
+# navbarMenu(
+#   "More",
+#   tabPanel("Developer",
+#            h4("Author Information"),
+#            helpText("Indiana University School of Medicine"),
+#            h4("Publication"),
+#            helpText("Please cite ...")
+#            )
+# )
+tags$div(
+  p(a("TSUNAMI", href="https://apps.medgen.iupui.edu/rsc/tsunami"), "Version v1.8 | ", a("IUSM",href="https://medicine.iu.edu/", target="_blank"), " | ", a("RI",href="http://www.regenstrief.org/", target="_blank"), style="color: grey; font-size: 12px"), 
+  p("Questions and feedback: zhihuan@iu.edu | ", a("Report Issue", href="https://github.com/huangzhii/TSUNAMI/issues", target="_blank"), " | ", a("Github", href="https://github.com/huangzhii/TSUNAMI/", target="_blank"), style="color: grey; font-size: 12px"),
+  style="text-align: center; padding-top: 40px"
+)
 )
