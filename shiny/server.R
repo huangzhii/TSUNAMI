@@ -130,6 +130,7 @@ observeEvent(input$dataset_lastClickId,{
       smartModal(error=T, title = "Object gset doesn't contain GPL90.", content = sprintf("%s's object gset doesn't contain GPL90, thus we cannot retrieve the expression data. Please try other available GSE data (e.g., GSE17537, GSE73119).",myGSE))
       return()
     }
+    
     gset <- gset[[idx]]
     edata <- exprs(gset) #This is the expression matrix
     if (dim(edata)[1] == 0 || is.null(dim(edata))){
@@ -207,7 +208,7 @@ observeEvent(input$dataset_lastClickId,{
           # data_temp <- print.data.frame(data.frame(data_temp), quote=FALSE)
           data <<- data_temp
           print("txt file Processed.")
-        } else if(fileExtension == "xlsx" || fileExtension == "xls"){
+        } else if(fileExtension == "xlsx"){
           data_temp <- read.xlsx(input$csvfile$datapath, sheet = 1, startRow = 1, colNames = TRUE)
           if(data_temp[dim(data_temp)[1],1] == "!series_matrix_table_end"){
             print("remove last row with \"!series_matrix_table_end\" ")
@@ -215,7 +216,10 @@ observeEvent(input$dataset_lastClickId,{
           }
           # data_temp <- print.data.frame(data.frame(data_temp), quote=FALSE)
           data <<- data_temp
-          print("xlsx / xls file Processed.")
+          print("xlsx file Processed.")
+        } else if(fileExtension == "xls"){
+          sendSweetAlert(session, title = "Error", text = "We discontinued to support XLS format. Please resubmit with another file format.", type = "error",
+                         btn_labels = "Ok", html = FALSE, closeOnClickOutside = TRUE)
         }
         removeModal()
 
@@ -438,43 +442,46 @@ observeEvent(input$dataset_lastClickId,{
       # save(finalSymChar, file = "~/Desktop/finalSymChar.Rdata")
       
       # advanced
-      if (input$sorting_adv_checkbox){
-        finalPValue <- matrix(0, ncol = 0, nrow = length(finalSym))
-        OS_IND <- as.numeric(data[input$row_osefs_ind, input$sort_col_start:dim(data)[2]])
-        OS <- as.numeric(data[input$row_osefs, input$sort_col_start:dim(data)[2]])
-        # print(OS_IND)
-        # print(OS)
-        # pvalue
-        for(i in 1:dim(finalExp)[1]){
-          rr = finalExp[i,]
-          rr_sorted_list = sort(rr, decreasing = FALSE, index.return=T)
-          rr_sorted = rr_sorted_list$x
-          rr_sorted_idx = rr_sorted_list$ix
-          medianB <- rep(0, length(rr))
-          medianB[ rr_sorted_idx[ceiling(length(rr)/2):length(rr)] ] = 1
-          ss <- survdiff(Surv(OS, OS_IND) ~ medianB)
-          finalPValue[i] <- 1-pchisq(ss$chisq, 1)
-        }
-        # print("final P value:")
-        # print(finalPValue)
-        finalPValue <- as.numeric(finalPValue)
-        # save(finalPValue,file="~/Desktop/finalPValue.Rdata")
-        if (input$select_pval_adv_checkbox){
-          finalExp <- finalExp[finalPValue<=input$advance_selection_pvalue,]
-          finalSym <- finalSym[finalPValue<=input$advance_selection_pvalue]
-          finalSymChar <- finalSymChar[finalPValue<=input$advance_selection_pvalue]
-          finalPValue <- finalPValue[finalPValue<=input$advance_selection_pvalue]
-        }
-        
-        data_final <<- data.frame(cbind(finalSym,finalPValue,finalExp))
-        colnames(data_final)[1:2] = c("Gene_Symbol", sprintf("P-value of %s",input$choose_OS_EFS))
-      }
-      else{
-        data_final <<- data.frame(cbind(finalSym,finalExp))
-        colnames(data_final)[1] = "Gene_Symbol"
-      }
+      # if (input$sorting_adv_checkbox){
+      #   finalPValue <- matrix(0, ncol = 0, nrow = length(finalSym))
+      #   OS_IND <- as.numeric(data[input$row_osefs_ind, input$sort_col_start:dim(data)[2]])
+      #   OS <- as.numeric(data[input$row_osefs, input$sort_col_start:dim(data)[2]])
+      #   # print(OS_IND)
+      #   # print(OS)
+      #   # pvalue
+      #   for(i in 1:dim(finalExp)[1]){
+      #     rr = finalExp[i,]
+      #     rr_sorted_list = sort(rr, decreasing = FALSE, index.return=T)
+      #     rr_sorted = rr_sorted_list$x
+      #     rr_sorted_idx = rr_sorted_list$ix
+      #     medianB <- rep(0, length(rr))
+      #     medianB[ rr_sorted_idx[ceiling(length(rr)/2):length(rr)] ] = 1
+      #     ss <- survdiff(Surv(OS, OS_IND) ~ medianB)
+      #     finalPValue[i] <- 1-pchisq(ss$chisq, 1)
+      #   }
+      #   # print("final P value:")
+      #   # print(finalPValue)
+      #   finalPValue <- as.numeric(finalPValue)
+      #   # save(finalPValue,file="~/Desktop/finalPValue.Rdata")
+      #   if (input$select_pval_adv_checkbox){
+      #     finalExp <- finalExp[finalPValue<=input$advance_selection_pvalue,]
+      #     finalSym <- finalSym[finalPValue<=input$advance_selection_pvalue]
+      #     finalSymChar <- finalSymChar[finalPValue<=input$advance_selection_pvalue]
+      #     finalPValue <- finalPValue[finalPValue<=input$advance_selection_pvalue]
+      #   }
+      #   
+      #   data_final <<- data.frame(cbind(finalSym,finalPValue,finalExp))
+      #   colnames(data_final)[1:2] = c("Gene_Symbol", sprintf("P-value of %s",input$choose_OS_EFS))
+      # }
+      # else{
+      #   data_final <<- data.frame(cbind(finalSym,finalExp))
+      #   colnames(data_final)[1] = "Gene_Symbol"
+      # }
+      data_final <<- data.frame(cbind(finalSym, finalExp))
+      colnames(data_final)[1] = "Gene_Symbol"
       #finally no matter if just basic or advanced:
       finalExp <<- finalExp
+      sampleID <<- colnames(finalExp)
       finalSym <<- finalSym
       finalSymChar <<- finalSymChar
       output$mytable_finaldata <- DT::renderDataTable({
@@ -541,7 +548,14 @@ observeEvent(input$dataset_lastClickId,{
       temptext <- substring(temptext, 2) # remove first \n separater
       geneCharVector_global <<- geneCharVector
       text <<- temptext
+      
+      colnames(temp_eigengene) <- sampleID
       eigengene_matrix <<- temp_eigengene
+      output$eigengene_matrix_select_row_ui <- renderUI({
+        selectInput(inputId="eigengene_matrix_select_row", label="Please select row:",
+                    choices = 1:dim(eigengene_matrix)[1], selected = 1, multiple = FALSE,
+                    selectize = TRUE, width = NULL, size = NULL)
+      })
 
       ## Compute maximum length
       max.length <- max(sapply(geneCharVector, length))
@@ -565,7 +579,7 @@ observeEvent(input$dataset_lastClickId,{
 
       output$mytable7 <- renderTable({
         return(eigengene_matrix)
-      },rownames = FALSE, colnames = FALSE, na = "", bordered = TRUE)
+      },rownames = TRUE, colnames = TRUE, na = "", bordered = TRUE, digits = 4)
 
       removeModal()
       print('tab4')
@@ -734,8 +748,14 @@ observeEvent(input$dataset_lastClickId,{
       temptext <- substring(temptext, 2) # remove first \n separater
       geneCharVector_global <<- geneCharVector_withoutColor # remove the color label
       text <<- temptext
+      colnames(temp_eigengene) <- sampleID
       eigengene_matrix <<- temp_eigengene
-
+      output$eigengene_matrix_select_row_ui <- renderUI({
+        selectInput(inputId="eigengene_matrix_select_row", label="Please select row:",
+                    choices = 1:dim(eigengene_matrix)[1], selected = 1, multiple = FALSE,
+                    selectize = TRUE, width = NULL, size = NULL)
+      })
+      
       ## Compute maximum length
       max.length <- max(sapply(geneCharVector, length))
       ## Add NA values to list elements
@@ -763,13 +783,72 @@ observeEvent(input$dataset_lastClickId,{
 
       output$mytable7 <- renderTable({
         return(eigengene_matrix)
-      },rownames = FALSE, colnames = FALSE, na = "", bordered = TRUE)
+      },rownames = TRUE, colnames = TRUE, na = "", bordered = TRUE)
 
       print('tab4')
       session$sendCustomMessage("download_cluster_ready","-")
       session$sendCustomMessage("myCallbackHandler", "tab4")
   })
-
+  
+  observeEvent(input$run_survival_analysis,{
+    if(is.null(input$eigengene_matrix_select_row)){
+      sendSweetAlert(session, title = "Error", text = "You haven't indicate which row of eigengene matrix will be dichotomized and analyzed.", type = "error",
+                     btn_labels = "OK", html = FALSE, closeOnClickOutside = TRUE)
+      return()
+    }
+    event = input$survival_event
+    time = input$survival_time
+    event = as.numeric(unlist( regmatches(event, gregexpr("[[:digit:]]+\\.*[[:digit:]]*", event)) ))
+    time = as.numeric(unlist( regmatches(time, gregexpr("[[:digit:]]+\\.*[[:digit:]]*", time)) ))
+    
+    if(length(event) != length(sampleID) | length(time) != length(sampleID)){
+      sendSweetAlert(session, title = "Error", text = sprintf("Number of OS/EFS events (%d) or number of OS/EFS times (%d) doesn't match number of samples.", length(event), length(time)),
+                     type = "error", btn_labels = "OK", html = FALSE, closeOnClickOutside = TRUE)
+      return()
+    }
+    
+    row = as.numeric(input$eigengene_matrix_select_row)
+    eigengene = eigengene_matrix[row,]
+    output$survival_analysis_results_ui <- renderUI({
+      plotOutput("survival_plot", width = "100%", height = "400px", click = NULL,
+                 dblclick = NULL, hover = NULL, hoverDelay = NULL,
+                 hoverDelayType = NULL, brush = NULL, clickId = NULL, hoverId = NULL,
+                 inline = FALSE)
+    })
+    mv = median(eigengene)
+    group = cbind(length(time))
+    for(j in 1:length(time)){
+      if(eigengene[j] < mv){
+        group[j] = 1
+      }else{
+        group[j] = 2
+      }
+    }
+    
+    mySurvTest = Surv(time, event)
+    # logrank
+    log1 = survdiff(mySurvTest ~ group)
+    logrank.p = pchisq(log1$chisq, 1, lower.tail=FALSE)
+    
+    # KM Curve
+    fit = survfit(mySurvTest ~ group)
+    n1 = sum(group==1)
+    leg1 = paste("Low risk(", n1, ")", sep = "")
+    n2 = sum(group==2)
+    leg2 = paste("High risk(", n2, ")", sep = "")
+    
+    output$survival_plot <- renderPlot({
+      plot(fit, mark.time=TRUE, xlab = "Months", ylab = "Survival", lty = 1:2,
+           col = 1:2, cex = 0.5)
+      title(main = paste("Survival Plot of Eigengene Module ", row, sep=""))
+      grid()
+      legend(x = "topright", legend = c(leg1, leg2), lty = 1:2,
+             col = 1:2, cex = 0.65)
+      text(10, 0.1, paste("p=", formatC(logrank.p, format="g", digits = 5), sep = ""),
+           pos = 4, cex = 1)
+    })
+  })
+  
   #   +------------------------------------------------------------+
   #   |
   #   |
@@ -1074,8 +1153,8 @@ observeEvent(input$dataset_lastClickId,{
     content = function(file) {
       separator <- switch(input$filetype2, "csv" = ',', "txt" = '\t')
       write.table(eigengene_matrix, file = file, append = FALSE, quote = TRUE, sep = separator,
-                  eol = "\r\n", na = "NA", dec = ".", row.names = F,
-                  col.names = F, qmethod = c("escape", "double"),
+                  eol = "\r\n", na = "NA", dec = ".", row.names = T,
+                  col.names = NA, qmethod = c("escape", "double"),
                   fileEncoding = "")
     }
   )

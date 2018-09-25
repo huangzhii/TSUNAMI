@@ -140,7 +140,7 @@ navbarPage( theme = "style.css",
                                                          multiple = FALSE,
                                                          accept = c("text/csv",
                                                                     "text/comma-separated-values,text/plain",
-                                                                    ".csv", ".xlsx", ".xls")),
+                                                                    ".csv", ".xlsx")),
                                                
                                                # Include clarifying text ----
                                                helpText("Note: Maximum file size allowed for uploading is 300MB. If uploaded data is with .xlsx or .xls, separater can be any value, but please make sure data are located in Sheet1."),
@@ -241,27 +241,27 @@ navbarPage( theme = "style.css",
                                                           checkboxInput("checkbox_duplicated", "Keep only one row with largest mean expression value when Gene Symbol is duplicated", TRUE),
                                                           numericInput("max_gene_retain", "Maximum Number of Genes to Retain (i.e. Top N genes sorted by mean expression values among all samples. Leave blank for keeping all data):", 10000, step = 1000, min = 0)
                                                           
-                                                 ), # EOF tabpanel main
-                                                 tabPanel("Advanced",
-                                                          h5("Choose Advanced Processes"),
-                                                          checkboxInput("sorting_adv_checkbox", "Sort expression data ascending to learn OS / EFS", F),
-                                                          conditionalPanel(condition = "input.sorting_adv_checkbox == 1",
-                                                                           selectizeInput(
-                                                                             'choose_OS_EFS', 'Specify OS or EFS:',
-                                                                             choices = c("OS", "EFS")),
-                                                                           helpText("If yes, please select objective row: row index and range of columns. Please refer OS/EFS position from Original Data (not Verified Data)."),
-                                                                           helpText("OS_IND/EFS_IND must either valued 0 or 1. OS/EFS must be numeric."),
-                                                                           numericInput("row_osefs_ind", "Row of OS_IND/EFS_IND:", 9, step = 1, width = NULL, min = 1),
-                                                                           numericInput("row_osefs", "Row of OS/EFS:", 10, step = 1, width = NULL, min = 1),
-                                                                           numericInput("sort_col_start", "Starting Col:", 2, step = 1, width = NULL, min = 1)
-                                                          ),
-                                                          checkboxInput("select_pval_adv_checkbox", "Pick Expression Data only with satisfied P-value.", F),
-                                                          conditionalPanel(condition = "input.select_pval_adv_checkbox == 1",
-                                                                           helpText("Calculated by median and the (non-central) Chi-Squared Distribution."),
-                                                                           numericInput("advance_selection_pvalue", "P-value smaller than:", 0.05, step = 0.001, width = NULL, min = 0)
-                                                          )
-                                                          
-                                                 )
+                                                 ) # EOF tabpanel main
+                                                 # tabPanel("Advanced",
+                                                 #          h5("Choose Advanced Processes"),
+                                                 #          checkboxInput("sorting_adv_checkbox", "Sort expression data ascending to learn OS / EFS", F),
+                                                 #          conditionalPanel(condition = "input.sorting_adv_checkbox == 1",
+                                                 #                           selectizeInput(
+                                                 #                             'choose_OS_EFS', 'Specify OS or EFS:',
+                                                 #                             choices = c("OS", "EFS")),
+                                                 #                           helpText("If yes, please select objective row: row index and range of columns. Please refer OS/EFS position from Original Data (not Verified Data)."),
+                                                 #                           helpText("OS_IND/EFS_IND must either valued 0 or 1. OS/EFS must be numeric."),
+                                                 #                           numericInput("row_osefs_ind", "Row of OS_IND/EFS_IND:", 9, step = 1, width = NULL, min = 1),
+                                                 #                           numericInput("row_osefs", "Row of OS/EFS:", 10, step = 1, width = NULL, min = 1),
+                                                 #                           numericInput("sort_col_start", "Starting Col:", 2, step = 1, width = NULL, min = 1)
+                                                 #          ),
+                                                 #          checkboxInput("select_pval_adv_checkbox", "Pick Expression Data only with satisfied P-value.", F),
+                                                 #          conditionalPanel(condition = "input.select_pval_adv_checkbox == 1",
+                                                 #                           helpText("Calculated by median and the (non-central) Chi-Squared Distribution."),
+                                                 #                           numericInput("advance_selection_pvalue", "P-value smaller than:", 0.05, step = 0.001, width = NULL, min = 0)
+                                                 #          )
+                                                 #          
+                                                 # )
                                                ), # EOF tabsetPanel
                                                actionButton("action3", "Continue to Co-Expression Analysis",style="color: WHITE; background-color: DODGERBLUE")
                                              ), # EOF siderbarPanel
@@ -418,7 +418,18 @@ navbarPage( theme = "style.css",
                                              tabsetPanel(
                                                id = 'tabset',
                                                tabPanel("Merged Clusters", DT::dataTableOutput("clusterResult")),
-                                               tabPanel("Eigengene Matrix", tableOutput("mytable7")),
+                                               tabPanel("Eigengene Matrix",
+                                                        tableOutput("mytable7"),
+                                                        
+                                                        h4("Survival Analysis", style="color: STEELBLUE; padding-top: 10px"),
+                                                        helpText("Please select which row of the eigengene matrix would be applied for survival analysis. Groups are dichotomized by its median value."),
+                                                        uiOutput("eigengene_matrix_select_row_ui"),
+                                                        helpText("Please copy and paste following information in the correct order with regard to sample IDs (column names in above eigengene matrix), Note: separator (space, comma, new line, tab, or semicolon) will be identified automatically."),
+                                                        textAreaInput("survival_event", "OS/EFS Events (1: deceased; 0: censored)", value = "", width = '100%', height = "20%", placeholder = "e.g., 0, 1, 0, ..."),
+                                                        textAreaInput("survival_time", "OS/EFS Times", value = "", width = '100%', height = "20%", placeholder = "e.g., 12.3, 10.6, 5.0, ..."),
+                                                        actionButton("run_survival_analysis", "Confirm and Run"),
+                                                        uiOutput("survival_analysis_results_ui")
+                                                        ),
                                                tabPanel("Circos Plots",
                                                         
                                                         h4("Circos Plot", style="color: STEELBLUE"),
