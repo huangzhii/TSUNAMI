@@ -398,7 +398,7 @@ observeEvent(input$dataset_lastClickId,{
 
       if (input$checkbox_logarithm){
         tmpExp[tmpExp <= 0] <- 0.000001
-        tmpExp <- log(tmpExp)
+        tmpExp <- log2(tmpExp)
       }
       if (input$checkbox_empty){
         print(sprintf("data dimension before remove gene with empty symbol: %d x %d",dim(tmpExp)[1],dim(tmpExp)[2]))

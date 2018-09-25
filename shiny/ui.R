@@ -236,7 +236,7 @@ navbarPage( theme = "style.css",
                                                             column(6, numericInput("variance_expval", "Lowest Variance Percentile (%) To Remove:", 10, step = 1, min = 0))
                                                           ),
                                                           checkboxInput("checkbox_NA", "Convert NA value to 0 in Expression Data", TRUE),
-                                                          checkboxInput("checkbox_logarithm", "Take the log (e) of Expression Data (Default: Unchecked)", FALSE),
+                                                          checkboxInput("checkbox_logarithm", "Take the log2 of Expression Data (Default: Unchecked)", FALSE),
                                                           checkboxInput("checkbox_empty", "Remove rows with empty Gene Symbol", TRUE),
                                                           checkboxInput("checkbox_duplicated", "Keep only one row with largest mean expression value when Gene Symbol is duplicated", TRUE),
                                                           numericInput("max_gene_retain", "Maximum Number of Genes to Retain (i.e. Top N genes sorted by mean expression values among all samples. Leave blank for keeping all data):", 10000, step = 1000, min = 0)
