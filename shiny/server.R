@@ -838,7 +838,7 @@ observeEvent(input$dataset_lastClickId,{
     leg2 = paste("High risk(", n2, ")", sep = "")
     
     output$survival_plot <- renderPlot({
-      plot(fit, mark.time=TRUE, xlab = "Months", ylab = "Survival", lty = 1:2,
+      plot(fit, mark.time=TRUE, xlab = "Times", ylab = "Survival", lty = 1:2,
            col = 1:2, cex = 0.5)
       title(main = paste("Survival Plot of Eigengene Module ", row, sep=""))
       grid()
