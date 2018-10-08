@@ -55,7 +55,7 @@ navbarPage( theme = "style.css",
                                                "All of which bring convenience to researchers for multiple purposes.",
                                                h5("Pipeline Flowchart", style="color: STEELBLUE; padding-top: 10px"),
                                                tags$div(
-                                                 tags$img(src='images/flowchart_concise_flat3.png',
+                                                 tags$img(src='images/flowchart_concise_flat4.png',
                                                           width="600",
                                                           alt="TSUNAMI Flowchart", class="center"),
                                                  style="text-align: center; padding: 20px"
@@ -172,12 +172,12 @@ navbarPage( theme = "style.css",
                                              mainPanel(
                                                h5("NCBI GEO Database"),
                                                helpText("Example GSE Microarray Data: GSE17537; GSE88882; GSE98761; GSE40294; GSE73119; GSE31399; GSE21361; GSE13002; GSE4309; GSE61084; GSE61085.", style="font-size: 12px"),
-                                               helpText("Example RNA-seq Expression Data: ", a("TCGA-BLCA",href="dataset/TCGA-BLCA.csv",target="_blank"), a("TCGA-BRCA",href="dataset/TCGA-BRCA.csv",target="_blank"),
-                                                        a("TCGA-CESC",href="dataset/TCGA-CESC.csv",target="_blank"),a("TCGA-ESCA",href="dataset/TCGA-ESCA.csv",target="_blank"),
-                                                        a("TCGA-HNSC",href="dataset/TCGA-HNSC.csv",target="_blank"),a("TCGA-KIRC",href="dataset/TCGA-KIRC.csv",target="_blank"),
-                                                        a("TCGA-KIRP",href="dataset/TCGA-KIRP.csv",target="_blank"),a("TCGA-LIHC",href="dataset/TCGA-LIHC.csv",target="_blank"),
+                                               helpText("Example RNA-seq Expression Data: ", a("TCGA-BLCA",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-BLCA.csv",target="_blank"), a("TCGA-BRCA",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-BRCA.csv",target="_blank"),
+                                                        a("TCGA-CESC",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-CESC.csv",target="_blank"),a("TCGA-ESCA",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-ESCA.csv",target="_blank"),
+                                                        a("TCGA-HNSC",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-HNSC.csv",target="_blank"),a("TCGA-KIRC",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-KIRC.csv",target="_blank"),
+                                                        a("TCGA-KIRP",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-KIRP.csv",target="_blank"),a("TCGA-LIHC",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-LIHC.csv",target="_blank"),
                                                         style="font-size: 12px"),
-                                               helpText("Example Single-cell RNA-seq Data: ", a("GSE59739_DataTable",href="dataset/GSE59739_DataTable.txt",target="_blank"), style="font-size: 12px"),
+                                               helpText("Example Single-cell RNA-seq Data: ", a("GSE59739_DataTable",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/GSE59739_DataTable.txt",target="_blank"), style="font-size: 12px"),
                                                tabsetPanel(
                                                  id = 'dataset',
                                                  tabPanel("Series", DT::dataTableOutput("mytable1"))
