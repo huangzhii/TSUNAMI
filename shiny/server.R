@@ -349,21 +349,22 @@ observeEvent(input$dataset_lastClickId,{
       # convert na to 0
       if (input$checkbox_NA){RNA[is.na(RNA)] <- 0}
 
-      # Remove data with lowest 20% absolute exp value shared by all samples
-      percentile <- ifelse(is.na(input$absolute_expval),0,input$absolute_expval)/100.
+      # Remove data with lowest 20% mean exp value shared by all samples
+      percentile <- ifelse(is.na(input$mean_expval),0,input$mean_expval)/100.
       print(sprintf("percentile 1: %f",percentile))
       # save(RNA, file="~/Desktop/RNA.Rdata")
       # save(geneID, file="~/Desktop/geneID.Rdata")
       if (percentile > 0){
-        RNA_filtered1 = RNA[apply(RNA,1,max) > quantile(RNA, percentile)[[1]], ]
-        geneID_filtered1 = geneID[apply(RNA,1,max) > quantile(RNA, percentile)[[1]], ]
+        RNAmean = apply(RNA,1,mean)
+        RNA_filtered1 = RNA[RNAmean > quantile(RNAmean, percentile)[[1]], ]
+        geneID_filtered1 = geneID[RNAmean > quantile(RNAmean, percentile)[[1]], ]
       }
       else {
         RNA_filtered1 = RNA
         geneID_filtered1 = as.matrix(geneID)
       }
       
-      print("after remove lowest k% abs exp value:")
+      print("after remove lowest k% mean exp value:")
       print(dim(RNA_filtered1))
       # Remove data with lowest 10% variance across samples
       percentile <- ifelse(is.na(input$variance_expval),0,input$variance_expval)/100.
@@ -429,12 +430,12 @@ observeEvent(input$dataset_lastClickId,{
       res <- sort.int(rowMeans(tmpExp), decreasing = TRUE, index.return=TRUE)
       sortMean <- res$x
       sortInd <- res$ix
-      topN <- min(ifelse(is.na(input$max_gene_retain),Inf,input$max_gene_retain), nrow(tmpExp))
+      # topN <- min(ifelse(is.na(input$max_gene_retain),Inf,input$max_gene_retain), nrow(tmpExp))
       #Remove gene symbol after vertical line: from ABC|123 to ABC:
       uniGene <- gsub("\\|.*$","", uniGene)
 
-      finalExp <- tmpExp[sortInd[1:topN], ]
-      finalSym <- uniGene[sortInd[1:topN]]
+      finalExp <- tmpExp[sortInd, ]
+      finalSym <- uniGene[sortInd]
       finalSymChar <- as.character(finalSym)
       
       # save(finalExp, file = "~/Desktop/finalExp.Rdata")

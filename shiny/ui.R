@@ -233,17 +233,17 @@ navbarPage( theme = "style.css",
                                                           # Horizontal line ----
                                                           tags$hr(),
                                                           h5("Remove Genes"),
-                                                          helpText("Remove data with lowest percentile absolute expression value shared by all samples. Then remove data with lowest percentile variance across samples.", style="margin: 0px"),
+                                                          helpText("Remove rows with lowest percentile mean expression value shared by all samples. Then remove data with lowest percentile variance across samples.", style="margin: 0px"),
                                                           helpText("Default value when leave them blank: 0.", style="color: STEELBLUE; font-size: 12px"),
                                                           fluidRow(
-                                                            column(6, numericInput("absolute_expval", "Lowest Absolute Percentile (%) To Remove:", 20, step = 1, min = 0)),
-                                                            column(6, numericInput("variance_expval", "Lowest Variance Percentile (%) To Remove:", 10, step = 1, min = 0))
+                                                            column(6, numericInput("mean_expval", "Lowest Mean Percentile (%) To Remove:", 20, step = 1, min = 0, max = 100)),
+                                                            column(6, numericInput("variance_expval", "Lowest Variance Percentile (%) To Remove:", 10, step = 1, min = 0, max = 100))
                                                           ),
                                                           checkboxInput("checkbox_NA", "Convert NA value to 0 in Expression Data", TRUE),
                                                           checkboxInput("checkbox_logarithm", "Take the log2(x+1) of Expression Data x (Default: Unchecked)", FALSE),
                                                           checkboxInput("checkbox_empty", "Remove rows with empty Gene Symbol", TRUE),
-                                                          checkboxInput("checkbox_duplicated", "Keep only one row with largest mean expression value when Gene Symbol is duplicated", TRUE),
-                                                          numericInput("max_gene_retain", "Maximum Number of Genes to Retain (i.e. Top N genes sorted by mean expression values among all samples. Leave blank for keeping all data):", 10000, step = 1000, min = 0)
+                                                          checkboxInput("checkbox_duplicated", "Keep only one row with largest mean expression value when Gene Symbol is duplicated", TRUE)
+                                                          # numericInput("max_gene_retain", "Maximum Number of Genes to Retain (i.e. Top N genes sorted by mean expression values among all samples. Leave blank for keeping all data):", 10000, step = 1000, min = 0)
                                                           
                                                  ) # EOF tabpanel main
                                                  # tabPanel("Advanced",
