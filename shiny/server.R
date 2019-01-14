@@ -1,3 +1,5 @@
+options(repos = BiocManager::repositories())
+getOption("repos")
 library(shiny)
 library(rsconnect)
 library(plyr)
@@ -489,7 +491,6 @@ observeEvent(input$dataset_lastClickId,{
         DT::datatable(data_final,
                       extensions = 'Responsive', escape=F, selection = 'none')
       })
-      
       removeModal()
       print('tab3')
       session$sendCustomMessage("download_finaldata_ready","-")
@@ -1167,7 +1168,7 @@ observeEvent(input$dataset_lastClickId,{
     content = function(file) {
       write.table(data_final, file = file, append = FALSE, quote = TRUE, sep = ',',
                   eol = "\r\n", na = "NA", dec = ".", row.names = F,
-                  col.names = NA, qmethod = c("escape", "double"),
+                  col.names = T, qmethod = c("escape", "double"),
                   fileEncoding = "")
     }
   )
