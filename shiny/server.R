@@ -523,7 +523,7 @@ observeEvent(input$dataset_lastClickId,{
                    content = sprintf("Too few genes to do lmQCM merging."))
         return()
       }
-      
+      mergedCluster <- mergedCluster@clusters.id
       geneCharVector <- matrix(0, nrow = 0, ncol = length(mergedCluster))
       temp_eigengene <- matrix(0, nrow = length(mergedCluster), ncol = dim(finalExp)[2]) # Clusters * Samples
 
