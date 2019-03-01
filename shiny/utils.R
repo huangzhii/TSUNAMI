@@ -8,7 +8,7 @@ varFilter2 <- function (eset, var.cutoff = 0.5, filterByQuantile = TRUE) {
   # if (deparse(substitute(var.func)) == "IQR") {
   #   vars <- genefilter:::rowIQRs(eset)
   # }
-  vars <- apply(exprs(eset), 1, var)
+  vars <- apply(eset, 1, var)
   if (filterByQuantile) {
     if (0 < var.cutoff && var.cutoff < 1) {
       quant = quantile(vars, probs = var.cutoff)

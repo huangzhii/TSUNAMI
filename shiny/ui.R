@@ -236,8 +236,8 @@ navbarPage( theme = "style.css",
                                                           helpText("Remove rows with lowest percentile mean expression value shared by all samples. Then remove data with lowest percentile variance across samples.", style="margin: 0px"),
                                                           helpText("Default value when leave them blank: 0.", style="color: STEELBLUE; font-size: 12px"),
                                                           fluidRow(
-                                                            column(6, numericInput("mean_expval", "Lowest Mean Percentile (%) To Remove:", 20, step = 1, min = 0, max = 100)),
-                                                            column(6, numericInput("variance_expval", "Lowest Variance Percentile (%) To Remove:", 20, step = 1, min = 0, max = 100))
+                                                            column(6, numericInput("mean_expval", "Lowest Mean Percentile (%) To Remove:", 50, step = 1, min = 0, max = 100)),
+                                                            column(6, numericInput("variance_expval", "Lowest Variance Percentile (%) To Remove:", 50, step = 1, min = 0, max = 100))
                                                           ),
                                                           checkboxInput("checkbox_NA", "Convert NA value to 0 in Expression Data", TRUE),
                                                           checkboxInput("checkbox_logarithm", "Take the log2(x+1) of Expression Data x (Default: Unchecked)", FALSE),

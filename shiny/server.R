@@ -39,6 +39,7 @@ text <- NULL
 geneCharVector_global <- NULL
 eigengene_matrix <- NULL
 fname <- NULL # e.g. 12345_at
+
 # listEnrichrDbs()
 enrichr_dbs <- c("GO_Biological_Process_2017b",
                  "GO_Molecular_Function_2017b",
@@ -57,7 +58,7 @@ enrichr_dbs <- c("GO_Biological_Process_2017b",
 enriched <- NULL # all enrichr results
 final_genes_str <- NULL
 
-function(input, output, session) {
+server <- function(input, output, session) {
   observeEvent(input$action1,{
       print('tab1')
       session$sendCustomMessage("myCallbackHandler", "tab1")
@@ -76,7 +77,6 @@ function(input, output, session) {
     colnames(GEO)[which(names(GEO) == "Sample.Count")] <- "Samples"
     GEO <- GEO %>% select("Samples", everything())
     GEO <- GEO %>% select("Actions", everything())
-    GEO <<- GEO
     # Basic process
     output$mytable1 <- DT::renderDataTable({
       DT::datatable(GEO, extensions = 'Responsive', escape=F, selection = 'none', rownames = F)
@@ -113,7 +113,7 @@ observeEvent(input$dataset_lastClickId,{
   if (input$dataset_lastClickId%like%"dataset_analysis"){
     row_of_GEO <- as.numeric(gsub("dataset_analysis_","",input$dataset_lastClickId))
     myGSE <- GEO$Accession[row_of_GEO]
-    GSE_name_title <<- GEO$Title[row_of_GEO]
+    GSE_name_title <- GEO$Title[row_of_GEO]
     print(myGSE)
     smartModal(error=F, title = sprintf("Loading %s file from NCBI GEO Database", myGSE),
                content = "We are currently loading your selected file from NCBI GEO Database ...")
@@ -142,9 +142,9 @@ observeEvent(input$dataset_lastClickId,{
       return()
     }
   # pdata <- pData(gset) # data.frame of phenotypic information.
-  fname <<- featureNames(gset) # e.g. 12345_at
-  data <<- cbind(fname, edata)
-  row.names(data) <<- seq(1, length(fname))
+  fname <- featureNames(gset) # e.g. 12345_at
+  data <- cbind(fname, edata)
+  row.names(data) <- seq(1, length(fname))
 
 
   updateTextInput(session, "platform_text", value = paste(annotation(gset), input$controller))
@@ -191,7 +191,7 @@ observeEvent(input$dataset_lastClickId,{
         smartModal(error=F, title = "Intepreting uploaded file in progress", content = "Intepreting ...")
         fileExtension <- getFileNameExtension(input$csvfile$datapath)
         if(fileExtension == "csv"){
-          data <<- read.csv(input$csvfile$datapath,
+          data <- read.csv(input$csvfile$datapath,
                             header = input$header,
                             sep = input$sep,
                             quote = input$quote)
@@ -208,7 +208,7 @@ observeEvent(input$dataset_lastClickId,{
             data_temp = data_temp[-dim(data_temp)[1],]
           }
           # data_temp <- print.data.frame(data.frame(data_temp), quote=FALSE)
-          data <<- data_temp
+          data <- data_temp
           print("txt file Processed.")
         } else if(fileExtension == "xlsx"){
           data_temp <- read.xlsx(input$csvfile$datapath, sheet = 1, startRow = 1, colNames = TRUE)
@@ -217,7 +217,7 @@ observeEvent(input$dataset_lastClickId,{
             data_temp = data_temp[-dim(data_temp)[1],]
           }
           # data_temp <- print.data.frame(data.frame(data_temp), quote=FALSE)
-          data <<- data_temp
+          data <- data_temp
           print("xlsx file Processed.")
         } else if(fileExtension == "xls"){
           sendSweetAlert(session, title = "Error", text = "We discontinued to support XLS format. Please resubmit with another file format.", type = "error",
@@ -307,7 +307,7 @@ observeEvent(input$dataset_lastClickId,{
 
     print(dim(data))
     print(length(fname2))
-    data[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data)[1],1] <<- fname2
+    data[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data)[1],1] <- fname2
     # row.names(data) <- seq(1, length(fname2))
     output$mytable4 <- DT::renderDataTable({
       # Expression Value
@@ -473,20 +473,17 @@ observeEvent(input$dataset_lastClickId,{
       #     finalPValue <- finalPValue[finalPValue<=input$advance_selection_pvalue]
       #   }
       #   
-      #   data_final <<- data.frame(cbind(finalSym,finalPValue,finalExp))
+      #   data_final <- data.frame(cbind(finalSym,finalPValue,finalExp))
       #   colnames(data_final)[1:2] = c("Gene_Symbol", sprintf("P-value of %s",input$choose_OS_EFS))
       # }
       # else{
-      #   data_final <<- data.frame(cbind(finalSym,finalExp))
+      #   data_final <- data.frame(cbind(finalSym,finalExp))
       #   colnames(data_final)[1] = "Gene_Symbol"
       # }
-      data_final <<- data.frame(cbind(finalSym, finalExp))
+      data_final <- data.frame(cbind(finalSym, finalExp))
       colnames(data_final)[1] = "Gene_Symbol"
       #finally no matter if just basic or advanced:
-      finalExp <<- finalExp
-      sampleID <<- colnames(finalExp)
-      finalSym <<- finalSym
-      finalSymChar <<- finalSymChar
+      sampleID <- colnames(finalExp)
       output$mytable_finaldata <- DT::renderDataTable({
         DT::datatable(data_final,
                       extensions = 'Responsive', escape=F, selection = 'none')
@@ -548,11 +545,11 @@ observeEvent(input$dataset_lastClickId,{
         temptext <- paste(temptext, capture.output(cat(geneChar, sep=',')), sep="\n")
       }
       temptext <- substring(temptext, 2) # remove first \n separater
-      geneCharVector_global <<- geneCharVector
-      text <<- temptext
+      geneCharVector_global <- geneCharVector
+      text <- temptext
       
       colnames(temp_eigengene) <- sampleID
-      eigengene_matrix <<- temp_eigengene
+      eigengene_matrix <- temp_eigengene
       output$eigengene_matrix_select_row_ui <- renderUI({
         selectInput(inputId="eigengene_matrix_select_row", label="Please select row:",
                     choices = 1:dim(eigengene_matrix)[1], selected = 1, multiple = FALSE,
@@ -748,10 +745,10 @@ observeEvent(input$dataset_lastClickId,{
         temptext <- paste(temptext, capture.output(cat(geneChar, sep=',')), sep="\n")
       }
       temptext <- substring(temptext, 2) # remove first \n separater
-      geneCharVector_global <<- geneCharVector_withoutColor # remove the color label
-      text <<- temptext
+      geneCharVector_global <- geneCharVector_withoutColor # remove the color label
+      text <- temptext
       colnames(temp_eigengene) <- sampleID
-      eigengene_matrix <<- temp_eigengene
+      eigengene_matrix <- temp_eigengene
       output$eigengene_matrix_select_row_ui <- renderUI({
         selectInput(inputId="eigengene_matrix_select_row", label="Please select row:",
                     choices = 1:dim(eigengene_matrix)[1], selected = 1, multiple = FALSE,
@@ -868,12 +865,12 @@ observeEvent(input$dataset_lastClickId,{
     # genes_str <- c('PHF|14','RBM|3','Nlrx1','MSL1','PHF21A','ARL10','INSR')
     print("genes_str for enrich analysis: ")
     print(genes_str)
-    final_genes_str <<- genes_str
+    final_genes_str <- genes_str
     updateTextAreaInput(session, "textareainput_GOEA",
                         label = paste(sprintf("Number of Genes: %d", length(final_genes_str)), input$controller),
                         value = paste(paste(final_genes_str, collapse = '\n'), input$controller))
     
-    enriched <<- enrichr(final_genes_str, enrichr_dbs)
+    enriched <- enrichr(final_genes_str, enrichr_dbs)
     
     Map(function(id) {
       dbres = enriched[[enrichr_dbs[id]]]
@@ -903,12 +900,12 @@ observeEvent(input$dataset_lastClickId,{
       # genes_str <- c('PHF|14','RBM|3','Nlrx1','MSL1','PHF21A','ARL10','INSR')
       print("genes_str for enrich analysis: ")
       print(genes_str[-1])
-      final_genes_str <<- genes_str[-1]
+      final_genes_str <- genes_str[-1]
       updateTextAreaInput(session, "textareainput_GOEA",
                           label = paste(sprintf("Number of Genes: %d", length(final_genes_str)), input$controller),
                           value = paste(paste(final_genes_str, collapse = '\n'), input$controller))
 
-      enriched <<- enrichr(final_genes_str, enrichr_dbs)
+      enriched <- enrichr(final_genes_str, enrichr_dbs)
 
       Map(function(id) {
         dbres = enriched[[enrichr_dbs[id]]]
