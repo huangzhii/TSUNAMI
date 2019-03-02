@@ -17,6 +17,7 @@ library(openxlsx)
 library(survival)
 library(naturalsort)
 library(shinyWidgets)
+library(progress)
 # circos plot
 library(circlize)
 # library(topGO) # Somehow conflict with WGCNA and GEOquery. Deprecated.
@@ -28,20 +29,10 @@ source("utils.R")
 # setwd("/Users/zhi/Desktop/GeneCoexpression/RGUI"); #mac #remove when deploy to shinyapps.io
 # source("./lmQCM/GeneCoExpressionAnalysis.R")
 # ----------------------------------------------------
-data <- NULL
-data_final <- NULL
-GEO <- NULL
-GSE_name_title <-NULL
-finalExp <- NULL
-finalSym <- NULL
-finalSymChar <- NULL
-text <- NULL
-geneCharVector_global <- NULL
-eigengene_matrix <- NULL
-fname <- NULL # e.g. 12345_at
-
+setClass("QCMObject", representation(clusters.id = "list", clusters.names = "list",
+                                     eigengene.matrix = "data.frame"))
 # listEnrichrDbs()
-enrichr_dbs <- c("GO_Biological_Process_2017b",
+enrichr_dbs <<- c("GO_Biological_Process_2017b",
                  "GO_Molecular_Function_2017b",
                  "GO_Cellular_Component_2017b",
                  "Jensen_DISEASES",
@@ -55,10 +46,23 @@ enrichr_dbs <- c("GO_Biological_Process_2017b",
                  "miRTarBase_2017",
                  "TargetScan_microRNA_2017",
                  "ChEA_2016")
-enriched <- NULL # all enrichr results
-final_genes_str <- NULL
-
 server <- function(input, output, session) {
+  
+  data <- reactiveVal(0)
+  data_final <- reactiveVal(0)
+  GEO <- reactiveVal(0)
+  GSE_name_title <-reactiveVal(0)
+  finalExp <- reactiveVal(0)
+  finalSym <- reactiveVal(0)
+  sampleID <- reactiveVal(0)
+  finalSymChar <- reactiveVal(0)
+  text.final <- reactiveVal(0)
+  geneCharVector_global <- reactiveVal(0)
+  eigengene_matrix <- reactiveVal(0)
+  fname <- reactiveVal(0) # e.g. 12345_at
+  enriched <- reactiveVal(0) # all enrichr results
+  final_genes_str <- reactiveVal(0)
+  
   observeEvent(input$action1,{
       print('tab1')
       session$sendCustomMessage("myCallbackHandler", "tab1")
@@ -73,19 +77,21 @@ server <- function(input, output, session) {
     on.exit(progress$close())
     # NCBI GEO
     load("./data/GEO_20180424.Rdata")
-    GEO[["Actions"]] <- paste0('<div><button type="button" class="btn-analysis" id=dataset_analysis_',1:nrow(GEO),'>Analyze</button></div>')
-    colnames(GEO)[which(names(GEO) == "Sample.Count")] <- "Samples"
-    GEO <- GEO %>% select("Samples", everything())
-    GEO <- GEO %>% select("Actions", everything())
+    GEO.temp <- GEO
+    GEO.temp[["Actions"]] <- paste0('<div><button type="button" class="btn-analysis" id=dataset_analysis_',1:nrow(GEO.temp),'>Analyze</button></div>')
+    colnames(GEO.temp)[which(names(GEO.temp) == "Sample.Count")] <- "Samples"
+    GEO.temp <- GEO.temp %>% select("Samples", everything())
+    GEO.temp <- GEO.temp %>% select("Actions", everything())
+    GEO(GEO.temp)
     # Basic process
     output$mytable1 <- DT::renderDataTable({
-      DT::datatable(GEO, extensions = 'Responsive', escape=F, selection = 'none', rownames = F)
+      DT::datatable(GEO(), extensions = 'Responsive', escape=F, selection = 'none', rownames = F)
     })
     
     # Other fancy processes
     # number of samples
     output$NCBI_GEO_Sample_Histogram <- renderPlotly({
-      GEO_sample_number <- GEO$Samples
+      GEO_sample_number <- GEO()$Samples
       plot_ly(x = GEO_sample_number, type = "histogram") %>% 
         layout(title = "Samples Histogram (log scale)",font=list(size = 10), 
                xaxis = list(title = "Number of Samples"),
@@ -95,7 +101,7 @@ server <- function(input, output, session) {
     })
     
     #release date
-    GEO_release_date <- as.Date(GEO$Release.Date,format = "%B %d, %Y")
+    GEO_release_date <- as.Date(GEO()$Release.Date,format = "%B %d, %Y")
     GEO_release_date_unique = cumsum(table(GEO_release_date)) #cummulative sum
     
     font <- list(family = "Courier New, monospace", size = 12, color = "black")
@@ -112,8 +118,9 @@ server <- function(input, output, session) {
 observeEvent(input$dataset_lastClickId,{
   if (input$dataset_lastClickId%like%"dataset_analysis"){
     row_of_GEO <- as.numeric(gsub("dataset_analysis_","",input$dataset_lastClickId))
-    myGSE <- GEO$Accession[row_of_GEO]
-    GSE_name_title <- GEO$Title[row_of_GEO]
+    myGSE <- GEO()$Accession[row_of_GEO]
+    GSE_name_title(GEO()$Title[row_of_GEO])
+    message(GSE_name_title())
     print(myGSE)
     smartModal(error=F, title = sprintf("Loading %s file from NCBI GEO Database", myGSE),
                content = "We are currently loading your selected file from NCBI GEO Database ...")
@@ -142,10 +149,11 @@ observeEvent(input$dataset_lastClickId,{
       return()
     }
   # pdata <- pData(gset) # data.frame of phenotypic information.
-  fname <- featureNames(gset) # e.g. 12345_at
-  data <- cbind(fname, edata)
-  row.names(data) <- seq(1, length(fname))
-
+  fname(featureNames(gset)) # e.g. 12345_at
+  data(cbind(fname(), edata))
+  data.temp <- data()
+  row.names(data.temp) <- seq(1, length(fname()))
+  data(data.temp)
 
   updateTextInput(session, "platform_text", value = paste(annotation(gset), input$controller))
   output$summary <- renderPrint({
@@ -158,12 +166,12 @@ observeEvent(input$dataset_lastClickId,{
   removeModal()
   output$mytable4 <- DT::renderDataTable({
     # Expression Value
-    DT::datatable(data,extensions = 'Responsive', escape=F, selection = 'none')
+    DT::datatable(data(),extensions = 'Responsive', escape=F, selection = 'none')
   })
   output$mytable5 <- DT::renderDataTable({
     # Expression Value
-    verified_data = data[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data)[1],
-                         c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data)[2])]
+    verified_data = data()[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data())[1],
+                         c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data())[2])]
     colnames(verified_data)[1] <- "Gene"
     DT::datatable(verified_data,extensions = 'Responsive', escape=F, selection = 'none')
   })
@@ -191,10 +199,11 @@ observeEvent(input$dataset_lastClickId,{
         smartModal(error=F, title = "Intepreting uploaded file in progress", content = "Intepreting ...")
         fileExtension <- getFileNameExtension(input$csvfile$datapath)
         if(fileExtension == "csv"){
-          data <- read.csv(input$csvfile$datapath,
+          data.temp <- read.csv(input$csvfile$datapath,
                             header = input$header,
                             sep = input$sep,
                             quote = input$quote)
+          data(data.temp)
           print("csv file Processed.")
         }
         else if(fileExtension == "txt"){
@@ -208,7 +217,7 @@ observeEvent(input$dataset_lastClickId,{
             data_temp = data_temp[-dim(data_temp)[1],]
           }
           # data_temp <- print.data.frame(data.frame(data_temp), quote=FALSE)
-          data <- data_temp
+          data(data_temp)
           print("txt file Processed.")
         } else if(fileExtension == "xlsx"){
           data_temp <- read.xlsx(input$csvfile$datapath, sheet = 1, startRow = 1, colNames = TRUE)
@@ -217,7 +226,7 @@ observeEvent(input$dataset_lastClickId,{
             data_temp = data_temp[-dim(data_temp)[1],]
           }
           # data_temp <- print.data.frame(data.frame(data_temp), quote=FALSE)
-          data <- data_temp
+          data(data_temp)
           print("xlsx file Processed.")
         } else if(fileExtension == "xls"){
           sendSweetAlert(session, title = "Error", text = "We discontinued to support XLS format. Please resubmit with another file format.", type = "error",
@@ -226,23 +235,23 @@ observeEvent(input$dataset_lastClickId,{
         removeModal()
 
         output$summary <- renderPrint({
-          print(sprintf("Number of Genes: %d",dim(data)[1]))
-          print(sprintf("Number of Samples: %d",(dim(data)[2]-1)))
+          print(sprintf("Number of Genes: %d\n",dim(data())[1]))
+          print(sprintf("Number of Samples: %d\n",(dim(data())[2]-1)))
           print("Annotation Platform: Unknown")
-        })
-        if ((dim(data)[2]-1) == 0){
+        }, quoted = FALSE)
+        if ((dim(data())[2]-1) == 0){
           print("Number of samples 0!")
           smartModal(error=T, title = "Important message", content = sprintf("Target file contains no sample. This problem could because user pick a not matched separator (default: Comma), please try another seperator (e.g. Tab or Space)."))
           return()
         }
         output$mytable4 <- DT::renderDataTable({
           # Expression Value
-          DT::datatable(data,extensions = 'Responsive', escape=F, selection = 'none')
+          DT::datatable(data(),extensions = 'Responsive', escape=F, selection = 'none')
         })
         output$mytable5 <- DT::renderDataTable({
           # Expression Value
-          verified_data = data[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data)[1],
-                               c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data)[2])]
+          verified_data = data()[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data())[1],
+                               c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data())[2])]
           colnames(verified_data)[1] <- "Gene"
           DT::datatable(verified_data,extensions = 'Responsive', escape=F, selection = 'none')
         })
@@ -261,7 +270,7 @@ observeEvent(input$dataset_lastClickId,{
   #   +--------------------------------
 
   observeEvent(input$action_platform,{
-    if(is.null(data)){
+    if(is.null(data())){
       smartModal(error=T, title = "Operation Failed", content = "You have not selected any data. Please go to previous section.")
       return()
     }
@@ -280,23 +289,25 @@ observeEvent(input$dataset_lastClickId,{
 
     #https://www.rdocumentation.org/packages/GEOquery/versions/2.38.4/topics/GEOData-class
     gpltable <- Table(gpl)
-    if (is.null(fname)){
+    if (is.null(fname())){
       # data is not from GEO
       print("data is self-uploaded, so no fname defined.")
-      fname <- data[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data)[1], 1]# Gene ID
-      fname <- noquote(fname) # convert "\"1553418_a_at\"" to "1553418_a_at" (safer)
-      fname <- gsub("\"","",fname) # convert "\"1553418_a_at\"" to "1553418_a_at"
+      fname(data()[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data())[1], 1])# Gene ID
+      fname.temp <- fname()
+      fname.temp <- noquote(fname.temp) # convert "\"1553418_a_at\"" to "1553418_a_at" (safer)
+      fname.temp <- gsub("\"","",fname.temp) # convert "\"1553418_a_at\"" to "1553418_a_at"
+      fname(fname.temp)
       # save(fname,file="/Users/zhi/Desktop/fname.Rdata")
     }
-    fname2 <- fname
+    fname2 <- fname()
     if (!is.null(gpltable$`Gene Symbol`)){
       print("load GPL table with name \"Gene Symbol\"")
-      fname2 <- gpltable$`Gene Symbol`[match(fname,gpltable$ID)]
+      fname2 <- gpltable$`Gene Symbol`[match(fname(), gpltable$ID)]
     }
     
     else if (!is.null(gpltable$`GENE_SYMBOL`)){
       print("load GPL table with name \"GENE_SYMBOL\"")
-      fname2 <- gpltable$`GENE_SYMBOL`[match(fname,gpltable$ID)]
+      fname2 <- gpltable$`GENE_SYMBOL`[match(fname(), gpltable$ID)]
     }
     else {
         removeModal()
@@ -305,18 +316,20 @@ observeEvent(input$dataset_lastClickId,{
         return()
     }
 
-    print(dim(data))
+    print(dim(data()))
     print(length(fname2))
-    data[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data)[1],1] <- fname2
+    data.temp <- data()
+    data.temp[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data.temp)[1],1] <- fname2
+    data(data.temp)
     # row.names(data) <- seq(1, length(fname2))
     output$mytable4 <- DT::renderDataTable({
       # Expression Value
-      DT::datatable(data,extensions = 'Responsive', escape=F, selection = 'none')
+      DT::datatable(data(),extensions = 'Responsive', escape=F, selection = 'none')
     })
     output$mytable5 <- DT::renderDataTable({
       # Expression Value
-      verified_data = data[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data)[1],
-                           c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data)[2])]
+      verified_data = data()[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data())[1],
+                           c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data())[2])]
       colnames(verified_data)[1] <- "Gene"
       DT::datatable(verified_data,extensions = 'Responsive', escape=F, selection = 'none')
     })
@@ -334,16 +347,21 @@ observeEvent(input$dataset_lastClickId,{
   #   +--------------------------------
 
   observeEvent(input$action3,{
-      if(is.null(data)){
+      if(is.null(data())){
         smartModal(error=T, title = "Operation Failed", content = "You have not selected any data. Please go to previous section.")
         return()
       }
       smartModal(error=F, title = "Preprocessing input data", content = "Preprocessing ...")
-      print(dim(data))
+      print(dim(data()))
+      
+      withProgress(message = 'Preprocessing input data', value = 0, {
       # Step 0
-      RNA <- as.matrix(data[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data)[1], ifelse(is.na(input$starting_col),2,input$starting_col):dim(data)[2]])
+      # Increment the progress bar, and update the detail text.
+      incProgress(1/5, detail = "Parsing Input Data")
+        
+      RNA <- as.matrix(data()[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data())[1], ifelse(is.na(input$starting_col),2,input$starting_col):dim(data())[2]])
       class(RNA) <- "numeric"
-      geneID <- data.frame(data[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data)[1], 1])
+      geneID <- data.frame(data()[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data())[1], 1])
       print(dim(RNA))
       print(dim(geneID))
       
@@ -353,6 +371,7 @@ observeEvent(input$dataset_lastClickId,{
 
       # Remove data with lowest 20% mean exp value shared by all samples
       percentile <- ifelse(is.na(input$mean_expval),0,input$mean_expval)/100.
+      percentile.mean <- percentile
       print(sprintf("percentile 1: %f",percentile))
       # save(RNA, file="~/Desktop/RNA.Rdata")
       # save(geneID, file="~/Desktop/geneID.Rdata")
@@ -368,8 +387,11 @@ observeEvent(input$dataset_lastClickId,{
       
       print("after remove lowest k% mean exp value:")
       print(dim(RNA_filtered1))
+      incProgress(1/5, detail = "Remove lowest k% mean exp value")
+      
       # Remove data with lowest 10% variance across samples
       percentile <- ifelse(is.na(input$variance_expval),0,input$variance_expval)/100.
+      percentile.var <- percentile
       print(sprintf("percentile 2: %f",percentile))
       if (percentile > 0){
         if (dim(RNA_filtered1)[2] > 3){
@@ -390,6 +412,7 @@ observeEvent(input$dataset_lastClickId,{
       
       print("after remove lowest l% var exp value:")
       print(dim(RNA_filtered2))
+      incProgress(1/5, detail = "Remove lowest l% var exp value")
 
       # expData <- RNA_filtered2
       # res <- highExpressionProbes(geneID_filtered2, geneID_filtered2, expData)
@@ -428,6 +451,9 @@ observeEvent(input$dataset_lastClickId,{
         print(sprintf("data dimension after remove duplicated gene symbol: %d x %d",dim(tmpExp)[1],dim(tmpExp)[2]))
 
       }
+      
+      incProgress(1/5, detail = "Sort genes based on mean.")
+      
       nSample <- ncol(tmpExp)
       res <- sort.int(rowMeans(tmpExp), decreasing = TRUE, index.return=TRUE)
       sortMean <- res$x
@@ -436,59 +462,45 @@ observeEvent(input$dataset_lastClickId,{
       #Remove gene symbol after vertical line: from ABC|123 to ABC:
       uniGene <- gsub("\\|.*$","", uniGene)
 
-      finalExp <- tmpExp[sortInd, ]
-      finalSym <- uniGene[sortInd]
-      finalSymChar <- as.character(finalSym)
+      finalExp(tmpExp[sortInd, ])
+      finalSym(uniGene[sortInd])
+      finalSymChar(as.character(finalSym()))
       
       # save(finalExp, file = "~/Desktop/finalExp.Rdata")
       # save(finalSym, file = "~/Desktop/finalSym.Rdata")
       # save(finalSymChar, file = "~/Desktop/finalSymChar.Rdata")
       
-      # advanced
-      # if (input$sorting_adv_checkbox){
-      #   finalPValue <- matrix(0, ncol = 0, nrow = length(finalSym))
-      #   OS_IND <- as.numeric(data[input$row_osefs_ind, input$sort_col_start:dim(data)[2]])
-      #   OS <- as.numeric(data[input$row_osefs, input$sort_col_start:dim(data)[2]])
-      #   # print(OS_IND)
-      #   # print(OS)
-      #   # pvalue
-      #   for(i in 1:dim(finalExp)[1]){
-      #     rr = finalExp[i,]
-      #     rr_sorted_list = sort(rr, decreasing = FALSE, index.return=T)
-      #     rr_sorted = rr_sorted_list$x
-      #     rr_sorted_idx = rr_sorted_list$ix
-      #     medianB <- rep(0, length(rr))
-      #     medianB[ rr_sorted_idx[ceiling(length(rr)/2):length(rr)] ] = 1
-      #     ss <- survdiff(Surv(OS, OS_IND) ~ medianB)
-      #     finalPValue[i] <- 1-pchisq(ss$chisq, 1)
-      #   }
-      #   # print("final P value:")
-      #   # print(finalPValue)
-      #   finalPValue <- as.numeric(finalPValue)
-      #   # save(finalPValue,file="~/Desktop/finalPValue.Rdata")
-      #   if (input$select_pval_adv_checkbox){
-      #     finalExp <- finalExp[finalPValue<=input$advance_selection_pvalue,]
-      #     finalSym <- finalSym[finalPValue<=input$advance_selection_pvalue]
-      #     finalSymChar <- finalSymChar[finalPValue<=input$advance_selection_pvalue]
-      #     finalPValue <- finalPValue[finalPValue<=input$advance_selection_pvalue]
-      #   }
-      #   
-      #   data_final <- data.frame(cbind(finalSym,finalPValue,finalExp))
-      #   colnames(data_final)[1:2] = c("Gene_Symbol", sprintf("P-value of %s",input$choose_OS_EFS))
-      # }
-      # else{
-      #   data_final <- data.frame(cbind(finalSym,finalExp))
-      #   colnames(data_final)[1] = "Gene_Symbol"
-      # }
-      data_final <- data.frame(cbind(finalSym, finalExp))
-      colnames(data_final)[1] = "Gene_Symbol"
+      incProgress(1/5, detail = "\nPost-processing...")
+      
+      data_final(data.frame(cbind(finalSym(), finalExp())))
+      data_final.temp <- data_final()
+      colnames(data_final.temp)[1] = "Gene_Symbol"
+      data_final(data_final.temp)
       #finally no matter if just basic or advanced:
-      sampleID <- colnames(finalExp)
+      sampleID(colnames(finalExp()))
       output$mytable_finaldata <- DT::renderDataTable({
-        DT::datatable(data_final,
+        DT::datatable(data_final(),
                       extensions = 'Responsive', escape=F, selection = 'none')
       })
       removeModal()
+      }) # progress bar finished.
+      
+      # showModal(modalDialog(
+      #   title = "Data After Preprocessing", footer = modalButton("OK"), easyClose = TRUE,
+      #   div(class = "busy",
+      #       p(sprintf("%d genes ---- Original.", dim(RNA)[1])),
+      #       p(sprintf("%d genes remained after remove lowest %.2f%% means.", dim(RNA_filtered1)[1], percentile.mean*100)),
+      #       p(sprintf("%d genes remained after remove lowest %.2f%% variances.", dim(RNA_filtered2)[1], percentile.var*100)),
+      #       style = "margin: auto; text-align: left"
+      #   )
+      # ))
+      
+      sendSweetAlert(session, title = "Data After Preprocessing",
+                     text = sprintf("%d genes ---- Original.\n%d genes remained after remove lowest %.2f%% means.\n%d genes remained after remove lowest %.2f%% variances.",
+                                    dim(RNA)[1], dim(RNA_filtered1)[1], percentile.mean*100, dim(RNA_filtered2)[1], percentile.var*100),
+                     type = "success",
+                     btn_labels = "OK", html = FALSE, closeOnClickOutside = TRUE)
+
       print('tab3')
       session$sendCustomMessage("download_finaldata_ready","-")
       session$sendCustomMessage("myCallbackHandler", "tab3")
@@ -504,25 +516,152 @@ observeEvent(input$dataset_lastClickId,{
   #   +--------------------------------
 
   observeEvent(input$action4_lmQCM,{
-    if(is.null(finalExp)){
+    if(is.null(finalExp())){
       smartModal(error=T, title = "Operation Failed", content = "You have not selected any data. Please go to previous section.")
       return()
     }
       #lmQCM
       smartModal(error=F, title = "Using lmQCM to calculate merged clusters", content = "Calculating. This could be several seconds to several minutes depends on number of genes. Please be patient.")
 
-      t <- try( mergedCluster <- lmQCM(finalExp, input$gamma, input$t, input$lambda,
-                                       input$beta, input$minClusterSize, input$massiveCC,
-                                       input$lmQCM_weight_normalization))
-      if("try-error" %in% class(t)) {
-        removeModal()
-        smartModal(error=T, title = "Error in lmQCM",
-                   content = sprintf("Too few genes to do lmQCM merging."))
-        return()
+      data_in = finalExp()
+      gamma = input$gamma
+      t = input$t
+      lambda = input$lambda
+      beta = input$beta
+      minClusterSize = input$minClusterSize
+      CCmethod = input$massiveCC
+      normalization = input$lmQCM_weight_normalization
+      
+#----------------------------------------------------------------------------
+# lmQCM start
+#----------------------------------------------------------------------------
+      withProgress(message = 'lmQCM [1/2]: ', value = 0, {
+        incProgress(1/16, detail = "Calculating massive correlation coefficient")
+        cMatrix <- cor(t(data_in), method = CCmethod)
+        diag(cMatrix) <- 0
+        incProgress(1/2, detail = "Find the local maximal edges")
+        if(normalization){
+          # Normalization
+          cMatrix <- abs(cMatrix)
+          D <- rowSums(cMatrix)
+          D.half <- 1/sqrt(D)
+          
+          cMatrix <- apply(cMatrix, 2, function(x) x*D.half )
+          cMatrix <- t(apply(cMatrix, 1, function(x) x*D.half ))
+        }
+  
+        C <- list()
+        nRow <- nrow(cMatrix)
+        maxV <- apply(cMatrix, 2, max)
+        maxInd <- apply(cMatrix, 2, which.max) # several diferrences comparing with Matlab results
+        
+        # Step 1 - find the local maximal edges
+        lm.ind <- which(maxV == sapply(maxInd, function(x) max(cMatrix[x,])))
+        maxEdges <- cbind(maxInd[lm.ind], lm.ind)
+        maxW <- maxV[lm.ind]
+        
+        res <- sort.int(maxW, decreasing = TRUE, index.return=TRUE)
+        sortMaxV <- res$x
+        sortMaxInd <- res$ix
+        sortMaxEdges <- maxEdges[sortMaxInd,]
+        message(sprintf("Number of Maximum Edges: %d", length(sortMaxInd)))
+        
+        incProgress(7/16, detail = sprintf("Number of Maximum Edges: %d", length(sortMaxInd)))
+        
+        currentInit <- 1
+        noNewInit <- 0
+        
+        nodesInCluster <- matrix(0, nrow = 0, ncol = 1)
+        
+      })
+      pb <- progress_bar$new(format = " Calculating [:bar] :percent eta: :eta",
+                             total = length(sortMaxInd), clear = F, width=60)
+      iter = 1
+      withProgress(message = 'lmQCM [2/2]: ', value = 0, {
+      while ((currentInit <= length(sortMaxInd)) & (noNewInit == 0)) {
+        pb$tick()
+        incProgress(1/length(sortMaxInd), detail = sprintf("Merging ... %.2f%%", iter/length(sortMaxInd)*100.))
+        iter = iter + 1
+        if (sortMaxV[currentInit] < (gamma * sortMaxV[1]) ) {
+          noNewInit <- 1
+        }
+        else {
+          if ( (is.element(sortMaxEdges[currentInit, 1], nodesInCluster) == FALSE) & is.element(sortMaxEdges[currentInit, 2], nodesInCluster) == FALSE) {
+            newCluster <- sortMaxEdges[currentInit, ]
+            addingMode <- 1
+            currentDensity <- sortMaxV[currentInit]
+            nCp <- 2
+            totalInd <- 1:nRow
+            remainInd <- setdiff(totalInd, newCluster)
+            # C = setdiff(A,B) for vectors A and B, returns the values in A that
+            # are not in B with no repetitions. C will be sorted.
+            while (addingMode == 1) {
+              neighborWeights <- colSums(cMatrix[newCluster, remainInd])
+              maxNeighborWeight <- max(neighborWeights)
+              maxNeighborInd <- which.max(neighborWeights)
+              c_v = maxNeighborWeight/nCp;
+              alphaN = 1 - 1/(2*lambda*(nCp+t));
+              if (c_v >= alphaN * currentDensity) {
+                newCluster <- c(newCluster, remainInd[maxNeighborInd])
+                nCp <- nCp + 1
+                currentDensity <- (currentDensity*((nCp-1)*(nCp-2)/2)+maxNeighborWeight)/(nCp*(nCp-1)/2)
+                remainInd <- setdiff(remainInd, remainInd[maxNeighborInd]);
+              }
+              else {
+                addingMode <- 0
+              }
+            }
+            nodesInCluster <- c(nodesInCluster, newCluster)
+            C <- c(C, list(newCluster))
+          }
+        }
+        currentInit <- currentInit + 1
       }
+      }) # progress bar end
+      
+      clusters <- merging_lmQCM(C, beta, minClusterSize)
+      # map rownames to clusters
+      clusters.names = list()
+      for (i in 1:length(clusters)){
+        mc = clusters[[i]]
+        clusters.names[[i]] = rownames(data_in)[mc]
+      }
+      # calculate eigengene
+      eigengene.matrix <- matrix(0, nrow = length(clusters), ncol = dim(data_in)[2]) # Clusters * Samples
+      
+      for (i in 1:(length(clusters.names))) {
+        geneID <- as.matrix(clusters.names[[i]])
+        X <- data_in[geneID,]
+        mu <- rowMeans(X)
+        stddev <- rowSds(as.matrix(X), na.rm=TRUE) # standard deviation with 1/(n-1)
+        XNorm <- sweep(X,1,mu) # normalize X
+        XNorm <- apply(XNorm, 2, function(x) x/stddev)
+        SVD <- svd(XNorm, LINPACK = FALSE)
+        eigengene.matrix[i,] <- t(SVD$v[,1])
+      }
+      eigengene.matrix = data.frame(eigengene.matrix)
+      colnames(eigengene.matrix) = colnames(data_in)
+      
+      mergedCluster <- methods::new("QCMObject", clusters.id = clusters, clusters.names = clusters.names,
+                                eigengene.matrix = eigengene.matrix)
+      
+      message("Done.")
+      
+#----------------------------------------------------------------------------
+# lmQCM finished
+#----------------------------------------------------------------------------
+        
+        
+        
+      # if("try-error" %in% class(t)) {
+      #   removeModal()
+      #   smartModal(error=T, title = "Error in lmQCM",
+      #              content = sprintf("Too few genes to do lmQCM merging."))
+      #   return()
+      # }
       mergedCluster <- mergedCluster@clusters.id
       geneCharVector <- matrix(0, nrow = 0, ncol = length(mergedCluster))
-      temp_eigengene <- matrix(0, nrow = length(mergedCluster), ncol = dim(finalExp)[2]) # Clusters * Samples
+      temp_eigengene <- matrix(0, nrow = length(mergedCluster), ncol = dim(finalExp())[2]) # Clusters * Samples
 
       temptext <- ""
       for (i in 1:(length(mergedCluster))) {
@@ -531,7 +670,7 @@ observeEvent(input$dataset_lastClickId,{
         print(i)
         print(vector)
         # ===== Calculate Eigengene Start
-        X <- finalExp[geneID,]
+        X <- finalExp()[geneID,]
         mu <- rowMeans(X)
         stddev <- rowSds(as.matrix(X), na.rm=TRUE) # standard deviation with 1/(n-1)
         #normalize X:
@@ -540,19 +679,19 @@ observeEvent(input$dataset_lastClickId,{
         SVD <- svd(XNorm, LINPACK = FALSE)
         temp_eigengene[i,] <- t(SVD$v[,1])
         # ===== Calculate Eigengene Finished
-        geneChar <- c(toString(i), finalSymChar[vector])
+        geneChar <- c(toString(i), finalSymChar()[vector])
         geneCharVector[i] <- list(geneChar)
         temptext <- paste(temptext, capture.output(cat(geneChar, sep=',')), sep="\n")
       }
-      temptext <- substring(temptext, 2) # remove first \n separater
-      geneCharVector_global <- geneCharVector
-      text <- temptext
+      temptext <- substring(temptext, 2) # remove firstfinal_genes_str \n separater
+      geneCharVector_global(geneCharVector)
+      text.final(temptext)
       
-      colnames(temp_eigengene) <- sampleID
-      eigengene_matrix <- temp_eigengene
+      colnames(temp_eigengene) <- sampleID()
+      eigengene_matrix(temp_eigengene)
       output$eigengene_matrix_select_row_ui <- renderUI({
         selectInput(inputId="eigengene_matrix_select_row", label="Please select row:",
-                    choices = 1:dim(eigengene_matrix)[1], selected = 1, multiple = FALSE,
+                    choices = 1:dim(eigengene_matrix())[1], selected = 1, multiple = FALSE,
                     selectize = TRUE, width = NULL, size = NULL)
       })
 
@@ -577,7 +716,7 @@ observeEvent(input$dataset_lastClickId,{
       })
 
       output$mytable7 <- renderTable({
-        return(eigengene_matrix)
+        return(eigengene_matrix())
       },rownames = TRUE, colnames = TRUE, na = "", bordered = TRUE, digits = 4)
 
       removeModal()
@@ -594,16 +733,17 @@ observeEvent(input$dataset_lastClickId,{
   #=================================================
 
   observeEvent(input$checkPower, {
-    if(is.null(finalExp)){
+    if(is.null(finalExp())){
       smartModal(error=T, title = "Operation Failed", content = "You have not selected any data. Please go to previous section.")
       return()
     }
-    if (length(finalSym) > 0){
+    if (length(finalSym()) > 0){
       #WGCNA
       smartModal(error=F, title = "Preview the power", content = "Running ...")
-
-      row.names(finalExp) <- finalSym
-      datExpr <- t(finalExp) # gene should be colnames, sample should be rownames
+      finalExp.temp <- finalExp()
+      row.names(finalExp.temp) <- finalSym()
+      finalExp(finalExp.temp)
+      datExpr <- t(finalExp()) # gene should be colnames, sample should be rownames
       # datExpr <- log(datExpr + 1) # uncomment if don't need logarithm
       print(dim(datExpr))
       # The following setting is important, do not omit.
@@ -650,15 +790,16 @@ observeEvent(input$dataset_lastClickId,{
   })
 
   observeEvent(input$action4_WGCNA,{
-      if(is.null(finalExp)){
+      if(is.null(finalExp())){
         smartModal(error=T, title = "Operation Failed", content = "You have not selected any data. Please go to previous section.")
         return()
       }
       #WGCNA
       smartModal(error=F, title = "Using WGCNA to calculate merged clusters", content = "Calculating. This could take a while depend on number of genes. Please be patient.")
-
-      row.names(finalExp) <- finalSym
-      datExpr <- t(finalExp) # gene should be colnames, sample should be rownames
+      finalExp.temp <- finalExp()
+      row.names(finalExp.temp) <- finalSym()
+      finalExp(finalExp.temp)
+      datExpr <- t(finalExp()) # gene should be colnames, sample should be rownames
       # datExpr <- log(datExpr + 1) # uncomment if don't need logarithm
       # The following setting is important, do not omit.
       options(stringsAsFactors = FALSE);
@@ -686,7 +827,7 @@ observeEvent(input$dataset_lastClickId,{
       
 
       netcolors = net$colors
-      matrixdata<- data.frame(cbind(finalSymChar, netcolors))
+      matrixdata<- data.frame(cbind(finalSymChar(), netcolors))
       geneCharVector <- matrix(0, nrow = 0, ncol = length(unique(netcolors))-1)
 
       #=====================================================================================
@@ -726,11 +867,11 @@ observeEvent(input$dataset_lastClickId,{
       # print(matrixdata)
       # print(finalSym)
       temptext <- ""
-      temp_eigengene <- matrix(0, nrow = length(unique(netcolors))-1, ncol = dim(finalExp)[2]) # Clusters * Samples
+      temp_eigengene <- matrix(0, nrow = length(unique(netcolors))-1, ncol = dim(finalExp())[2]) # Clusters * Samples
       for (i in 1: (length(unique(netcolors))-1) ){
         geneID <- which(matrixdata$netcolors == i)
         # ===== Calculate Eigengene Start
-        X <- finalExp[geneID,]
+        X <- finalExp()[geneID,]
         mu <- rowMeans(X)
         stddev <- rowSds(as.matrix(X), na.rm=TRUE) # standard deviation with 1/(n-1)
         #normalize X:
@@ -745,13 +886,13 @@ observeEvent(input$dataset_lastClickId,{
         temptext <- paste(temptext, capture.output(cat(geneChar, sep=',')), sep="\n")
       }
       temptext <- substring(temptext, 2) # remove first \n separater
-      geneCharVector_global <- geneCharVector_withoutColor # remove the color label
-      text <- temptext
-      colnames(temp_eigengene) <- sampleID
-      eigengene_matrix <- temp_eigengene
+      geneCharVector_global(geneCharVector_withoutColor) # remove the color label
+      text.final(temptext)
+      colnames(temp_eigengene) <- sampleID()
+      eigengene_matrix(temp_eigengene)
       output$eigengene_matrix_select_row_ui <- renderUI({
         selectInput(inputId="eigengene_matrix_select_row", label="Please select row:",
-                    choices = 1:dim(eigengene_matrix)[1], selected = 1, multiple = FALSE,
+                    choices = 1:dim(eigengene_matrix())[1], selected = 1, multiple = FALSE,
                     selectize = TRUE, width = NULL, size = NULL)
       })
       
@@ -781,8 +922,8 @@ observeEvent(input$dataset_lastClickId,{
       })
 
       output$mytable7 <- renderTable({
-        return(eigengene_matrix)
-      },rownames = TRUE, colnames = TRUE, na = "", bordered = TRUE)
+        return(eigengene_matrix())
+      },rownames = TRUE, colnames = TRUE, na = "", bordered = TRUE, digits = 4)
 
       print('tab4')
       session$sendCustomMessage("download_cluster_ready","-")
@@ -800,14 +941,14 @@ observeEvent(input$dataset_lastClickId,{
     event = as.numeric(unlist( regmatches(event, gregexpr("[[:digit:]]+\\.*[[:digit:]]*", event)) ))
     time = as.numeric(unlist( regmatches(time, gregexpr("[[:digit:]]+\\.*[[:digit:]]*", time)) ))
     
-    if(length(event) != length(sampleID) | length(time) != length(sampleID)){
+    if(length(event) != length(sampleID()) | length(time) != length(sampleID())){
       sendSweetAlert(session, title = "Error", text = sprintf("Number of OS/EFS events (%d) or number of OS/EFS times (%d) doesn't match number of samples.", length(event), length(time)),
                      type = "error", btn_labels = "OK", html = FALSE, closeOnClickOutside = TRUE)
       return()
     }
     
     row = as.numeric(input$eigengene_matrix_select_row)
-    eigengene = eigengene_matrix[row,]
+    eigengene = eigengene_matrix()[row,]
     output$survival_analysis_results_ui <- renderUI({
       plotOutput("survival_plot", width = "100%", height = "400px", click = NULL,
                  dblclick = NULL, hover = NULL, hoverDelay = NULL,
@@ -856,24 +997,24 @@ observeEvent(input$dataset_lastClickId,{
   #   |
   #   +--------------------------------
   observeEvent(input$action_finaldata4enrichr,{
-    if(is.null(finalSym)){
+    if(is.null(finalSym())){
       smartModal(error=T, title = "Operation Failed", content = "You have not selected any data. Please go to previous section.")
       return()
     }
-    genes_str = finalSym
+    genes_str <- finalSym()
     genes_str <- unlist(strsplit(genes_str, " /// "))
     # genes_str <- c('PHF|14','RBM|3','Nlrx1','MSL1','PHF21A','ARL10','INSR')
     print("genes_str for enrich analysis: ")
     print(genes_str)
-    final_genes_str <- genes_str
+    final_genes_str(genes_str)
     updateTextAreaInput(session, "textareainput_GOEA",
-                        label = paste(sprintf("Number of Genes: %d", length(final_genes_str)), input$controller),
-                        value = paste(paste(final_genes_str, collapse = '\n'), input$controller))
+                        label = paste(sprintf("Number of Genes: %d", length(final_genes_str())), input$controller),
+                        value = paste(paste(final_genes_str(), collapse = '\n'), input$controller))
     
-    enriched <- enrichr(final_genes_str, enrichr_dbs)
+    enriched(enrichr(final_genes_str(), enrichr_dbs))
     
     Map(function(id) {
-      dbres = enriched[[enrichr_dbs[id]]]
+      dbres = enriched()[[enrichr_dbs[id]]]
       dbres = dbres[ , -which(names(dbres) %in% c("Old.P.value","	Old.Adjusted.P.value"))]
       output[[paste("mytable_Enrichr",id,sep="_")]] <- DT::renderDataTable({DT::datatable(dbres, selection="none", escape=FALSE, pageLength = 100,
                                                                                           options = list(paging = F, searching = T, dom='t',ordering=T), extensions = 'Responsive',
@@ -895,20 +1036,20 @@ observeEvent(input$dataset_lastClickId,{
       print("row_of_final_cluster:")
       print(cluster)
       # print(geneCharVector_global[[cluster]])
-      genes_str <- geneCharVector_global[[cluster]]
+      genes_str <- geneCharVector_global()[[cluster]]
       genes_str <- unlist(strsplit(genes_str, " /// "))
       # genes_str <- c('PHF|14','RBM|3','Nlrx1','MSL1','PHF21A','ARL10','INSR')
       print("genes_str for enrich analysis: ")
       print(genes_str[-1])
-      final_genes_str <- genes_str[-1]
+      final_genes_str(genes_str[-1])
       updateTextAreaInput(session, "textareainput_GOEA",
-                          label = paste(sprintf("Number of Genes: %d", length(final_genes_str)), input$controller),
-                          value = paste(paste(final_genes_str, collapse = '\n'), input$controller))
+                          label = paste(sprintf("Number of Genes: %d", length(final_genes_str())), input$controller),
+                          value = paste(paste(final_genes_str(), collapse = '\n'), input$controller))
 
-      enriched <- enrichr(final_genes_str, enrichr_dbs)
+      enriched(enrichr(final_genes_str(), enrichr_dbs))
 
       Map(function(id) {
-        dbres = enriched[[enrichr_dbs[id]]]
+        dbres = enriched()[[enrichr_dbs[id]]]
         dbres = dbres[ , -which(names(dbres) %in% c("Old.P.value","	Old.Adjusted.P.value"))]
         output[[paste("mytable_Enrichr",id,sep="_")]] <- DT::renderDataTable({DT::datatable(dbres, selection="none", escape=FALSE,
                                                                                             options = list(paging = T, pageLength = 100, searching = T, dom='t',ordering=T), extensions = 'Responsive',
@@ -932,7 +1073,7 @@ observeEvent(input$dataset_lastClickId,{
     if (input$button_lastClickId%like%"circos"){
       smartModal(error=F, title = "Processing", content = "We are working on your customized circos plot ...")
       cluster <- as.numeric(gsub("circos_","",input$button_lastClickId))
-      genes_str <- geneCharVector_global[[cluster]]
+      genes_str <- geneCharVector_global()[[cluster]]
       genes_str <- unlist(strsplit(genes_str, " /// "))
       genes_str <- genes_str[-1]
       # genes_str <- c('PHF|14','RBM|3','Nlrx1','MSL1','PHF21A','ARL10','INSR')
@@ -1051,14 +1192,14 @@ observeEvent(input$dataset_lastClickId,{
   })
   
   observeEvent(input$action_finaldata4circos,{
-    if(is.null(data_final)){
+    if(is.null(data_final())){
       sendSweetAlert(session, title = "Insufficient Input Data", text = "Please finish previous steps.",
                      type = "error", btn_labels = "OK", html = F, closeOnClickOutside = T)
       return()
     }
     smartModal(error=F, title = "Processing", content = "We are working on your customized circos plot ...")
-    # save(data_final, file = "~/Desktop/datafinal.Rdata")
-    genes_str <- levels(data_final[,1])
+    # save(data_final(), file = "~/Desktop/datafinal.Rdata")
+    genes_str <- levels(data_final()[,1])
     genes_str <- unlist(strsplit(genes_str, " /// "))
     # print("genes_str for circos plot: ")
     # print(genes_str)
@@ -1133,12 +1274,12 @@ observeEvent(input$dataset_lastClickId,{
     content = function(file) {
       sep <- switch(input$filetype1, "csv" = 0, "txt" = 1)
       if (sep == 0){
-        text_download = gsub(",", ",", noquote(text))
+        text_download = gsub(",", ",", noquote(text.final()))
         write.table(text_download, file, eol = "\r\n", quote = FALSE,
                     row.names = FALSE, col.names = FALSE)
       }
       if (sep == 1){
-        text_download = gsub(",", "\t", noquote(text))
+        text_download = gsub(",", "\t", noquote(text.final()))
         write.table(text_download, file, eol = "\r\n", quote = FALSE,
                     row.names = FALSE, col.names = FALSE)
       }
@@ -1151,7 +1292,7 @@ observeEvent(input$dataset_lastClickId,{
     },
     content = function(file) {
       separator <- switch(input$filetype2, "csv" = ',', "txt" = '\t')
-      write.table(eigengene_matrix, file = file, append = FALSE, quote = TRUE, sep = separator,
+      write.table(eigengene_matrix(), file = file, append = FALSE, quote = TRUE, sep = separator,
                   eol = "\r\n", na = "NA", dec = ".", row.names = T,
                   col.names = NA, qmethod = c("escape", "double"),
                   fileEncoding = "")
@@ -1163,7 +1304,7 @@ observeEvent(input$dataset_lastClickId,{
       name = "finaldata.csv"
     },
     content = function(file) {
-      write.table(data_final, file = file, append = FALSE, quote = TRUE, sep = ',',
+      write.table(data_final(), file = file, append = FALSE, quote = TRUE, sep = ',',
                   eol = "\r\n", na = "NA", dec = ".", row.names = F,
                   col.names = T, qmethod = c("escape", "double"),
                   fileEncoding = "")
@@ -1172,7 +1313,7 @@ observeEvent(input$dataset_lastClickId,{
   
   output$downloadData3 <- downloadHandler(
     filename = 'GO_results.zip',
-    content = function(fname) {
+    content = function(fname_in) {
       separator <- switch(input$filetype3, "csv" = ',', "txt" = '\t')
       if(separator == ','){
         fs <- paste0(enrichr_dbs, '.csv')
@@ -1182,17 +1323,17 @@ observeEvent(input$dataset_lastClickId,{
       }
       fs <- c(fs, 'genes_list.txt')
       for(i in 1:length(enrichr_dbs)){
-        write.table(enriched[[enrichr_dbs[i]]], file = fs[i], sep = separator, col.names = NA)
+        write.table(enriched()[[enrichr_dbs[i]]], file = fs[i], sep = separator, col.names = NA)
         print(fs[i])
       }
-      if(length(final_genes_str) > 0){
-        write(final_genes_str, file = 'genes_list.txt', sep = "\n")
+      if(length(final_genes_str()) > 0){
+        write(final_genes_str(), file = 'genes_list.txt', sep = "\n")
       }
       else{
         write("You cannot believe I disabled this function. Haha.", file = 'genes_list.txt')
       }
-      zip(zipfile=fname, files=fs)
-      if(file.exists(paste0(fname, ".zip"))) {file.rename(paste0(fname, ".zip"), fname)}
+      zip(zipfile=fname_in, files=fs)
+      if(file.exists(paste0(fname_in, ".zip"))) {file.rename(paste0(fname_in, ".zip"), fname_in)}
 
     },
     contentType = "application/zip"
