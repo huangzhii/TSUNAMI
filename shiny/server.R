@@ -32,9 +32,10 @@ source("utils.R")
 setClass("QCMObject", representation(clusters.id = "list", clusters.names = "list",
                                      eigengene.matrix = "data.frame"))
 # listEnrichrDbs()
-enrichr_dbs <<- c("GO_Biological_Process_2017b",
-                 "GO_Molecular_Function_2017b",
-                 "GO_Cellular_Component_2017b",
+path2TCGAdata <<- "http://web.ics.purdue.edu/~huang898/TSUNAMI_data/20190303_TCGA_gdac_mRNAseq/"
+enrichr_dbs <<- c("GO_Biological_Process_2018",
+                 "GO_Molecular_Function_2018",
+                 "GO_Cellular_Component_2018",
                  "Jensen_DISEASES",
                  "Reactome_2016",
                  "KEGG_2016",
@@ -46,12 +47,15 @@ enrichr_dbs <<- c("GO_Biological_Process_2017b",
                  "miRTarBase_2017",
                  "TargetScan_microRNA_2017",
                  "ChEA_2016")
+TCGA.gdac.list <<- read.csv("./data/TCGA_gdac_metadata.csv", header = T)
+
 server <- function(input, output, session) {
   
   data <- reactiveVal(0)
   data_final <- reactiveVal(0)
   GEO <- reactiveVal(0)
-  GSE_name_title <-reactiveVal(0)
+  GSE_name_title <- reactiveVal(0)
+  mygset <- reactiveVal(0)
   finalExp <- reactiveVal(0)
   finalSym <- reactiveVal(0)
   sampleID <- reactiveVal(0)
@@ -72,18 +76,24 @@ server <- function(input, output, session) {
     
     # Create a Progress object
     progress <- shiny::Progress$new(session)
-    progress$set(message = "Loading NCBI GEO database. Last fetched version: 04/24/2018", value = 0)
+    progress$set(message = "Loading NCBI GEO database. Last fetched version: 03/03/2019", value = 100)
     # Close the progress when this reactive exits (even if there's an error)
     on.exit(progress$close())
     # NCBI GEO
-    load("./data/GEO_20180424.Rdata")
+    load("./data/GEO_20190303.Rdata")
     GEO.temp <- GEO
-    GEO.temp[["Actions"]] <- paste0('<div><button type="button" class="btn-analysis" id=dataset_analysis_',1:nrow(GEO.temp),'>Analyze</button></div>')
+    GEO.temp[["Actions"]] <- paste0('<div><button type="button" class="btn-analysis" id=GEO_dataset_analysis_',1:nrow(GEO.temp),'>Analyze</button></div>')
     colnames(GEO.temp)[which(names(GEO.temp) == "Sample.Count")] <- "Samples"
     GEO.temp <- GEO.temp %>% select("Samples", everything())
     GEO.temp <- GEO.temp %>% select("Actions", everything())
     GEO(GEO.temp)
     # Basic process
+    TCGA.gdac.list[["Actions"]] <- paste0('<div><button type="button" class="btn-analysis" id=TCGA_dataset_analysis_',1:nrow(TCGA.gdac.list),'>Analyze</button></div>')
+    TCGA.gdac.list <- TCGA.gdac.list %>% select("Actions", everything())
+    output$mytable0 <- DT::renderDataTable({
+      DT::datatable(TCGA.gdac.list, extensions = 'Responsive', escape=F, selection = 'none',
+                    options = list(paging = F, searching = T, dom='t',ordering=T), rownames = F)
+    })
     output$mytable1 <- DT::renderDataTable({
       DT::datatable(GEO(), extensions = 'Responsive', escape=F, selection = 'none', rownames = F)
     })
@@ -115,9 +125,46 @@ server <- function(input, output, session) {
   })
 
 
-observeEvent(input$dataset_lastClickId,{
-  if (input$dataset_lastClickId%like%"dataset_analysis"){
-    row_of_GEO <- as.numeric(gsub("dataset_analysis_","",input$dataset_lastClickId))
+observeEvent(input$dataset_lastClickId_mytable0,{
+  if (input$dataset_lastClickId_mytable0%like%"TCGA_dataset_analysis"){
+    row_of_TCGA <- as.numeric(gsub("TCGA_dataset_analysis_","",input$dataset_lastClickId_mytable0))
+    print(TCGA.gdac.list[row_of_TCGA,])
+    cancer.name = TCGA.gdac.list[row_of_TCGA,2]
+    smartModal(error=F, title = sprintf("Loading TCGA %s Data", cancer.name),
+               content = sprintf("Loading TCGA %s Data ...", cancer.name))
+    load(url(paste0(path2TCGAdata, cancer.name, ".Rdata")))
+    TCGA.mRNAseq = data.frame(cbind(rownames(TCGA.mRNAseq), TCGA.mRNAseq))
+    colnames(TCGA.mRNAseq)[1] = "Gene"
+    data(TCGA.mRNAseq)
+    updateTextInput(session, "platform_text", value = "")
+    output$summary <- renderPrint({
+      print(sprintf("Number of Genes: %d",dim(data())[1]))
+      print(sprintf("Number of Samples: %d",dim(data())[2]))
+    })
+    
+    print("GEO file is downloaded to server and processed.")
+    output$mytable4 <- DT::renderDataTable({
+      # Expression Value
+      DT::datatable(data(),extensions = 'Responsive', escape=F, selection = 'none')
+    })
+    output$mytable5 <- DT::renderDataTable({
+      # Expression Value
+      verified_data = data()[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data())[1],
+                             c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data())[2])]
+      colnames(verified_data)[1] <- "Gene"
+      DT::datatable(verified_data,extensions = 'Responsive', escape=F, selection = 'none')
+    })
+    
+    print('tab2')
+    removeModal()
+    session$sendCustomMessage("myCallbackHandler", "tab2")
+  }
+})
+
+
+observeEvent(input$dataset_lastClickId_mytable1,{
+  if (input$dataset_lastClickId_mytable1%like%"GEO_dataset_analysis"){
+    row_of_GEO <- as.numeric(gsub("GEO_dataset_analysis_","",input$dataset_lastClickId_mytable1))
     myGSE <- GEO()$Accession[row_of_GEO]
     GSE_name_title(GEO()$Title[row_of_GEO])
     message(GSE_name_title())
@@ -132,38 +179,75 @@ observeEvent(input$dataset_lastClickId,{
       return()
     }
     
-    if (length(gset) > 1) idx <- grep("GPL90", attr(gset, "names")) else idx <- 1
-    if (length(idx) == 0){
+    # if (length(gset) > 1) idx <- grep("GPL90", attr(gset, "names")) else idx <- 1
+    if (length(gset) == 0){
       removeModal()
-      print("Object gset doesn't contain GPL90.")
-      smartModal(error=T, title = "Object gset doesn't contain GPL90.", content = sprintf("%s's object gset doesn't contain GPL90, thus we cannot retrieve the expression data. Please try other available GSE data (e.g., GSE17537, GSE73119).",myGSE))
+      print("This GSE accession doesn't contain any series matrix.")
+      smartModal(error=T, title = "This GSE accession doesn't contain any series matrix.", content = sprintf("%s doesn't contain any series matrix. Please try other available GSE data (e.g., GSE17537, GSE73119).",myGSE))
       return()
     }
-    
-    gset <- gset[[idx]]
-    edata <- exprs(gset) #This is the expression matrix
-    if (dim(edata)[1] == 0 || is.null(dim(edata))){
+    mygset(gset[[1]])
+    # select index
+    if (length(gset) > 1){
+      gset.names = names(gset)
+      print(gset.names)
+      gset.names = paste0(rep(1:length(gset.names)), ". ", gset.names)
+      gset.names = paste0(gset.names, collapse = "\n")
       removeModal()
-      print("No expression data")
-      smartModal(error=T, title = "Important message", content = sprintf("%s doesn't contain any expression data, please try other available GSE data (e.g., GSE17537, GSE73119).", myGSE))
-      return()
+      inputSweetAlert(session, inputId = "whichgset", title = "This data contains multiple serie matrices.\nInput the ID (e.g. 1) to select desired one.",
+                      text = gset.names,
+                      type = "info", btn_labels = "Ok")
+      observeEvent(input$whichgset, {
+        mygset(gset[[as.numeric(input$whichgset)]])
+      })
     }
-  # pdata <- pData(gset) # data.frame of phenotypic information.
-  fname(featureNames(gset)) # e.g. 12345_at
+  }
+})
+
+
+observeEvent(data(),{
+  if (typeof(data()) == "double"){
+    return()
+  }
+  samples = colnames(data())[input$starting_col:dim(data())[2]]
+  output$data_sample_subgroup_ui <- renderUI({
+    checkboxGroupInput("data_sample_subgroup", "Choose samples:",
+                       choiceNames = samples,
+                       choiceValues = samples,
+                       selected = samples
+    )
+  })
+})
+
+
+observeEvent(mygset(),{
+  if (typeof(mygset()) == "double"){
+    return()
+  }
+  smartModal(error=F, title = sprintf("Selecting table from NCBI GEO Database"),
+             content = "We are currently loading your selected file from NCBI GEO Database ...")
+  edata <- exprs(mygset()) #This is the expression matrix
+  if (dim(edata)[1] == 0 || is.null(dim(edata))){
+    removeModal()
+    print("No expression data")
+    smartModal(error=T, title = "Important message", content = sprintf("%s doesn't contain any expression data, please try other available GSE data (e.g., GSE17537, GSE73119).", myGSE))
+    return()
+  }
+  # pdata <- pData(mygset()) # data.frame of phenotypic information.
+  fname(featureNames(mygset())) # e.g. 12345_at
   data(cbind(fname(), edata))
   data.temp <- data()
   row.names(data.temp) <- seq(1, length(fname()))
   data(data.temp)
-
-  updateTextInput(session, "platform_text", value = paste(annotation(gset), input$controller))
+  
+  updateTextInput(session, "platform_text", value = paste(annotation(mygset()), input$controller))
   output$summary <- renderPrint({
     print(sprintf("Number of Genes: %d",dim(edata)[1]))
     print(sprintf("Number of Samples: %d",dim(edata)[2]))
-    print(sprintf("Annotation Platform: %s",annotation(gset)))
+    print(sprintf("Annotation Platform: %s",annotation(mygset())))
   })
-
+  
   print("GEO file is downloaded to server and processed.")
-  removeModal()
   output$mytable4 <- DT::renderDataTable({
     # Expression Value
     DT::datatable(data(),extensions = 'Responsive', escape=F, selection = 'none')
@@ -171,94 +255,94 @@ observeEvent(input$dataset_lastClickId,{
   output$mytable5 <- DT::renderDataTable({
     # Expression Value
     verified_data = data()[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data())[1],
-                         c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data())[2])]
+                           c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data())[2])]
     colnames(verified_data)[1] <- "Gene"
     DT::datatable(verified_data,extensions = 'Responsive', escape=F, selection = 'none')
   })
   print('tab2')
+  removeModal()
   session$sendCustomMessage("myCallbackHandler", "tab2")
-  }
-}
-)
+})
 
-  output$readingcsv <- reactive({
-    print("readingcsv = 1")
-    return(is.null(input$csvfile))
-  })
+output$readingcsv <- reactive({
+  print("readingcsv = 1")
+  return(is.null(input$csvfile))
+})
 
 
-  observeEvent(input$action2,{
-    options(stringsAsFactors = FALSE)
-      if(is.null(input$csvfile)){
-        print("no files!")
-        smartModal(error=T, title = "Important message", content = "No file uploaded! Please retry!")
-        return(NULL)
+observeEvent(input$action2,{
+  options(stringsAsFactors = FALSE)
+    if(is.null(input$csvfile)){
+      print("no files!")
+      smartModal(error=T, title = "Important message", content = "No file uploaded! Please retry!")
+      return(NULL)
+    }
+    else {
+      print("Reading file.")
+      smartModal(error=F, title = "Intepreting uploaded file in progress", content = "Intepreting ...")
+      fileExtension <- getFileNameExtension(input$csvfile$datapath)
+      if(fileExtension == "csv"){
+        data.temp <- read.csv(input$csvfile$datapath,
+                          header = input$header,
+                          sep = input$sep,
+                          quote = input$quote)
+        data(data.temp)
+        print("csv file Processed.")
       }
-      else {
-        print("Reading file.")
-        smartModal(error=F, title = "Intepreting uploaded file in progress", content = "Intepreting ...")
-        fileExtension <- getFileNameExtension(input$csvfile$datapath)
-        if(fileExtension == "csv"){
-          data.temp <- read.csv(input$csvfile$datapath,
-                            header = input$header,
-                            sep = input$sep,
-                            quote = input$quote)
-          data(data.temp)
-          print("csv file Processed.")
+      else if(fileExtension == "txt"){
+        data_temp = as.matrix(readLines(input$csvfile$datapath), sep = '\n')
+        data_temp = strsplit(data_temp, split=input$sep)
+        max.length <- max(sapply(data_temp, length))
+        data_temp <- lapply(data_temp, function(v) { c(v, rep(NA, max.length-length(v)))})
+        data_temp <- data.frame(do.call(rbind, data_temp))
+        if(data_temp[dim(data_temp)[1],1] == "!series_matrix_table_end"){
+          print("remove last row with \"!series_matrix_table_end\" ")
+          data_temp = data_temp[-dim(data_temp)[1],]
         }
-        else if(fileExtension == "txt"){
-          data_temp = as.matrix(readLines(input$csvfile$datapath), sep = '\n')
-          data_temp = strsplit(data_temp, split=input$sep)
-          max.length <- max(sapply(data_temp, length))
-          data_temp <- lapply(data_temp, function(v) { c(v, rep(NA, max.length-length(v)))})
-          data_temp <- data.frame(do.call(rbind, data_temp))
-          if(data_temp[dim(data_temp)[1],1] == "!series_matrix_table_end"){
-            print("remove last row with \"!series_matrix_table_end\" ")
-            data_temp = data_temp[-dim(data_temp)[1],]
-          }
-          # data_temp <- print.data.frame(data.frame(data_temp), quote=FALSE)
-          data(data_temp)
-          print("txt file Processed.")
-        } else if(fileExtension == "xlsx"){
-          data_temp <- read.xlsx(input$csvfile$datapath, sheet = 1, startRow = 1, colNames = TRUE)
-          if(data_temp[dim(data_temp)[1],1] == "!series_matrix_table_end"){
-            print("remove last row with \"!series_matrix_table_end\" ")
-            data_temp = data_temp[-dim(data_temp)[1],]
-          }
-          # data_temp <- print.data.frame(data.frame(data_temp), quote=FALSE)
-          data(data_temp)
-          print("xlsx file Processed.")
-        } else if(fileExtension == "xls"){
-          sendSweetAlert(session, title = "Error", text = "We discontinued to support XLS format. Please resubmit with another file format.", type = "error",
-                         btn_labels = "Ok", html = FALSE, closeOnClickOutside = TRUE)
+        # data_temp <- print.data.frame(data.frame(data_temp), quote=FALSE)
+        data(data_temp)
+        print("txt file Processed.")
+      } else if(fileExtension == "xlsx"){
+        data_temp <- read.xlsx(input$csvfile$datapath, sheet = 1, startRow = 1, colNames = TRUE)
+        if(data_temp[dim(data_temp)[1],1] == "!series_matrix_table_end"){
+          print("remove last row with \"!series_matrix_table_end\" ")
+          data_temp = data_temp[-dim(data_temp)[1],]
         }
-        removeModal()
-
-        output$summary <- renderPrint({
-          print(sprintf("Number of Genes: %d\n",dim(data())[1]))
-          print(sprintf("Number of Samples: %d\n",(dim(data())[2]-1)))
-          print("Annotation Platform: Unknown")
-        }, quoted = FALSE)
-        if ((dim(data())[2]-1) == 0){
-          print("Number of samples 0!")
-          smartModal(error=T, title = "Important message", content = sprintf("Target file contains no sample. This problem could because user pick a not matched separator (default: Comma), please try another seperator (e.g. Tab or Space)."))
-          return()
-        }
-        output$mytable4 <- DT::renderDataTable({
-          # Expression Value
-          DT::datatable(data(),extensions = 'Responsive', escape=F, selection = 'none')
-        })
-        output$mytable5 <- DT::renderDataTable({
-          # Expression Value
-          verified_data = data()[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data())[1],
-                               c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data())[2])]
-          colnames(verified_data)[1] <- "Gene"
-          DT::datatable(verified_data,extensions = 'Responsive', escape=F, selection = 'none')
-        })
-        print('tab2')
-        session$sendCustomMessage("myCallbackHandler", "tab2")
+        # data_temp <- print.data.frame(data.frame(data_temp), quote=FALSE)
+        data(data_temp)
+        print("xlsx file Processed.")
+      } else if(fileExtension == "xls"){
+        sendSweetAlert(session, title = "Error", text = "We discontinued to support XLS format. Please resubmit with another file format.", type = "error",
+                       btn_labels = "Ok", html = FALSE, closeOnClickOutside = TRUE)
       }
-  })
+      removeModal()
+
+      output$summary <- renderPrint({
+        print(sprintf("Number of Genes: %d\n",dim(data())[1]))
+        print(sprintf("Number of Samples: %d\n",(dim(data())[2]-1)))
+        print("Annotation Platform: Unknown")
+      }, quoted = FALSE)
+      if ((dim(data())[2]-1) == 0){
+        print("Number of samples 0!")
+        smartModal(error=T, title = "Important message", content = sprintf("Target file contains no sample. This problem could because user pick a not matched separator (default: Comma), please try another seperator (e.g. Tab or Space)."))
+        return()
+      }
+      output$mytable4 <- DT::renderDataTable({
+        # Expression Value
+        DT::datatable(data(),extensions = 'Responsive', escape=F, selection = 'none')
+      })
+      output$mytable5 <- DT::renderDataTable({
+        # Expression Value
+        verified_data = data()[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data())[1],
+                             c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data())[2])]
+        colnames(verified_data)[1] <- "Gene"
+        DT::datatable(verified_data,extensions = 'Responsive', escape=F, selection = 'none')
+      })
+      
+      print('tab2')
+      session$sendCustomMessage("myCallbackHandler", "tab2")
+    }
+})
 
 
   #   +------------------------------------------------------------+
@@ -304,10 +388,13 @@ observeEvent(input$dataset_lastClickId,{
       print("load GPL table with name \"Gene Symbol\"")
       fname2 <- gpltable$`Gene Symbol`[match(fname(), gpltable$ID)]
     }
-    
     else if (!is.null(gpltable$`GENE_SYMBOL`)){
       print("load GPL table with name \"GENE_SYMBOL\"")
       fname2 <- gpltable$`GENE_SYMBOL`[match(fname(), gpltable$ID)]
+    }
+    else if (!is.null(gpltable$`CLONE_ID`)){
+      print("load GPL table with name \"CLONE_ID\"")
+      fname2 <- gpltable$`CLONE_ID`[match(fname(), gpltable$ID)]
     }
     else {
         removeModal()
@@ -320,6 +407,7 @@ observeEvent(input$dataset_lastClickId,{
     print(length(fname2))
     data.temp <- data()
     data.temp[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data.temp)[1],1] <- fname2
+    rownames(data.temp)[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data.temp)[1]] <- fname2
     data(data.temp)
     # row.names(data) <- seq(1, length(fname2))
     output$mytable4 <- DT::renderDataTable({
@@ -328,11 +416,13 @@ observeEvent(input$dataset_lastClickId,{
     })
     output$mytable5 <- DT::renderDataTable({
       # Expression Value
+      
       verified_data = data()[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data())[1],
                            c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data())[2])]
       colnames(verified_data)[1] <- "Gene"
       DT::datatable(verified_data,extensions = 'Responsive', escape=F, selection = 'none')
     })
+    
     print("Platform Conversion finished")
 
     removeModal()
@@ -346,22 +436,46 @@ observeEvent(input$dataset_lastClickId,{
   #   |
   #   +--------------------------------
 
+  observe({
+    if(typeof(data()) != "double"){
+      samples = colnames(data())[input$starting_col:dim(data())[2]]
+      if(input$data_sample_subgroup_selectall == 0) return(NULL) 
+      else if (input$data_sample_subgroup_selectall%%2 == 1)
+      {
+        updateCheckboxGroupInput(session,"data_sample_subgroup",choices=samples)
+      }
+      else
+      {
+        updateCheckboxGroupInput(session,"data_sample_subgroup",choices=samples, selected=samples)
+      }
+    }
+  })
+
   observeEvent(input$action3,{
       if(is.null(data())){
         smartModal(error=T, title = "Operation Failed", content = "You have not selected any data. Please go to previous section.")
         return()
       }
       smartModal(error=F, title = "Preprocessing input data", content = "Preprocessing ...")
-      print(dim(data()))
+      
+      RNA = data()
+      if(!is.null(input$data_sample_subgroup)){
+        RNA = RNA[, colnames(RNA) %in% input$data_sample_subgroup]
+      }
+      print(dim(RNA))
       
       withProgress(message = 'Preprocessing input data', value = 0, {
       # Step 0
       # Increment the progress bar, and update the detail text.
       incProgress(1/5, detail = "Parsing Input Data")
         
-      RNA <- as.matrix(data()[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data())[1], ifelse(is.na(input$starting_col),2,input$starting_col):dim(data())[2]])
+      if(!is.null(input$data_sample_subgroup)){
+        RNA <- as.matrix(RNA[ifelse(is.na(input$starting_row),1,input$starting_row):dim(RNA)[1],])
+      } else{
+        RNA <- as.matrix(RNA[ifelse(is.na(input$starting_row),1,input$starting_row):dim(RNA)[1], ifelse(is.na(input$starting_col),2,input$starting_col):dim(RNA)[2]])
+      }
       class(RNA) <- "numeric"
-      geneID <- data.frame(data()[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data())[1], 1])
+      geneID <- data.frame(rownames(RNA)[ifelse(is.na(input$starting_row),1,input$starting_row):dim(RNA)[1]])
       print(dim(RNA))
       print(dim(geneID))
       
@@ -521,7 +635,7 @@ observeEvent(input$dataset_lastClickId,{
       return()
     }
       #lmQCM
-      smartModal(error=F, title = "Using lmQCM to calculate merged clusters", content = "Calculating. This could be several seconds to several minutes depends on number of genes. Please be patient.")
+      smartModal(error=F, title = "lmQCM [1/2]", content = "Calculating massive correlation coefficient matrix...")
 
       data_in = finalExp()
       gamma = input$gamma
@@ -536,7 +650,7 @@ observeEvent(input$dataset_lastClickId,{
 # lmQCM start
 #----------------------------------------------------------------------------
       withProgress(message = 'lmQCM [1/2]: ', value = 0, {
-        incProgress(1/16, detail = "Calculating massive correlation coefficient")
+        incProgress(1/16, detail = "Calculating massive correlation coefficient matrix...")
         cMatrix <- cor(t(data_in), method = CCmethod)
         diag(cMatrix) <- 0
         incProgress(1/2, detail = "Find the local maximal edges")
@@ -574,14 +688,28 @@ observeEvent(input$dataset_lastClickId,{
         nodesInCluster <- matrix(0, nrow = 0, ncol = 1)
         
       })
+      removeModal()
+      
+      
       pb <- progress_bar$new(format = " Calculating [:bar] :percent eta: :eta",
                              total = length(sortMaxInd), clear = F, width=60)
-      iter = 1
-      withProgress(message = 'lmQCM [2/2]: ', value = 0, {
+      iter = 0
+      
+      
+      progressSweetAlert(
+        session = session, id = "myprogress",
+        title = "lmQCM [2/2] Merging ...",
+        display_pct = TRUE, value = 0
+      )
+      
       while ((currentInit <= length(sortMaxInd)) & (noNewInit == 0)) {
         pb$tick()
-        incProgress(1/length(sortMaxInd), detail = sprintf("Merging ... %.2f%%", iter/length(sortMaxInd)*100.))
         iter = iter + 1
+        updateProgressBar(
+          session = session,
+          id = "myprogress",
+          value = iter/length(sortMaxInd)*100
+        )
         if (sortMaxV[currentInit] < (gamma * sortMaxV[1]) ) {
           noNewInit <- 1
         }
@@ -617,7 +745,13 @@ observeEvent(input$dataset_lastClickId,{
         }
         currentInit <- currentInit + 1
       }
-      }) # progress bar end
+      
+      closeSweetAlert(session = session)
+      sendSweetAlert(
+        session = session,
+        title ="lmQCM Calculation completed !",
+        type = "success"
+      )
       
       clusters <- merging_lmQCM(C, beta, minClusterSize)
       # map rownames to clusters
@@ -1047,7 +1181,7 @@ observeEvent(input$dataset_lastClickId,{
                           value = paste(paste(final_genes_str(), collapse = '\n'), input$controller))
 
       enriched(enrichr(final_genes_str(), enrichr_dbs))
-
+      
       Map(function(id) {
         dbres = enriched()[[enrichr_dbs[id]]]
         dbres = dbres[ , -which(names(dbres) %in% c("Old.P.value","	Old.Adjusted.P.value"))]
@@ -1056,6 +1190,7 @@ observeEvent(input$dataset_lastClickId,{
                                                                                             rownames = T) #%>% formatRound(colnames(dbres)[3:dim(dbres)[2]], digits=8)
         })
       }, 1:length(enrichr_dbs))
+        
       removeModal()
       print('tab5')
       session$sendCustomMessage("download_go_ready","-")

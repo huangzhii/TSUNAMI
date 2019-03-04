@@ -170,21 +170,28 @@ navbarPage( theme = "style.css",
                                              
                                              # Main panel for displaying outputs ----
                                              mainPanel(
-                                               h5("NCBI GEO Database"),
+                                               h5("Database"),
                                                helpText("Example GSE Microarray Data: GSE17537; GSE88882; GSE98761; GSE40294; GSE73119; GSE31399; GSE21361; GSE13002; GSE4309; GSE61084; GSE61085.", style="font-size: 12px"),
-                                               helpText("Example RNA-seq Expression Data: ", a("TCGA-BLCA",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-BLCA.csv",target="_blank"), a("TCGA-BRCA",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-BRCA.csv",target="_blank"),
-                                                        a("TCGA-CESC",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-CESC.csv",target="_blank"),a("TCGA-ESCA",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-ESCA.csv",target="_blank"),
-                                                        a("TCGA-HNSC",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-HNSC.csv",target="_blank"),a("TCGA-KIRC",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-KIRC.csv",target="_blank"),
-                                                        a("TCGA-KIRP",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-KIRP.csv",target="_blank"),a("TCGA-LIHC",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-LIHC.csv",target="_blank"),
-                                                        style="font-size: 12px"),
+                                               # helpText("Example RNA-seq Expression Data: ", a("TCGA-BLCA",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-BLCA.csv",target="_blank"), a("TCGA-BRCA",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-BRCA.csv",target="_blank"),
+                                               #          a("TCGA-CESC",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-CESC.csv",target="_blank"),a("TCGA-ESCA",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-ESCA.csv",target="_blank"),
+                                               #          a("TCGA-HNSC",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-HNSC.csv",target="_blank"),a("TCGA-KIRC",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-KIRC.csv",target="_blank"),
+                                               #          a("TCGA-KIRP",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-KIRP.csv",target="_blank"),a("TCGA-LIHC",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/TCGA-LIHC.csv",target="_blank"),
+                                               #          style="font-size: 12px"),
                                                helpText("Example Single-cell RNA-seq Data: ", a("GSE59739_DataTable",href="http://web.ics.purdue.edu/~huang898/TSUNAMI_data/GSE59739_DataTable.txt",target="_blank"), style="font-size: 12px"),
                                                tabsetPanel(
                                                  id = 'dataset',
-                                                 tabPanel("Series", DT::dataTableOutput("mytable1"))
+                                                 tabPanel("TCGA mRNA-seq Data",
+                                                          h5("Table of illuminahiseq rnaseqv2 RSEM genes normalized mRNA-seq data",
+                                                             style="color: black; font-size: 14px; font-weight: bold"),
+                                                          DT::dataTableOutput("mytable0")),
+                                                 tabPanel("GEO Series Matrix", DT::dataTableOutput("mytable1"))
                                                ),
                                                
                                                tags$script("$(document).on('click', '#mytable1 button', function () {
-                                                           Shiny.onInputChange('dataset_lastClickId',this.id)
+                                                           Shiny.onInputChange('dataset_lastClickId_mytable1',this.id)
+                                                           });
+                                                           $(document).on('click', '#mytable0 button', function () {
+                                                           Shiny.onInputChange('dataset_lastClickId_mytable0',this.id)
                                                            });")
                                   )
                                              )
@@ -198,7 +205,7 @@ navbarPage( theme = "style.css",
                                              # Sidebar panel for inputs ----
                                              sidebarPanel(
                                                tabsetPanel(
-                                                 tabPanel("Main",
+                                                 tabPanel("Basic",
                                                           # Input: Select a file ----
                                                           # h5("Choose Preview dimensions"),
                                                           # helpText("Preview starting from the beginning to specific rows and columns.", style="margin: 0px"),
@@ -242,10 +249,18 @@ navbarPage( theme = "style.css",
                                                           checkboxInput("checkbox_NA", "Convert NA value to 0 in Expression Data", TRUE),
                                                           checkboxInput("checkbox_logarithm", "Take the log2(x+1) of Expression Data x (Default: Unchecked)", FALSE),
                                                           checkboxInput("checkbox_empty", "Remove rows with empty Gene Symbol", TRUE),
-                                                          checkboxInput("checkbox_duplicated", "Keep only one row with largest mean expression value when Gene Symbol is duplicated", TRUE)
+                                                          checkboxInput("checkbox_duplicated", "Keep only one row with largest mean expression value when Gene Symbol is duplicated", TRUE),
                                                           # numericInput("max_gene_retain", "Maximum Number of Genes to Retain (i.e. Top N genes sorted by mean expression values among all samples. Leave blank for keeping all data):", 10000, step = 1000, min = 0)
+                                                          actionButton("action3", "Continue to Co-Expression Analysis",style="color: WHITE; background-color: DODGERBLUE")
                                                           
-                                                 ) # EOF tabpanel main
+                                                 ),
+                                                 
+                                                 tabPanel("Advanced",
+                                                          h5("Select Samples Subgroup", style="color: black; font-size: 14px; font-weight: bold"),
+                                                          actionLink("data_sample_subgroup_selectall","Select/Deselect All"),
+                                                          uiOutput("data_sample_subgroup_ui")
+                                                 )
+                                                 # EOF tabpanel main
                                                  # tabPanel("Advanced",
                                                  #          h5("Choose Advanced Processes"),
                                                  #          checkboxInput("sorting_adv_checkbox", "Sort expression data ascending to learn OS / EFS", F),
@@ -266,13 +281,12 @@ navbarPage( theme = "style.css",
                                                  #          )
                                                  #          
                                                  # )
-                                               ), # EOF tabsetPanel
-                                               actionButton("action3", "Continue to Co-Expression Analysis",style="color: WHITE; background-color: DODGERBLUE")
+                                               ) # EOF tabsetPanel
                                              ), # EOF siderbarPanel
                                              
                                              # Main panel for displaying outputs ----
                                              mainPanel(
-                                               h5("Data Summary"),
+                                               h5("Data Summary"), 
                                                verbatimTextOutput("summary"),
                                                h5("Data Preview"),
                                                tabsetPanel(
@@ -489,11 +503,11 @@ navbarPage( theme = "style.css",
                                                         
                                                         tabsetPanel(
                                                           id = 'tabset',
-                                                          tabPanel("GO_Biological_Process_2017b",
+                                                          tabPanel("GO_Biological_Process_2018",
                                                                    DT::dataTableOutput("mytable_Enrichr_1")),
-                                                          tabPanel("GO_Molecular_Function_2017b",
+                                                          tabPanel("GO_Molecular_Function_2018",
                                                                    DT::dataTableOutput("mytable_Enrichr_2")),
-                                                          tabPanel("GO_Cellular_Component_2017b",
+                                                          tabPanel("GO_Cellular_Component_2018",
                                                                    DT::dataTableOutput("mytable_Enrichr_3")),
                                                           tabPanel("Jensen_DISEASES",
                                                                    DT::dataTableOutput("mytable_Enrichr_4")),
