@@ -753,7 +753,17 @@ observeEvent(input$action2,{
         type = "success"
       )
       
-      clusters <- merging_lmQCM(C, beta, minClusterSize)
+      t <- try(clusters <- merging_lmQCM(C, beta, minClusterSize))
+      if("try-error" %in% class(t)) {
+        removeModal()
+        sendSweetAlert(
+          session = session,
+          title ="Too few genes to perform lmQCM clustering and merging.",
+          type = "error"
+        )
+        return()
+      }
+      
       # map rownames to clusters
       clusters.names = list()
       for (i in 1:length(clusters)){
