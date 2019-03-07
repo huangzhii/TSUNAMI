@@ -7,15 +7,21 @@ bad.gse = NULL
 i = 0
 for (gse in GEO$Accession){
   i = i+1
-  if (i > 100){
+  if (i > 10000){
     return()
   }
   print(gse)
-  gset <- getGEO(gse, GSEMatrix=TRUE, AnnotGPL=FALSE)
+  t <- try(gset <- getGEO(gse, GSEMatrix=TRUE, AnnotGPL=FALSE))
   if (length(gset) == 0){
     print("This GSE accession doesn't contain any series matrix.")
     bad.gse = c(bad.gse, gse)
   }
-  gset = gset[[1]] # only pick the first gset
-  annotation = c(annotation, gset@annotation)
+  if("try-error" %in% class(t)) {
+    print("error occured")
+  } else {
+    gset = gset[[1]] # only pick the first gset for testing
+    annotation = c(annotation, gset@annotation)
+  }
+  rm(gset)
 }
+
