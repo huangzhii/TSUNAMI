@@ -761,7 +761,7 @@ observeEvent(input$action2,{
           title ="Too few genes to perform lmQCM clustering and merging.",
           type = "error"
         )
-        return()
+        clusters <- C
       }
       
       # map rownames to clusters
