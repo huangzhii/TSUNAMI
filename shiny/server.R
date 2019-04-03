@@ -758,8 +758,8 @@ observeEvent(input$action2,{
         removeModal()
         sendSweetAlert(
           session = session,
-          title ="Too few genes to perform lmQCM clustering and merging.",
-          type = "error"
+          title ="Warning: lmQCM program skip merging process due to insuffcient amount of genes.",
+          type = "warning"
         )
         clusters <- C
       }
