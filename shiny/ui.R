@@ -55,7 +55,7 @@ navbarPage( theme = "style.css",
                                                "All of which bring convenience to researchers for multiple purposes.",
                                                h5("Pipeline Flowchart", style="color: STEELBLUE; padding-top: 10px"),
                                                tags$div(
-                                                 tags$img(src='images/flowchart_concise_flat4.png',
+                                                 tags$img(src='images/figure 1.png',
                                                           width="600",
                                                           alt="TSUNAMI Flowchart", class="center"),
                                                  style="text-align: center; padding: 20px"
