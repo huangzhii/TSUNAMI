@@ -143,7 +143,7 @@ navbarPage( theme = "style.css",
                                                                     ".csv", ".xlsx")),
                                                
                                                # Include clarifying text ----
-                                               helpText("Note: Maximum file size allowed for uploading is 300 MB. If data is uploaded from a .xlsx or .xls file, separater can be any value, but please make sure data are located in Sheet1."),
+                                               helpText("Note: maximum file size allowed for uploading is 300 MB. If data is uploaded from a .xlsx or .xls file, separator can be any value, but please make sure data are located in Sheet1."),
                                                
                                                # Input: Checkbox if file has header ----
                                                checkboxInput("header", "Header", TRUE),
