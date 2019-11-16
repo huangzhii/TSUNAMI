@@ -643,7 +643,7 @@ observeEvent(input$action2,{
       lambda = input$lambda
       beta = input$beta
       minClusterSize = input$minClusterSize
-      CCmethod = input$massiveCC
+      CCmethod = tolower(input$massiveCC)
       normalization = input$lmQCM_weight_normalization
       
 #----------------------------------------------------------------------------
@@ -915,7 +915,7 @@ observeEvent(input$action2,{
       })
       output$WGCNAPowerPlot1 <- renderPlot({
         plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
-             xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit,signed R^2",type="n",
+             xlab="Soft threshold (power)",ylab="Scale-free topology model fit, signed R²",type="n",
              main = paste("Scale independence"))
         text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
              labels=powers,cex=cex1,col="red")
@@ -925,7 +925,7 @@ observeEvent(input$action2,{
       output$WGCNAPowerPlot2 <- renderPlot({
         # Mean connectivity as a function of the soft-thresholding power
         plot(sft$fitIndices[,1], sft$fitIndices[,5],
-             xlab="Soft Threshold (power)",ylab="Mean Connectivity", type="n",
+             xlab="Soft threshold (power)",ylab="Mean connectivity", type="n",
              main = paste("Mean connectivity"))
         text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
       })
@@ -999,7 +999,7 @@ observeEvent(input$action2,{
                           "Module colors",
                           dendroLabels = FALSE, hang = 0.03,
                           addGuide = TRUE, guideHang = 0.05,
-                          main = sprintf("power= %d, minModuleSize= %d,mergeCutHeight= %.4f",
+                          main = sprintf("Power = %d, minModuleSize = %d, mergeCutHeight = %.4f",
                                          input$power, input$minModuleSize, input$mergeCutHeight))
       })
 
@@ -1122,9 +1122,9 @@ observeEvent(input$action2,{
     leg2 = paste("High risk(", n2, ")", sep = "")
     
     output$survival_plot <- renderPlot({
-      plot(fit, mark.time=TRUE, xlab = "Times", ylab = "Survival", lty = 1:2,
+      plot(fit, mark.time=TRUE, xlab = "Survival times", ylab = "Survival probability", lty = 1:2,
            col = 1:2, cex = 0.5)
-      title(main = paste("Survival Plot of Eigengene Module ", row, sep=""))
+      title(main = paste("Survival plot of eigengene module ", row, sep=""))
       grid()
       legend(x = "topright", legend = c(leg1, leg2), lty = 1:2,
              col = 1:2, cex = 0.65)
@@ -1256,7 +1256,7 @@ observeEvent(input$action2,{
         xlim = cbind(rep(0, dim(factors_count)[1]), factors_count[,2])
         rownames(xlim) = factors_count[,1]
         BED.data <- data.frame(hg38.matched[,c(4,6:7,10,14)])
-        circlizeGenomics(BED.data, factors, xlim, mySpecies="hg38", myTitle = "Human Genome (GRCh38/hg38)",
+        circlizeGenomics(BED.data, factors, xlim, mySpecies="hg38", myTitle = "Human genome (GRCh38/hg38) (genes)",
                          input$circos_param_size,
                          input$circos_param_genelink,
                          input$circos_param_genesymbol)

@@ -135,15 +135,15 @@ navbarPage( theme = "style.css",
                                              # Sidebar panel for inputs ----
                                              sidebarPanel(
                                                # Input: Select a file ----
-                                               h4("File Uploader", style="color: STEELBLUE"),
-                                               fileInput("csvfile", "Choose File",
+                                               h4("File uploader", style="color: STEELBLUE"),
+                                               fileInput("csvfile", "Choose file",
                                                          multiple = FALSE,
                                                          accept = c("text/csv",
                                                                     "text/comma-separated-values,text/plain",
                                                                     ".csv", ".xlsx")),
                                                
                                                # Include clarifying text ----
-                                               helpText("Note: Maximum file size allowed for uploading is 300MB. If uploaded data is with .xlsx or .xls, separater can be any value, but please make sure data are located in Sheet1."),
+                                               helpText("Note: Maximum file size allowed for uploading is 300 MB. If data is uploaded from a .xlsx or .xls file, separater can be any value, but please make sure data are located in Sheet1."),
                                                
                                                # Input: Checkbox if file has header ----
                                                checkboxInput("header", "Header", TRUE),
@@ -159,13 +159,13 @@ navbarPage( theme = "style.css",
                                                  # Input: Select quotes ----
                                                  column(6, radioButtons("quote", "Quote",
                                                                         choices = c(None = "",
-                                                                                    "Double Quote" = '"',
-                                                                                    "Single Quote" = "'"),
+                                                                                    "Double quote" = '"',
+                                                                                    "Single quote" = "'"),
                                                                         selected = '"'))
                                                ),
                                                # Horizontal line ----
                                                tags$hr(),
-                                               actionButton("action2", "Confirm when Complete")
+                                               actionButton("action2", "Confirm when complete")
                                              ),
                                              
                                              # Main panel for displaying outputs ----
@@ -217,17 +217,17 @@ navbarPage( theme = "style.css",
                                                           # ),
                                                           # Horizontal line ----
                                                           # tags$hr(),
-                                                          h5("Verify starting column and row of expression data"),
+                                                          h5("Verify starting column and row of expression data:"),
                                                           helpText("Choose starting column and row for expression data.", style="margin: 0px"),
-                                                          helpText("Default value when leave them blank: starting row = 1, starting column = 2.", style="color: STEELBLUE; font-size: 12px"),
+                                                          helpText("Default values when leaving the input boxes blank: starting row = 1, starting column = 2.", style="color: STEELBLUE; font-size: 12px"),
                                                           
                                                           fluidRow(
                                                             column(6, numericInput("starting_row", "Gene and Expression starting row:", 1, step = 1, min = 1)),
                                                             column(6, numericInput("starting_col", "Expression starting column:", 2, step = 1, min = 1))
                                                           ),
-                                                          h5("Convert Probe ID to Gene Symbol"),
-                                                          helpText("Convert Probe ID to Gene Symbol with Platform GPL*** (Optional for self-uploaded data):"),
-                                                          tags$span(style="color:STEELBLUE", "Be sure to verify (modify) Gene Symbol."),
+                                                          h5("Convert probe ID to gene symbol:"),
+                                                          helpText("Convert probe ID to gene symbol with identified platform (optional for self-uploaded data):"),
+                                                          tags$span(style="color:STEELBLUE", "Be sure to verify (modify) gene symbol."),
                                                           fluidRow(
                                                             column(8, textInput("platform_text", NULL, value = "Unknown", width = NULL, placeholder = NULL)),
                                                             column(4, actionButton("action_platform", "Convert"))
@@ -239,25 +239,25 @@ navbarPage( theme = "style.css",
                                                           
                                                           # Horizontal line ----
                                                           tags$hr(),
-                                                          h5("Remove Genes"),
+                                                          h5("Remove genes:"),
                                                           helpText("Remove rows with lowest percentile mean expression value shared by all samples. Then remove data with lowest percentile variance across samples.", style="margin: 0px"),
-                                                          helpText("Default value when leave them blank: 0.", style="color: STEELBLUE; font-size: 12px"),
+                                                          helpText("Default values when leaving the input boxes blank: 0.", style="color: STEELBLUE; font-size: 12px"),
                                                           fluidRow(
-                                                            column(6, numericInput("mean_expval", "Lowest Mean Percentile (%) To Remove:", 50, step = 1, min = 0, max = 100)),
-                                                            column(6, numericInput("variance_expval", "Lowest Variance Percentile (%) To Remove:", 50, step = 1, min = 0, max = 100))
+                                                            column(6, numericInput("mean_expval", "Lowest mean percentile (%) to remove:", 50, step = 1, min = 0, max = 100)),
+                                                            column(6, numericInput("variance_expval", "Lowest variance percentile (%) to remove:", 50, step = 1, min = 0, max = 100))
                                                           ),
-                                                          checkboxInput("checkbox_NA", "Convert NA value to 0 in Expression Data", TRUE),
-                                                          checkboxInput("checkbox_logarithm", "Take the log2(x+1) of Expression Data x (Default: Unchecked)", FALSE),
-                                                          checkboxInput("checkbox_empty", "Remove rows with empty Gene Symbol", TRUE),
-                                                          checkboxInput("checkbox_duplicated", "Keep only one row with largest mean expression value when Gene Symbol is duplicated", TRUE),
+                                                          checkboxInput("checkbox_NA", "Convert NA value to 0 in expression data.", TRUE),
+                                                          checkboxInput("checkbox_logarithm", "Take the log₂(x+1) of expression data x (default: unchecked).", FALSE),
+                                                          checkboxInput("checkbox_empty", "Remove rows with empty gene symbol.", TRUE),
+                                                          checkboxInput("checkbox_duplicated", "Keep only one row with largest mean expression value when gene symbol is duplicated.", TRUE),
                                                           # numericInput("max_gene_retain", "Maximum Number of Genes to Retain (i.e. Top N genes sorted by mean expression values among all samples. Leave blank for keeping all data):", 10000, step = 1000, min = 0)
-                                                          actionButton("action3", "Continue to Co-Expression Analysis",style="color: WHITE; background-color: DODGERBLUE")
+                                                          actionButton("action3", "Continue to co-expression analysis",style="color: WHITE; background-color: DODGERBLUE")
                                                           
                                                  ),
                                                  
                                                  tabPanel("Advanced",
-                                                          h5("Select Samples Subgroup", style="color: black; font-size: 14px; font-weight: bold"),
-                                                          actionLink("data_sample_subgroup_selectall","Select/Deselect All"),
+                                                          h5("Select samples subgroup", style="color: black; font-size: 14px; font-weight: bold"),
+                                                          actionLink("data_sample_subgroup_selectall","Select/Deselect all"),
                                                           uiOutput("data_sample_subgroup_ui")
                                                  )
                                                  # EOF tabpanel main
@@ -318,28 +318,28 @@ navbarPage( theme = "style.css",
                                                                threshold of the module density to ensure proper stopping
                                                                criterion for the greedy search for each module (Usually λ and t won't change), and beta (β) (Default = 0.4) is the
                                                                threshold for overlapping ratio for merging"),
-                                                      helpText("Weight Normalization is to normalize the correlation matrix (default: Not selected). However we recommend to check it while the expression data comes from microarray."),
-                                                      prettyCheckbox(inputId = "lmQCM_weight_normalization", label = "Weight Normalization",
+                                                      helpText("Weight normalization is to normalize the correlation matrix (default: Not selected). However we recommend to check it while the expression data comes from microarray."),
+                                                      prettyCheckbox(inputId = "lmQCM_weight_normalization", label = "Weight normalization.",
                                                                      value = F, status = "default", icon = icon("check")),
                                                       fluidRow(
                                                         column(6, numericInput("gamma", "gamma (γ):", 0.7, step = 0.05)),
-                                                        column(6, numericInput("lambda", "lambda (λ)", 1, step = 0.05))
+                                                        column(6, numericInput("lambda", "lambda (λ):", 1, step = 0.05))
                                                       ),
                                                       fluidRow(
                                                         column(6, numericInput("t", "t:", 1, step = 0.05)),
                                                         column(6, numericInput("beta", "beta (β):", 0.4, step = 0.05))
                                                       ),
                                                       fluidRow(
-                                                        column(6, numericInput("minClusterSize", "Minimum Cluster Size:", 10, step = 1, width = NULL)),
+                                                        column(6, numericInput("minClusterSize", "Minimum cluster size:", 10, step = 1, width = NULL)),
                                                         column(6, selectizeInput(
-                                                          'massiveCC', 'Calculation of Correlation Coefficient',
-                                                          choices = c("pearson", "spearman")))
+                                                          'massiveCC', 'Calculation of correlation coefficient',
+                                                          choices = c("Pearson", "Spearman")))
                                                       ),
                                                       
                                                       
                                                       # Horizontal line ----
                                                       tags$hr(),
-                                                      actionButton("action4_lmQCM", "Confirm and Run",
+                                                      actionButton("action4_lmQCM", "Confirm and run",
                                                                    style="color: WHITE; background-color: DODGERBLUE"),
                                                       br(),
                                                       br(),
@@ -356,7 +356,7 @@ navbarPage( theme = "style.css",
                                                       h5("Step 1: Pick Soft Thresholding"),
                                                       helpText("The soft thresholding, is a value used to power the correlation of the genes to that threshold. The assumption on that by raising the correlation to a power will reduce the noise of the correlations in the adjacency matrix. To pick up one threshold use the pickSoftThreshold function, which calculates for each power if the network resembles to a scale-free graph. The power which produce a higher similarity with a scale-free network is the one you should use."),
                                                       
-                                                      actionButton("checkPower", "Check Power (β)"),
+                                                      actionButton("checkPower", "Check power (β)"),
                                                       uiOutput("WGCNAPowerPlot1and2"),
                                                       
                                                       # Horizontal line ----
@@ -371,17 +371,17 @@ navbarPage( theme = "style.css",
                                                       helpText("minModuleSize (Default = 10): Minimum module size for module detection."),
                                                       fluidRow(
                                                         column(6, numericInput("power", "power (β):", 6, step = 1, min = 1)),
-                                                        column(6, numericInput("reassignThreshold", "Reassign Threshold", 0, step = 0.01))
+                                                        column(6, numericInput("reassignThreshold", "Reassign threshold:", 0, step = 0.01))
                                                       ),
                                                       fluidRow(
-                                                        column(6, numericInput("mergeCutHeight", "Merge Cut Height:", 0.25, step = 0.01)),
+                                                        column(6, numericInput("mergeCutHeight", "Merge cut height:", 0.25, step = 0.01)),
                                                         # column(6, numericInput("verbose", "verbose:", 3, step = 1))
-                                                        column(6, numericInput("minModuleSize", "Minimum Module Size:", 10, step = 1, width = NULL))
+                                                        column(6, numericInput("minModuleSize", "Minimum module size:", 10, step = 1, width = NULL))
                                                       ),
                                                       
                                                       # Horizontal line ----
                                                       tags$hr(),
-                                                      actionButton("action4_WGCNA", "Confirm and Run",
+                                                      actionButton("action4_WGCNA", "Confirm and run",
                                                                    style="color: WHITE; background-color: DODGERBLUE"),
                                                       uiOutput("WGCNAresultUI"),
                                                       br(),
@@ -421,12 +421,12 @@ navbarPage( theme = "style.css",
                                              h4("Download Results", style="color: STEELBLUE; padding-top: 10px"),
                                              fluidRow(
                                                column(6,
-                                                      radioButtons("filetype1", "Merged Clusters with Gene Symbol:",
+                                                      radioButtons("filetype1", "Merged clusters with gene symbol:",
                                                                    choices = c("csv", "txt")),
                                                       downloadButton('downloadData1', 'Download')
                                                ),
                                                column(6,
-                                                      radioButtons("filetype2", "Eigengene Matrix:",
+                                                      radioButtons("filetype2", "Eigengene matrix:",
                                                                    choices = c("csv", "txt")),
                                                       downloadButton('downloadData2', 'Download')
                                                )
