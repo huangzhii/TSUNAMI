@@ -1,5 +1,5 @@
 # TSUNAMI: Translational Bioinformatics Tool SUite for Network Analysis and MIning
-Gene co-expression network (GCN) mining aims to mine gene modules with highly correlated expression profiles across sample cohorts. It may help to reveal latent molecular interactions, identify novel gene functions, pathways and drug targets, as well as providing disease mechanistic insights on for biological researchers. TSUNAMI is developed to allow biological researchers with no programing background to perform GCN mining themselves. Users can get access to our online service from https://apps.medgen.iupui.edu/rsc/tsunami/
+Gene co-expression network (GCN) mining aims to mine gene modules with highly correlated expression profiles across sample cohorts. It may help to reveal latent molecular interactions, identify novel gene functions, pathways and drug targets, as well as providing disease mechanistic insights on for biological researchers. TSUNAMI is developed to allow biological researchers with no programing background to perform GCN mining themselves. Users can get access to our online service from http://spore.ph.iu.edu:3838/zhihuan/TSUNAMI/.
 
 ## Features
 It has several highlight features and advantages:
