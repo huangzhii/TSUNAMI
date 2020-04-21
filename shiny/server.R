@@ -316,10 +316,15 @@ observeEvent(input$action2,{
                        btn_labels = "Ok", html = FALSE, closeOnClickOutside = TRUE)
       }
       removeModal()
+      
+      # first column as gene
+      data.temp = data()[,2:dim(data())[2]]
+      rownames(data.temp) = data()[,1]
+      data(data.temp)
 
       output$summary <- renderPrint({
-        print(sprintf("Number of Genes: %d\n",dim(data())[1]))
-        print(sprintf("Number of Samples: %d\n",(dim(data())[2]-1)))
+        print(sprintf("Number of Genes: %d",dim(data())[1]))
+        print(sprintf("Number of Samples: %d",(dim(data())[2]-1)))
         print("Annotation Platform: Unknown")
       }, quoted = FALSE)
       if ((dim(data())[2]-1) == 0){
@@ -744,6 +749,16 @@ observeEvent(input$action2,{
           }
         }
         currentInit <- currentInit + 1
+      }
+      
+      if(length(C) == 0) {
+        removeModal()
+        sendSweetAlert(
+          session = session,
+          title ="Clusters size = 0 before merging. Please try other set of parameters. Program stopped.",
+          type = "error"
+        )
+        return()
       }
       
       closeSweetAlert(session = session)
