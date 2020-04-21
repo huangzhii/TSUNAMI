@@ -320,7 +320,7 @@ observeEvent(input$action2,{
       removeModal()
       
       # first column as gene
-      data.temp = data()[,2:dim(data())[2]]
+      data.temp = data()#[,2:dim(data())[2]]
       rownames(data.temp) = data()[,1]
       data(data.temp)
 
