@@ -295,6 +295,8 @@ observeEvent(input$action2,{
         max.length <- max(sapply(data_temp, length))
         data_temp <- lapply(data_temp, function(v) { c(v, rep(NA, max.length-length(v)))})
         data_temp <- data.frame(do.call(rbind, data_temp))
+        colnames(data_temp) = data_temp[1,]
+        data_temp = data_temp[2:dim(data_temp)[1],]
         if(data_temp[dim(data_temp)[1],1] == "!series_matrix_table_end"){
           print("remove last row with \"!series_matrix_table_end\" ")
           data_temp = data_temp[-dim(data_temp)[1],]
@@ -337,7 +339,7 @@ observeEvent(input$action2,{
         DT::datatable(data(),extensions = 'Responsive', escape=F, selection = 'none')
       })
       output$mytable5 <- DT::renderDataTable({
-        # Expression Value
+        # Verified data
         verified_data = data()[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data())[1],
                              c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data())[2])]
         colnames(verified_data)[1] <- "Gene"
