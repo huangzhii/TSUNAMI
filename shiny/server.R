@@ -297,6 +297,12 @@ observeEvent(input$action2,{
         data_temp <- data.frame(do.call(rbind, data_temp))
         colnames(data_temp) = data_temp[1,]
         data_temp = data_temp[2:dim(data_temp)[1],]
+        if (is.null(dim(data_temp))){
+          removeModal()
+          sendSweetAlert(session, title = "Error", text = "Input file extention TXT found, but cannot construct matrix. Please confirm your data format and separator.", type = "error",
+                         btn_labels = "Ok", html = FALSE, closeOnClickOutside = TRUE)
+          return()
+        }
         if(data_temp[dim(data_temp)[1],1] == "!series_matrix_table_end"){
           print("remove last row with \"!series_matrix_table_end\" ")
           data_temp = data_temp[-dim(data_temp)[1],]
@@ -319,10 +325,10 @@ observeEvent(input$action2,{
       }
       removeModal()
       
-      # first column as gene
-      data.temp = data()#[,2:dim(data())[2]]
-      rownames(data.temp) = data()[,1]
-      data(data.temp)
+      # # first column as gene
+      # data.temp = data()#[,2:dim(data())[2]]
+      # rownames(data.temp) = data()[,1]
+      # data(data.temp)
 
       output$summary <- renderPrint({
         print(sprintf("Number of Genes: %d",dim(data())[1]))
@@ -476,13 +482,17 @@ observeEvent(input$action2,{
       # Increment the progress bar, and update the detail text.
       incProgress(1/5, detail = "Parsing Input Data")
         
+      if (!is.null(input$starting_col) && input$starting_col >= 2){
+        geneID <- data.frame(RNA[,input$starting_col-1])
+      } else{ # use rownames as gene ID
+        geneID <- data.frame(rownames(RNA)[ifelse(is.na(input$starting_row),1,input$starting_row):dim(RNA)[1]])
+      }
       if(!is.null(input$data_sample_subgroup)){
         RNA <- as.matrix(RNA[ifelse(is.na(input$starting_row),1,input$starting_row):dim(RNA)[1],])
       } else{
         RNA <- as.matrix(RNA[ifelse(is.na(input$starting_row),1,input$starting_row):dim(RNA)[1], ifelse(is.na(input$starting_col),2,input$starting_col):dim(RNA)[2]])
       }
       class(RNA) <- "numeric"
-      geneID <- data.frame(rownames(RNA)[ifelse(is.na(input$starting_row),1,input$starting_row):dim(RNA)[1]])
       print(dim(RNA))
       print(dim(geneID))
       
