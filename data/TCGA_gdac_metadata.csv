@@ -1,0 +1,38 @@
+Disease Name,Cohort,Cases
+Adrenocortical carcinoma,ACC,92
+Bladder urothelial carcinoma,BLCA,412
+Breast invasive carcinoma,BRCA,1098
+Cervical and endocervical cancers,CESC,307
+Cholangiocarcinoma,CHOL,51
+Colon adenocarcinoma,COAD,460
+Colorectal adenocarcinoma,COADREAD,631
+Lymphoid Neoplasm Diffuse Large B-cell Lymphoma,DLBC,58
+Esophageal carcinoma,ESCA,185
+Glioblastoma multiforme,GBM,613
+Glioma,GBMLGG,1129
+Head and Neck squamous cell carcinoma,HNSC,528
+Kidney Chromophobe,KICH,113
+Pan-kidney cohort (KICH+KIRC+KIRP),KIPAN,973
+Kidney renal clear cell carcinoma,KIRC,537
+Kidney renal papillary cell carcinoma,KIRP,323
+Acute Myeloid Leukemia,LAML,200
+Brain Lower Grade Glioma,LGG,516
+Liver hepatocellular carcinoma,LIHC,377
+Lung adenocarcinoma,LUAD,585
+Lung squamous cell carcinoma,LUSC,504
+Mesothelioma,MESO,87
+Ovarian serous cystadenocarcinoma,OV,602
+Pancreatic adenocarcinoma,PAAD,185
+Pheochromocytoma and Paraganglioma,PCPG,179
+Prostate adenocarcinoma,PRAD,499
+Rectum adenocarcinoma,READ,171
+Sarcoma,SARC,261
+Skin Cutaneous Melanoma,SKCM,470
+Stomach adenocarcinoma,STAD,443
+Stomach and Esophageal carcinoma,STES,628
+Testicular Germ Cell Tumors,TGCT,150
+Thyroid carcinoma,THCA,503
+Thymoma,THYM,124
+Uterine Corpus Endometrial Carcinoma,UCEC,560
+Uterine Carcinosarcoma,UCS,57
+Uveal Melanoma,UVM,80

@@ -1,0 +1,12 @@
+name: tsunami
+title: TSUNAMI
+username: zhihuan
+account: zhihuan
+server: shiny.ph.iu.edu
+hostUrl: https://shiny.ph.iu.edu/__api__
+appId: 33
+bundleId: 190
+url: https://shiny.ph.iu.edu/TSUNAMI/
+when: 1612994188.83013
+asMultiple: FALSE
+asStatic: FALSE
