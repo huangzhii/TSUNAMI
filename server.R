@@ -68,6 +68,7 @@ server <- function(input, output, session) {
   fname <- reactiveVal(0) # e.g. 12345_at
   enriched <- reactiveVal(0) # all enrichr results
   final_genes_str <- reactiveVal(0)
+  data.name <- reactiveVal(0)
   
   observeEvent(input$action1,{
       print('tab1')
@@ -132,14 +133,16 @@ observeEvent(input$dataset_lastClickId_mytable0,{
     row_of_TCGA <- as.numeric(gsub("TCGA_dataset_analysis_","",input$dataset_lastClickId_mytable0))
     print(TCGA.gdac.list[row_of_TCGA,])
     cancer.name = TCGA.gdac.list[row_of_TCGA,2]
+    data.name(cancer.name)
     smartModal(error=F, title = sprintf("Loading TCGA %s Data", cancer.name),
                content = sprintf("Loading TCGA %s Data ...", cancer.name))
     load(paste0(path2TCGAdata, cancer.name, ".Rdata"))
-    TCGA.mRNAseq = data.frame(cbind(rownames(TCGA.mRNAseq), TCGA.mRNAseq))
-    colnames(TCGA.mRNAseq)[1] = "Gene"
+    # TCGA.mRNAseq = data.frame(cbind(rownames(TCGA.mRNAseq), TCGA.mRNAseq))
+    # colnames(TCGA.mRNAseq)[1] = "Gene"
     data(TCGA.mRNAseq)
     updateTextInput(session, "platform_text", value = "")
     output$summary <- renderPrint({
+      print(sprintf("Data: %s", data.name() ))
       print(sprintf("Number of Genes: %d",dim(data())[1]))
       print(sprintf("Number of Samples: %d",dim(data())[2]))
     })
@@ -152,8 +155,8 @@ observeEvent(input$dataset_lastClickId_mytable0,{
     output$mytable5 <- DT::renderDataTable({
       # Expression Value
       verified_data = data()[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data())[1],
-                             c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data())[2])]
-      colnames(verified_data)[1] <- "Gene"
+                             ifelse(is.na(input$starting_col),1,input$starting_col):dim(data())[2]]
+      # colnames(verified_data)[1] <- "Gene"
       DT::datatable(verified_data,extensions = 'Responsive', escape=F, selection = 'none')
     })
     
@@ -168,6 +171,7 @@ observeEvent(input$dataset_lastClickId_mytable1,{
   if (input$dataset_lastClickId_mytable1%like%"GEO_dataset_analysis"){
     row_of_GEO <- as.numeric(gsub("GEO_dataset_analysis_","",input$dataset_lastClickId_mytable1))
     myGSE <- GEO()$Accession[row_of_GEO]
+    data.name(myGSE)
     GSE_name_title(GEO()$Title[row_of_GEO])
     message(GSE_name_title())
     print(myGSE)
@@ -237,13 +241,16 @@ observeEvent(mygset(),{
   }
   # pdata <- pData(mygset()) # data.frame of phenotypic information.
   fname(featureNames(mygset())) # e.g. 12345_at
-  data(cbind(fname(), edata))
-  data.temp <- data()
-  row.names(data.temp) <- seq(1, length(fname()))
-  data(data.temp)
+  # data(cbind(fname(), edata))
+  # data.temp <- data()
+  # row.names(data.temp) <- seq(1, length(fname()))
+  # data(data.temp)
+  row.names(edata) <- fname()
+  data(edata)
   
   updateTextInput(session, "platform_text", value = paste(annotation(mygset()), input$controller))
   output$summary <- renderPrint({
+    print(sprintf("Data: %s", data.name() ))
     print(sprintf("Number of Genes: %d",dim(edata)[1]))
     print(sprintf("Number of Samples: %d",dim(edata)[2]))
     print(sprintf("Annotation Platform: %s",annotation(mygset())))
@@ -257,8 +264,8 @@ observeEvent(mygset(),{
   output$mytable5 <- DT::renderDataTable({
     # Expression Value
     verified_data = data()[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data())[1],
-                           c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data())[2])]
-    colnames(verified_data)[1] <- "Gene"
+                           ifelse(is.na(input$starting_col),1,input$starting_col):dim(data())[2]]
+    # colnames(verified_data)[1] <- "Gene"
     DT::datatable(verified_data,extensions = 'Responsive', escape=F, selection = 'none')
   })
   print('tab2')
@@ -327,12 +334,13 @@ observeEvent(input$action2,{
       }
       removeModal()
       
-      # # first column as gene
-      # data.temp = data()#[,2:dim(data())[2]]
-      # rownames(data.temp) = data()[,1]
-      # data(data.temp)
-
+      # first column as gene
+      data.temp = data()#[,2:dim(data())[2]]
+      rownames(data.temp) = data()[,1]
+      data(data.temp)
+      data.name('Uploaded Data')
       output$summary <- renderPrint({
+        print(sprintf("Data: %s", data.name() ))
         print(sprintf("Number of Genes: %d",dim(data())[1]))
         print(sprintf("Number of Samples: %d",(dim(data())[2]-1)))
         print("Annotation Platform: Unknown")
@@ -349,8 +357,8 @@ observeEvent(input$action2,{
       output$mytable5 <- DT::renderDataTable({
         # Verified data
         verified_data = data()[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data())[1],
-                             c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data())[2])]
-        colnames(verified_data)[1] <- "Gene"
+                               ifelse(is.na(input$starting_col),1,input$starting_col):dim(data())[2]]
+        # colnames(verified_data)[1] <- "Gene"
         DT::datatable(verified_data,extensions = 'Responsive', escape=F, selection = 'none')
       })
       
@@ -421,7 +429,7 @@ observeEvent(input$action2,{
     print(dim(data()))
     print(length(fname2))
     data.temp <- data()
-    data.temp[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data.temp)[1],1] <- fname2
+    # data.temp[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data.temp)[1],1] <- fname2
     rownames(data.temp)[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data.temp)[1]] <- fname2
     data(data.temp)
     # row.names(data) <- seq(1, length(fname2))
@@ -433,8 +441,8 @@ observeEvent(input$action2,{
       # Expression Value
       
       verified_data = data()[ifelse(is.na(input$starting_row),1,input$starting_row):dim(data())[1],
-                           c(1, ifelse(is.na(input$starting_col),2,input$starting_col):dim(data())[2])]
-      colnames(verified_data)[1] <- "Gene"
+                            ifelse(is.na(input$starting_col),2,input$starting_col):dim(data())[2]]
+      # colnames(verified_data)[1] <- "Gene"
       DT::datatable(verified_data,extensions = 'Responsive', escape=F, selection = 'none')
     })
     
@@ -484,11 +492,12 @@ observeEvent(input$action2,{
       # Increment the progress bar, and update the detail text.
       incProgress(1/5, detail = "Parsing Input Data")
         
-      if (!is.null(input$starting_col) && input$starting_col >= 2){
-        geneID <- data.frame(RNA[,input$starting_col-1])
-      } else{ # use rownames as gene ID
-        geneID <- data.frame(rownames(RNA)[ifelse(is.na(input$starting_row),1,input$starting_row):dim(RNA)[1]])
-      }
+      # if (!is.null(input$starting_col) && input$starting_col >= 2){
+      #   geneID <- data.frame(RNA[,input$starting_col-1])
+      # } else{ # use rownames as gene ID
+      #   geneID <- data.frame(rownames(RNA)[ifelse(is.na(input$starting_row),1,input$starting_row):dim(RNA)[1]])
+      # }
+      geneID <- data.frame(rownames(RNA)[ifelse(is.na(input$starting_row),1,input$starting_row):dim(RNA)[1]])
       if(!is.null(input$data_sample_subgroup)){
         RNA <- as.matrix(RNA[ifelse(is.na(input$starting_row),1,input$starting_row):dim(RNA)[1],])
       } else{
@@ -609,6 +618,11 @@ observeEvent(input$action2,{
       data_final.temp <- data_final()
       colnames(data_final.temp)[1] = "Gene_Symbol"
       data_final(data_final.temp)
+      
+      # data_final.temp <- data.frame(finalExp())
+      # rownames(data_final.temp) <- finalSym()
+      # data_final(data_final.temp)
+      
       #finally no matter if just basic or advanced:
       sampleID(colnames(finalExp()))
       output$mytable_finaldata <- DT::renderDataTable({

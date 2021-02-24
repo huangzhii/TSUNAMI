@@ -115,7 +115,10 @@ navbarPage( theme = "style.css",
                                                                      ')),
                                                # Horizontal line ----
                                                tags$hr(),
-                                               tags$b('Please click side bar buttons to navigate between analysis steps. Please avoid using “back” or “forward” button on the browser to navigate between the analysis steps. Click those button may lose everything you have done.'),
+                                               tags$div(
+                                                 'Please click side bar buttons to navigate between analysis steps. Please avoid using “back” or “forward” button on the browser to navigate between the analysis steps. Click those button may lose everything you have done.',
+                                                 style="font-weight:bold; color:red"
+                                               ),
                                                br(),
                                                br(),
                                                actionButton("action1", "Proceed"),
@@ -226,7 +229,7 @@ navbarPage( theme = "style.css",
                                                           
                                                           fluidRow(
                                                             column(6, numericInput("starting_row", "Gene and Expression starting row:", 1, step = 1, min = 1)),
-                                                            column(6, numericInput("starting_col", "Expression starting column:", 2, step = 1, min = 1))
+                                                            column(6, numericInput("starting_col", "Expression starting column:", 1, step = 1, min = 1))
                                                           ),
                                                           h5("Convert probe ID to gene symbol:"),
                                                           helpText("Convert probe ID to gene symbol with identified platform (optional for self-uploaded data):"),
