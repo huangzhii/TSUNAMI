@@ -61,6 +61,7 @@ navbarPage( theme = "style.css",
                                                  style="text-align: center; padding: 20px"
                                                ),
                                                "Figure above: TSUNAMI in flowchart. Blue blocks represent operations; Pink rounded rectangles represent Download processes; Dashed arrow means optional process.",
+                                               tags$head(tags$script("Shiny.addCustomMessageHandler('redirectmessage', function(message) {window.location = 'https://biolearns.medicine.iu.edu';});")),
                                                
                                                tags$head(
                                                  tags$script(HTML("(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

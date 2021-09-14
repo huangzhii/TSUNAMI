@@ -70,6 +70,66 @@ server <- function(input, output, session) {
   final_genes_str <- reactiveVal(0)
   data.name <- reactiveVal(0)
   
+  
+  
+  
+  ###################### Website migration ######################
+  
+  # reactiveValues object for storing current data set.
+  redirect.time <- 10
+  EventTime <- Sys.time() + redirect.time
+  
+  # Return the UI for a modal dialog with data selection input. If 'failed' is
+  # TRUE, then display a message that the previous value was invalid.
+  dataModal <- function(failed = FALSE) {
+    modalDialog(
+      title = "Web server migration notice",
+      "Dear TSUNAMI user: We are switching from R shiny server page to Biolearns TSUNAMI. If you would like to use legacy R shiny server page, you can click stay button. Otherwise, click Redirect now button if you want to proceed now.",
+      HTML("<br><br>"),
+      output$eventTimeRemaining <- renderText({
+        invalidateLater(1000, session)
+        paste("Redirect to Biolearns in:", 
+              round(difftime(EventTime, Sys.time(), units='secs')), 'secs')
+      }),
+      
+      footer = tagList(
+        actionButton("stay", "Stay on this site"),
+        actionButton("redirect", "Redirect now")
+      )
+    )
+  }
+  showModal(dataModal())
+  
+  # When OK button is pressed, attempt to load the data set. If successful,
+  # remove the modal. If not show another modal, but this time with a failure
+  # message.
+  observeEvent(input$stay, {
+    removeModal()
+  })
+  
+  observeEvent(input$redirect, {
+    session$sendCustomMessage("redirectmessage", "redirectmessage")
+    
+  })
+  
+  dt <- 0                       # Nb seconds
+  # Timer one second
+  autoInvalidate <- reactiveTimer(1000)
+  observe({
+    dt <<- dt + 1             # Increment one second
+    someCondition = FALSE
+    if(dt >= redirect.time){             # After 30 seconds
+      someCondition = TRUE
+    }
+    if(someCondition)
+      session$sendCustomMessage("redirectmessage", "redirectmessage")
+    else
+      autoInvalidate()      # Restart timer
+  })
+  
+  
+  
+  
   observeEvent(input$action1,{
       print('tab1')
       session$sendCustomMessage("myCallbackHandler", "tab1")
